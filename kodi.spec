@@ -7,7 +7,7 @@
 
 Name: kodi
 Version: 14.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -345,6 +345,7 @@ ln -sf %{_fontbasedir}/google-roboto/Roboto-Bold.ttf ${RPM_BUILD_ROOT}%{_datadir
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
 mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
+
 %post
 /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 
@@ -358,6 +359,14 @@ fi
 
 %posttrans
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+rmdir %{_libdir}/xbmc %{_datadir}/xbmc
+ln -s kodi ${RPM_BUILD_ROOT}%{_libdir}/xbmc
+ln -s kodi ${RPM_BUILD_ROOT}%{_datadir}/xbmc
+
+
+%posttrans devel
+rmdir %{_includedir}/xbmc
+ln -s kodi ${RPM_BUILD_ROOT}%{_includedir}/xbmc
 
 
 %files
@@ -368,9 +377,9 @@ fi
 %{_bindir}/xbmc
 %{_bindir}/xbmc-standalone
 %{_libdir}/kodi
-%{_libdir}/xbmc
+%ghost %{_libdir}/xbmc
 %{_datadir}/kodi
-%{_datadir}/xbmc
+%ghost %{_datadir}/xbmc
 %{_datadir}/xsessions/kodi.desktop
 %{_datadir}/xsessions/xbmc.desktop
 %{_datadir}/applications/kodi.desktop
@@ -382,7 +391,7 @@ fi
 
 %files devel
 %{_includedir}/kodi
-%{_includedir}/xbmc
+%ghost %{_includedir}/xbmc
 
 
 %files eventclients
@@ -407,6 +416,9 @@ fi
 
 
 %changelog
+* Mon Jan 05 2015 Michael Cronenworth <mike@cchtml.com> - 14.0-2
+- Fix xbmc upgrade path
+
 * Sun Dec 28 2014 Michael Cronenworth <mike@cchtml.com> - 14.0-1
 - Update to 14.0 final
 
