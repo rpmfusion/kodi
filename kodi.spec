@@ -6,8 +6,8 @@
 %global _hardened_build 1
 
 Name: kodi
-Version: 14.0
-Release: 2%{?dist}
+Version: 14.1
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -216,6 +216,8 @@ third-party plugins.
 Summary: Development files needed to compile C programs against kodi
 Group: Development/Libraries
 Requires: %{name}%{?_isa} = %{version}-%{release}
+Obsoletes: xbmc-devel < 14.0
+Provides: xbmc-devel = %{version}
 
 %description devel
 Kodi is a free cross-platform media-player jukebox and entertainment hub.
@@ -225,6 +227,8 @@ install this package.
 
 %package eventclients
 Summary: Media center event client remotes
+Obsoletes: xbmc-eventclients < 14.0
+Provides: xbmc-eventclients = %{version}
 
 %description eventclients
 This package contains support for using Kodi with the PS3 Remote, the Wii
@@ -234,8 +238,8 @@ Remote, a J2ME based remote and the command line xbmc-send utility.
 Summary: Media center event client remotes development files
 Requires:	%{name}-eventclients%{?_isa} = %{version}-%{release}
 Requires:	%{name}-devel%{?_isa} = %{version}-%{release}
-Obsoletes: xbmc-eventclients < 14.0-1
-Provides:  xbmc-eventclients = %{version}
+Obsoletes: xbmc-eventclients-devel < 14.0
+Provides:  xbmc-eventclients-devel = %{version}
 
 %description eventclients-devel
 This package contains the development header files for the eventclients
@@ -359,14 +363,18 @@ fi
 
 %posttrans
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-rmdir %{_libdir}/xbmc %{_datadir}/xbmc
-ln -s kodi ${RPM_BUILD_ROOT}%{_libdir}/xbmc
-ln -s kodi ${RPM_BUILD_ROOT}%{_datadir}/xbmc
+if [ ! -L %{_libdir}/xbmc ] ; then
+    rmdir %{_libdir}/xbmc %{_datadir}/xbmc
+    ln -s kodi ${RPM_BUILD_ROOT}%{_libdir}/xbmc
+    ln -s kodi ${RPM_BUILD_ROOT}%{_datadir}/xbmc
+fi
 
 
 %posttrans devel
-rmdir %{_includedir}/xbmc
-ln -s kodi ${RPM_BUILD_ROOT}%{_includedir}/xbmc
+if [ ! -L %{_includedir}/xbmc ] ; then
+    rmdir %{_includedir}/xbmc
+    ln -s kodi ${RPM_BUILD_ROOT}%{_includedir}/xbmc
+fi
 
 
 %files
@@ -416,6 +424,10 @@ ln -s kodi ${RPM_BUILD_ROOT}%{_includedir}/xbmc
 
 
 %changelog
+* Fri Jan 30 2015 Michael Cronenworth <mike@cchtml.com> - 14.1-1
+- Update to 14.1 final
+- Fix Obsoletes for -devel
+
 * Mon Jan 05 2015 Michael Cronenworth <mike@cchtml.com> - 14.0-2
 - Fix xbmc upgrade path
 
