@@ -1,4 +1,4 @@
-#global PRERELEASE rc3
+#global PRERELEASE b1
 %global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -6,7 +6,7 @@
 %global _hardened_build 1
 
 Name: kodi
-Version: 14.1
+Version: 14.2
 Release: 1%{?dist}
 Summary: Media center
 
@@ -63,9 +63,8 @@ Provides: xbmc = %{version}
 # Upstream does not support ppc64
 ExcludeArch: ppc64
 
-BuildRequires: SDL-devel
+BuildRequires: SDL2-devel
 BuildRequires: SDL_image-devel
-BuildRequires: SDL_mixer-devel
 BuildRequires: a52dec-devel
 BuildRequires: afpfs-ng-devel
 BuildRequires: avahi-devel
@@ -284,6 +283,7 @@ chmod +x bootstrap
 %endif
 --enable-goom \
 --enable-pulse \
+--enable-joystick \
 %if 0%{?_with_libcec}
 --enable-libcec \
 %else
@@ -424,6 +424,10 @@ fi
 
 
 %changelog
+* Sun Mar 29 2015 Michael Cronenworth <mike@cchtml.com> - 14.2-1
+- Update to 14.2 final
+- Build with SDL2 to enable joystick support
+
 * Fri Jan 30 2015 Michael Cronenworth <mike@cchtml.com> - 14.1-1
 - Update to 14.1 final
 - Fix Obsoletes for -devel
