@@ -7,7 +7,7 @@
 
 Name: kodi
 Version: 14.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -40,6 +40,9 @@ Patch4: kodi-14.0-versioning.patch
 
 # Remove call to internal ffmpeg function (misued anyway)
 Patch5: kodi-14.0-dvddemux-ffmpeg.patch
+
+# GCC5 inline changes
+Patch6: kodi-14.0-gcc5.patch
 
 # Kodi is the renamed XBMC project
 Obsoletes: xbmc < 14.0-1
@@ -253,6 +256,7 @@ library.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p0
+%patch6 -p1
 
 %if 0%{?_with_hdhomerun}
 %else
@@ -424,6 +428,9 @@ fi
 
 
 %changelog
+* Fri May 22 2015 Michael Cronenworth <mike@cchtml.com> - 14.2-2
+- GCC5 fixes
+
 * Sun Mar 29 2015 Michael Cronenworth <mike@cchtml.com> - 14.2-1
 - Update to 14.2 final
 - Build with SDL2 to enable joystick support
