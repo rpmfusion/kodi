@@ -1,4 +1,4 @@
-#global PRERELEASE b1
+#global PRERELEASE b2
 %global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -6,8 +6,8 @@
 %global _hardened_build 1
 
 Name: kodi
-Version: 14.2
-Release: 2%{?dist}
+Version: 15.0
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -29,7 +29,7 @@ Patch1: xbmc-13.0-dvdread.patch
 
 # need to file trac ticket, this patch just forces external hdhomerun
 # functionality, needs to be able fallback internal version
-Patch2: kodi-14.0-hdhomerun.patch
+Patch2: kodi-15.0-hdhomerun.patch
 
 # Avoid segfault during goom's configure
 # https://bugzilla.redhat.com/1069079
@@ -41,8 +41,8 @@ Patch4: kodi-14.0-versioning.patch
 # Remove call to internal ffmpeg function (misued anyway)
 Patch5: kodi-14.0-dvddemux-ffmpeg.patch
 
-# GCC5 inline changes
-Patch6: kodi-14.0-gcc5.patch
+# The screensaver needs updating for GCC5
+Patch6: kodi-15.0-gcc5.patch
 
 # Kodi is the renamed XBMC project
 Obsoletes: xbmc < 14.0-1
@@ -54,8 +54,9 @@ Provides: xbmc = %{version}
 %global _with_libbluray 1
 %global _with_cwiid 1
 %global _with_libssh 1
-%global _with_libcec 1
+%global _with_libcec 0
 %global _with_external_ffmpeg 1
+%global _with_wayland 0
 %endif
 
 %ifarch x86_64 i686
@@ -117,7 +118,7 @@ BuildRequires: libbluray-devel
 BuildRequires: libcap-devel
 BuildRequires: libcdio-devel
 %if 0%{?_with_libcec}
-BuildRequires: libcec-devel >= 2.2.0
+BuildRequires: libcec-devel >= 3.0.0
 %endif
 %if 0%{?_with_crystalhd}
 BuildRequires: libcrystalhd-devel
@@ -153,6 +154,9 @@ BuildRequires: libva-devel
 BuildRequires: libvdpau-devel
 %endif
 BuildRequires: libvorbis-devel
+%if 0%{?_with_wayland}
+BuildRequires: libwayland-client-devel
+%endif
 BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
 BuildRequires: lzo-devel
@@ -164,6 +168,7 @@ BuildRequires: mesa-libGLES-devel
 %endif
 BuildRequires: nasm
 BuildRequires: pcre-devel
+BuildRequires: pixman-devel
 BuildRequires: pulseaudio-libs-devel
 BuildRequires: python-devel
 BuildRequires: python-pillow
@@ -175,6 +180,9 @@ BuildRequires: tinyxml-devel
 BuildRequires: tre-devel
 BuildRequires: trousers-devel
 BuildRequires: wavpack-devel
+%if 0%{?_with_wayland}
+BuildRequires: weston-devel
+%endif
 BuildRequires: yajl-devel
 BuildRequires: zlib-devel
 
@@ -189,7 +197,7 @@ Requires: google-roboto-fonts
 Requires: libbluray%{?_isa}
 %endif
 %if 0%{?_with_libcec}
-Requires: libcec%{?_isa} >= 2.2.0
+Requires: libcec%{?_isa} >= 3.0.0
 %endif
 %if 0%{?_with_crystalhd}
 Requires: libcrystalhd%{?_isa}
@@ -284,6 +292,9 @@ chmod +x bootstrap
 --with-lirc-device=/var/run/lirc/lircd \
 %if 0%{?_with_external_ffmpeg}
 --with-ffmpeg=shared \
+%endif
+%if 0%{?_with_wayland}
+--enable-wayland \
 %endif
 --enable-goom \
 --enable-pulse \
@@ -383,7 +394,7 @@ fi
 
 %files
 %license copying.txt LICENSE.GPL
-%doc CONTRIBUTORS README.md docs
+%doc CONTRIBUTING.md README.md docs
 %{_bindir}/kodi
 %{_bindir}/kodi-standalone
 %{_bindir}/xbmc
@@ -428,6 +439,12 @@ fi
 
 
 %changelog
+* Wed Jul 22 2015 Michael Cronenworth <mike@cchtml.com> - 15.0-1
+- Kodi 15.0 final
+
+* Tue Jun 16 2015 Michael Cronenworth <mike@cchtml.com> - 15.0-0.1
+- Kodi 15.0 beta 2
+
 * Fri May 22 2015 Michael Cronenworth <mike@cchtml.com> - 14.2-2
 - GCC5 fixes
 

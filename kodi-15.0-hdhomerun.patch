@@ -15,7 +15,7 @@ diff --git a/Makefile.in b/Makefile.in
 index 8eda3c4..fbb19bd 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -204,7 +204,6 @@
+@@ -188,7 +188,6 @@
  LIB_DIRS=\
  	lib/cximage-6.0 \
  	lib/libexif \
@@ -23,36 +23,35 @@ index 8eda3c4..fbb19bd 100644
  	lib/cpluff \
  	lib/xbmc-dll-symbols
  
-@@ -425,8 +424,6 @@
+@@ -404,15 +403,13 @@
+ endif
+ libexif: dllloader
  	$(MAKE) -C lib/libexif
- cmyth: dllloader
- 	$(MAKE) -C lib/cmyth
 -libhdhomerun: dllloader
 -	$(MAKE) -C lib/libhdhomerun
- papcodecs: dllloader dvdpcodecs
- 	test -d system/players/paplayer || mkdir system/players/paplayer
- 	$(MAKE) -C lib/vgmstream
-@@ -454,7 +451,7 @@
  
- codecs: papcodecs dvdpcodecs dvdpextcodecs
+ imagelib: dllloader
+ 	$(MAKE) -C lib/cximage-6.0
  
--libs: $(LIBSSE4) libhdhomerun imagelib libexif system/libcpluff-@ARCH@.so $(CMYTH)
-+libs: $(LIBSSE4) imagelib libexif system/libcpluff-@ARCH@.so $(CMYTH)
+ codecs: dvdpcodecs dvdpextcodecs
  
- externals: codecs libs visualizations screensavers libaddon pvraddons
+-libs: $(LIBSSE4) libhdhomerun imagelib libexif system/libcpluff-@ARCH@.so
++libs: $(LIBSSE4) imagelib libexif system/libcpluff-@ARCH@.so
  
-diff --git a/configure.in b/configure.in
+ externals: codecs libs visualizations screensavers libaddon
+ 
+diff --git a/configure.ac b/configure.ac
 index 343292e..2060e24 100644
---- a/configure.in
-+++ b/configure.in
-@@ -2544,7 +2544,6 @@ OUTPUT_FILES="Makefile \
+--- a/configure.ac
++++ b/configure.ac
+@@ -2477,7 +2477,6 @@
+     xbmc/network/Makefile \
+     xbmc/network/upnp/Makefile \
      lib/libexif/Makefile \
-     lib/libXDAAP/Makefile \
-     lib/cmyth/Makefile \
 -    lib/libhdhomerun/Makefile \
-     lib/libsquish/Makefile \
      lib/cximage-6.0/Makefile \
      lib/libUPnP/Makefile \
+     xbmc/DllPaths_generated.h \
 diff --git a/xbmc/filesystem/DllHDHomeRun.h b/xbmc/filesystem/DllHDHomeRun.h
 index 150b00f..57936be 100644
 --- a/xbmc/filesystem/DllHDHomeRun.h
