@@ -6,7 +6,7 @@
 %global _hardened_build 1
 
 Name: kodi
-Version: 15.0
+Version: 15.1
 Release: 1%{?dist}
 Summary: Media center
 
@@ -439,6 +439,9 @@ fi
 
 
 %changelog
+* Sun Aug 16 2015 Michael Cronenworth <mike@cchtml.com> - 15.1-1
+- Kodi 15.1 final
+
 * Wed Jul 22 2015 Michael Cronenworth <mike@cchtml.com> - 15.0-1
 - Kodi 15.0 final
 
