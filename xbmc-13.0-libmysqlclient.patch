@@ -12,10 +12,10 @@ See https://bugzilla.redhat.com/1069079
  configure.in | 2 ++
  1 file changed, 2 insertions(+)
 
-diff --git a/configure.in b/configure.in
+diff --git a/configure.ac b/configure.ac
 index 2060e24..2a20339 100644
---- a/configure.in
-+++ b/configure.in
+--- a/configure.ac
++++ b/configure.ac
 @@ -2898,6 +2898,7 @@ XB_CONFIG_MODULE([xbmc/visualizations/Goom/goom2k4-0],[
    ./configure  \
      CFLAGS="$CFLAGS" \ 
