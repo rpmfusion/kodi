@@ -6,7 +6,7 @@
 %global _hardened_build 1
 
 Name: kodi
-Version: 15.1
+Version: 15.2
 Release: 1%{?dist}
 Summary: Media center
 
@@ -40,9 +40,6 @@ Patch4: kodi-14.0-versioning.patch
 
 # Remove call to internal ffmpeg function (misued anyway)
 Patch5: kodi-14.0-dvddemux-ffmpeg.patch
-
-# The screensaver needs updating for GCC5
-Patch6: kodi-15.0-gcc5.patch
 
 # Kodi is the renamed XBMC project
 Obsoletes: xbmc < 14.0-1
@@ -264,7 +261,6 @@ library.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p0
-%patch6 -p1
 
 %if 0%{?_with_hdhomerun}
 %else
@@ -439,6 +435,9 @@ fi
 
 
 %changelog
+* Thu Oct 22 2015 Michael Cronenworth <mike@cchtml.com> - 15.2-1
+- Kodi 15.2 final
+
 * Sun Aug 16 2015 Michael Cronenworth <mike@cchtml.com> - 15.1-1
 - Kodi 15.1 final
 
