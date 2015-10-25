@@ -7,7 +7,7 @@
 
 Name: kodi
 Version: 15.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -134,6 +134,7 @@ BuildRequires: libmms-devel
 BuildRequires: libmodplug-devel
 BuildRequires: libmpcdec-devel
 BuildRequires: libmpeg2-devel
+BuildRequires: libnfs-devel
 BuildRequires: libogg-devel
 # for AirPlay support
 BuildRequires: libplist-devel
@@ -182,9 +183,6 @@ BuildRequires: weston-devel
 %endif
 BuildRequires: yajl-devel
 BuildRequires: zlib-devel
-
-# nfs-utils-lib-devel package currently broken
-#BuildRequires: nfs-utils-lib-devel
 
 Requires: google-roboto-fonts
 # need explicit requires for these packages
@@ -435,6 +433,9 @@ fi
 
 
 %changelog
+* Sat Oct 24 2015 Michael Cronenworth <mike@cchtml.com> - 15.2-2
+- Enable NFS client support
+
 * Thu Oct 22 2015 Michael Cronenworth <mike@cchtml.com> - 15.2-1
 - Kodi 15.2 final
 
