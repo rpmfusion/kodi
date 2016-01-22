@@ -7,7 +7,7 @@
 
 Name: kodi
 Version: 15.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -41,6 +41,9 @@ Patch4: kodi-14.0-versioning.patch
 # Remove call to internal ffmpeg function (misued anyway)
 Patch5: kodi-14.0-dvddemux-ffmpeg.patch
 
+# https://bugzilla.rpmfusion.org/show_bug.cgi?id=3927
+Patch6: kodi-15.0-interface-arrays.patch
+
 # Kodi is the renamed XBMC project
 Obsoletes: xbmc < 14.0-1
 Provides: xbmc = %{version}
@@ -51,7 +54,7 @@ Provides: xbmc = %{version}
 %global _with_libbluray 1
 %global _with_cwiid 1
 %global _with_libssh 1
-%global _with_libcec 0
+%global _with_libcec 1
 %global _with_external_ffmpeg 1
 %global _with_wayland 0
 %endif
@@ -259,6 +262,7 @@ library.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p0
+%patch6 -p1
 
 %if 0%{?_with_hdhomerun}
 %else
@@ -433,6 +437,10 @@ fi
 
 
 %changelog
+* Fri Jan 22 2016 Michael Cronenworth <mike@cchtml.com> - 15.2-3
+- Enable libcec support
+- Include patch for RFBZ#3927
+
 * Sat Oct 24 2015 Michael Cronenworth <mike@cchtml.com> - 15.2-2
 - Enable NFS client support
 

@@ -1,0 +1,85 @@
+From b579a159d71c7db3a96058b4f1bc512e0abfbd82 Mon Sep 17 00:00:00 2001
+From: Joel Teichroeb <joel@teichroeb.net>
+Date: Fri, 18 Dec 2015 20:49:08 -0800
+Subject: [PATCH] Use two full size members instead of using a static array as
+ a union
+
+This really shouldn't change anything, but the current implementation
+fails to work correctly when using the new C++11 ABI in gcc 5.1 and up.
+I'm hoping someone will be able to find the root cause, but this is better
+than nothing.
+---
+ xbmc/interfaces/legacy/Alternative.h | 28 ++++++++--------------------
+ 1 file changed, 8 insertions(+), 20 deletions(-)
+
+diff --git a/xbmc/interfaces/legacy/Alternative.h b/xbmc/interfaces/legacy/Alternative.h
+index 9f6c06d..34fb1ea 100644
+--- a/xbmc/interfaces/legacy/Alternative.h
++++ b/xbmc/interfaces/legacy/Alternative.h
+@@ -31,58 +31,46 @@ namespace XBMCAddon
+   public:
+   private:
+     WhichAlternative pos;
+-    unsigned char m_data[sizeof(T1) > sizeof(T2) ? sizeof(T1) : sizeof(T2)];
++    T1 d1;
++    T2 d2;
+ 
+   public:
+     Alternative() : pos(none) {}
+-    Alternative(const Alternative& o)
+-    {
+-      unsigned char* data = m_data;
+-      pos = o.pos;
+-      if (pos == first)
+-        new(data) T1(o.former());
+-      else if (pos == second)
+-        new(data) T2(o.later());
+-    }
+ 
+     inline WhichAlternative which() const { return pos; }
+ 
+     inline T1& former()
+     {
+-      unsigned char* data = m_data;
+       if (pos == second)// first and none is ok
+         throw WrongTypeException("Access of XBMCAddon::Alternative as incorrect type");
+       if (pos == none)
+-        new(data) T1();
++        d1 = T1();
+       pos = first;
+-      return *((T1*)data);
++      return d1;
+     }
+ 
+     inline const T1& former() const
+     {
+-      const unsigned char* data = m_data;
+       if (pos != first)
+         throw WrongTypeException("Access of XBMCAddon::Alternative as incorrect type");
+-      return *((T1*)data);
++      return d1;
+     }
+ 
+     inline T2& later()
+     {
+-      unsigned char* data = m_data;
+       if (pos == first)
+         throw WrongTypeException("Access of XBMCAddon::Alternative as incorrect type");
+       if (pos == none)
+-        new(data) T2();
++        d2 = T2();
+       pos = second;
+-      return *((T2*)data);
++      return d2;
+     }
+ 
+     inline const T2& later() const
+     {
+-      const unsigned char* data = m_data;
+       if (pos != second)
+         throw WrongTypeException("Access of XBMCAddon::Alternative as incorrect type");
+-      return *((T2*)data);
++      return d2;
+     }
+ 
+     inline operator T1& () { return former(); }
