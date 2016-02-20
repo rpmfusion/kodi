@@ -1,0 +1,11 @@
+--- a/xbmc/Application.cpp	2015-12-06 14:30:15.924980306 -0600
++++ b/xbmc/Application.cpp	2015-12-06 14:37:42.234030771 -0600
+@@ -495,7 +495,7 @@
+   CProfilesManager::GetInstance().Load();
+ 
+   CLog::Log(LOGNOTICE, "-----------------------------------------------------------------------");
+-  CLog::Log(LOGNOTICE, "Starting %s (%s). Platform: %s %s %d-bit", CSysInfo::GetAppName().c_str(), CSysInfo::GetVersion().c_str(),
++  CLog::Log(LOGNOTICE, "Starting %s from RPM Fusion (%s). Platform: %s %s %d-bit", CSysInfo::GetAppName().c_str(), CSysInfo::GetVersion().c_str(),
+             g_sysinfo.GetBuildTargetPlatformName().c_str(), g_sysinfo.GetBuildTargetCpuFamily().c_str(), g_sysinfo.GetXbmcBitness());
+ 
+   std::string buildType;
