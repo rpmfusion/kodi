@@ -37,6 +37,8 @@ Patch3: kodi-14.0-dvddemux-ffmpeg.patch
 # needed to build bundled ffmpeg)
 Patch4: kodi-16.0-dcadec.patch
 
+Patch5: ffmpeg-2.9.patch
+
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
 # (libbluray in EPEL 6 is too old.)
@@ -249,6 +251,7 @@ library.
 %patch2 -p1
 %patch3 -p0
 %patch4 -p0
+%patch5 -p1
 
 
 %build
