@@ -6,7 +6,7 @@
 %global _hardened_build 1
 
 Name: kodi
-Version: 16.0
+Version: 16.1
 Release: 1%{?dist}
 Summary: Media center
 
@@ -407,6 +407,9 @@ fi
 
 
 %changelog
+* Mon May 16 2016 Michael Kuhn <suraia@ikkoku.de> - 16.1-1
+- Update to 16.1.
+
 * Sat Feb 20 2016 Michael Cronenworth <mike@cchtml.com> - 16.0-1
 - Kodi 16.0 final
 
