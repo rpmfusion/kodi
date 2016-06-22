@@ -39,9 +39,7 @@ Patch4: kodi-16.0-dcadec.patch
 
 Patch5: ffmpeg-2.9.patch
 
-%if 0%{?fedora} >= 24
 Patch6: gcc6.patch
-%endif
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
