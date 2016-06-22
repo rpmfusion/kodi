@@ -7,7 +7,7 @@
 
 Name: kodi
 Version: 16.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -417,6 +417,9 @@ fi
 
 
 %changelog
+* Wed Jun 22 2016 Nicolas Chauvet <kwizart@gmail.com> - 16.1-2
+- Fix build - patches by Michael Kuhn <suraia@ikkoku.de>
+
 * Mon Apr 25 2016 Michael Cronenworth <mike@cchtml.com> - 16.1-1
 - Kodi 16.1 final
 
