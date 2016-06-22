@@ -7,7 +7,7 @@
 
 Name: kodi
 Version: 16.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -36,6 +36,10 @@ Patch3: kodi-14.0-dvddemux-ffmpeg.patch
 # Disable dcadec library detection when using external ffmpeg (dcadec is only
 # needed to build bundled ffmpeg)
 Patch4: kodi-16.0-dcadec.patch
+
+Patch5: ffmpeg-2.9.patch
+
+Patch6: gcc6.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -249,6 +253,10 @@ library.
 %patch2 -p1
 %patch3 -p0
 %patch4 -p0
+%patch5 -p1
+%if 0%{?fedora} >= 24
+%patch6 -p1
+%endif
 
 
 %build
@@ -407,6 +415,9 @@ fi
 
 
 %changelog
+* Wed Jun 22 2016 Nicolas Chauvet <kwizart@gmail.com> - 16.1-2
+- Fix build - patches by Michael Kuhn <suraia@ikkoku.de>
+
 * Mon Apr 25 2016 Michael Cronenworth <mike@cchtml.com> - 16.1-1
 - Kodi 16.1 final
 
