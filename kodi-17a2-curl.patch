@@ -1,0 +1,28 @@
+--- a/xbmc/filesystem/DllLibCurl.h	2016-07-30 12:05:53.891636907 -0500
++++ b/xbmc/filesystem/DllLibCurl.h	2016-07-30 12:06:36.590142106 -0500
+@@ -52,7 +52,7 @@
+     virtual CURLMcode multi_fdset(CURLM *multi_handle, fd_set *read_fd_set, fd_set *write_fd_set, fd_set *exc_fd_set, int *max_fd)=0;
+     virtual CURLMcode multi_timeout(CURLM *multi_handle, long *timeout)=0;
+     virtual CURLMsg*  multi_info_read(CURLM *multi_handle, int *msgs_in_queue)=0;
+-    virtual void multi_cleanup(CURL_HANDLE * handle )=0;
++    virtual void multi_cleanup(CURLM *multi_handle)=0;
+     virtual struct curl_slist* slist_append(struct curl_slist *, const char *)=0;
+     virtual void  slist_free_all(struct curl_slist *)=0;
+   };
+--- a/xbmc/filesystem/CurlFile.h	2016-07-30 12:07:48.496992870 -0500
++++ b/xbmc/filesystem/CurlFile.h	2016-07-30 12:08:32.160505849 -0500
+@@ -27,8 +27,12 @@
+ 
+ namespace XCURL
+ {
+-  typedef void CURL_HANDLE;
+-  typedef void CURLM;
++  #define CURL CURL_HANDLE
++  #include <netdb.h>
++  #include <curl/curl.h>
++  #undef CURL
++  typedef struct XCURL::Curl_easy CURL_HANDLE;
++  typedef struct XCURL::Curl_multi CURLM;
+   struct curl_slist;
+ }
+ 

@@ -4,6 +4,7 @@
 # use the line below for pre-releases
 %global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
+%global _with_dvd 0
 
 Name: kodi
 Version: 17.0
@@ -23,8 +24,22 @@ Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 # ./kodi-generate-tarball-xz.sh
 Source1: kodi-generate-tarball-xz.sh
 
+%if 0%{?_with_dvd}
+# kodi uses modified libdvd{nav,read} source and downloads at build time
+# wget -O kodi-libdvdnav-master.tar.gz https://github.com/xbmc/libdvdnav/archive/master.tar.gz
+Source2: kodi-libdvdnav-master.tar.gz
+# wget -O kodi-libdvdread-master.tar.gz https://github.com/xbmc/libdvdread/archive/master.tar.gz
+Source3: kodi-libdvdread-master.tar.gz
+%endif
+
 # Set program version parameters
 Patch1: kodi-16.0-versioning.patch
+
+# Fix curl namespace definitions
+Patch2: kodi-17a2-curl.patch
+
+# Drop DVD library support
+Patch3: kodi-17a2-libdvd.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -100,7 +115,6 @@ BuildRequires: libcrystalhd-devel
 %endif
 BuildRequires: libcurl-devel
 BuildRequires: libdca-devel
-BuildRequires: libdvdread-devel
 %if 0%{?el6}
 BuildRequires: libjpeg-devel
 %else
@@ -234,7 +248,13 @@ library.
 
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
-%patch1 -p1
+%patch1 -p1 -b.versioning
+%patch2 -p1 -b.curl
+%patch3 -p1 -b.libdvd
+%if 0%{?_with_dvd}
+cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
+cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
+%endif
 
 
 %build
@@ -253,9 +273,7 @@ chmod +x bootstrap
 %if 0%{?_with_wayland}
 --enable-wayland \
 %endif
---enable-goom \
 --enable-pulse \
---enable-joystick \
 %if 0%{?_with_libcec}
 --enable-libcec \
 %else
@@ -266,7 +284,7 @@ chmod +x bootstrap
 %else
 --disable-ssh \
 %endif
---disable-dvdcss \
+--disable-optical-drive \
 --disable-optimizations --disable-debug \
 %ifnarch %{arm}
 --enable-gl \
@@ -278,10 +296,6 @@ chmod +x bootstrap
 --disable-vaapi \
 %ifarch armv7hl \
 --enable-tegra \
---disable-neon \
-%endif
-%ifarch armv7hnl
---enable-neon \
 %endif
 %endif
 CFLAGS="$RPM_OPT_FLAGS -fPIC -I/usr/include/afpfs-ng/ -I/usr/include/samba-4.0/ -D__STDC_CONSTANT_MACROS" \
