@@ -8,7 +8,7 @@
 
 Name: kodi
 Version: 17.0
-Release: 0.2%{?dist}
+Release: 0.3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -300,10 +300,10 @@ chmod +x bootstrap
 %endif
 CFLAGS="$RPM_OPT_FLAGS -fPIC -I/usr/include/afpfs-ng/ -I/usr/include/samba-4.0/ -D__STDC_CONSTANT_MACROS" \
 CXXFLAGS="$RPM_OPT_FLAGS -fPIC -I/usr/include/afpfs-ng/ -I/usr/include/samba-4.0/ -D__STDC_CONSTANT_MACROS" \
-LDFLAGS="-fPIC" \
+LDFLAGS="$RPM_LD_FLAGS -fPIC" \
 ASFLAGS=-fPIC
 
-make %{?_smp_mflags} VERBOSE=1
+make %{?_smp_mflags} V=1
 
 
 %install
@@ -406,6 +406,11 @@ fi
 
 
 %changelog
+* Sun Jul 31 2016 Julian Sikorski <belegdol@fedoraproject.org> - 17.0-0.3
+- Rebuilt for ffmpeg-3.1.1
+- Fixed the verbose build
+- Ensured $RPM_LD_FLAGS are used
+
 * Tue Jul 05 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.2
 - Kodi 17.0 alpha 2
 
