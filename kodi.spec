@@ -1,4 +1,4 @@
-%global PRERELEASE a2
+%global PRERELEASE a3
 %global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -8,7 +8,7 @@
 
 Name: kodi
 Version: 17.0
-Release: 0.3%{?dist}
+Release: 0.4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -35,11 +35,8 @@ Source3: kodi-libdvdread-master.tar.gz
 # Set program version parameters
 Patch1: kodi-16.0-versioning.patch
 
-# Fix curl namespace definitions
-Patch2: kodi-17a2-curl.patch
-
 # Drop DVD library support
-Patch3: kodi-17a2-libdvd.patch
+Patch2: kodi-17a2-libdvd.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -249,8 +246,7 @@ library.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-%patch2 -p1 -b.curl
-%patch3 -p1 -b.libdvd
+%patch2 -p1 -b.libdvd
 %if 0%{?_with_dvd}
 cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
 cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
@@ -389,12 +385,10 @@ fi
 %python_sitelib/kodi
 %dir %{_datadir}/pixmaps/kodi
 %{_datadir}/pixmaps/kodi/*.png
-%{_bindir}/kodi-j2meremote
 %{_bindir}/kodi-ps3d
 %{_bindir}/kodi-ps3remote
 %{_bindir}/kodi-send
 %{_bindir}/kodi-wiiremote
-%{_mandir}/man1/kodi-j2meremote.1.gz
 %{_mandir}/man1/kodi-ps3remote.1.gz
 %{_mandir}/man1/kodi-send.1.gz
 %{_mandir}/man1/kodi-standalone.1.gz
@@ -406,6 +400,9 @@ fi
 
 
 %changelog
+* Fri Aug 05 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.4
+- Kodi 17 alpha 3
+
 * Sun Jul 31 2016 Julian Sikorski <belegdol@fedoraproject.org> - 17.0-0.3
 - Rebuilt for ffmpeg-3.1.1
 - Fixed the verbose build
