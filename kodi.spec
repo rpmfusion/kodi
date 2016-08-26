@@ -1,4 +1,4 @@
-%global PRERELEASE a3
+%global PRERELEASE b1
 %global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -8,7 +8,7 @@
 
 Name: kodi
 Version: 17.0
-Release: 0.4%{?dist}
+Release: 0.5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -400,6 +400,9 @@ fi
 
 
 %changelog
+* Fri Aug 26 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.5
+- Kodi 17 beta 1
+
 * Fri Aug 05 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.4
 - Kodi 17 alpha 3
 
