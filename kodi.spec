@@ -42,9 +42,6 @@ Patch2: kodi-17a2-libdvd.patch
 # https://github.com/popcornmix/xbmc/commit/e2e1ba73de53e0f64baa2edc6a45263c0eb72f0b.patch
 Patch3: kodi-17b5-libcec4.patch
 
-# EGL support broke with upstream commit 4733383b8f1c1dd0b95e9e5358425d8a0b7ba8fc
-Patch4: kodi-17b5-egl.patch
-
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
 # (libbluray in EPEL 6 is too old.)
@@ -61,7 +58,8 @@ Patch4: kodi-17b5-egl.patch
 %endif
 
 # Upstream does not support ppc64
-ExcludeArch: ppc64
+# ARM support is restricted to one GPU per build
+ExcludeArch: %{arm} ppc64
 
 BuildRequires: SDL2-devel
 BuildRequires: SDL_image-devel
@@ -265,7 +263,6 @@ library.
 %if 0%{?fedora} > 25
 %patch3 -p1 -b.libcec4
 %endif
-%patch4 -p1 -b.egl
 %if 0%{?_with_dvd}
 cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
 cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
@@ -422,7 +419,7 @@ fi
 * Mon Oct 31 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.8
 - Kodi 17 beta 5
 - Include patch for libcec 4.0 support
-- Patch EGL support
+- Drop ARM support
 
 * Mon Oct 10 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.7
 - Kodi 17 beta 3
