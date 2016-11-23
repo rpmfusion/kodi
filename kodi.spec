@@ -1,13 +1,13 @@
-%global PRERELEASE a1
+#global PRERELEASE rc1
 %global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
-%global DIRVERSION %{version}%{PRERELEASE}
+#global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 
 Name: kodi
-Version: 17.0
-Release: 0.1%{?dist}
+Version: 16.1
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -23,8 +23,19 @@ Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 # ./kodi-generate-tarball-xz.sh
 Source1: kodi-generate-tarball-xz.sh
 
+# filed ticket, but patch still needs work
+# http://trac.xbmc.org/ticket/9658
+Patch1: xbmc-13.0-dvdread.patch
+
 # Set program version parameters
-Patch1: kodi-16.0-versioning.patch
+Patch2: kodi-16.0-versioning.patch
+
+# Remove call to internal ffmpeg function (misued anyway)
+Patch3: kodi-14.0-dvddemux-ffmpeg.patch
+
+# Disable dcadec library detection when using external ffmpeg (dcadec is only
+# needed to build bundled ffmpeg)
+Patch4: kodi-16.0-dcadec.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -164,7 +175,7 @@ BuildRequires: weston-devel
 BuildRequires: yajl-devel
 BuildRequires: zlib-devel
 
-Requires: dejavu-sans-fonts
+Requires: google-roboto-fonts
 # need explicit requires for these packages
 # as they are dynamically loaded via XBMC's arcane
 # pseudo-DLL loading scheme (sigh)
@@ -235,6 +246,9 @@ library.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1
+%patch2 -p1
+%patch3 -p0
+%patch4 -p0
 
 
 %build
@@ -310,8 +324,9 @@ ln -s %{python_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module
 #install -d $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib
 #ln -s %{python_sitearch}/pysqlite2 $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib/pysqlite2
 
-# Use external font files instead of bundled ones
-ln -sf %{_fontbasedir}/dejavu/DejaVuSans-Bold.ttf ${RPM_BUILD_ROOT}%{_datadir}/kodi/addons/skin.estouchy/fonts/
+# Use external Roboto font files instead of bundled ones
+ln -sf %{_fontbasedir}/google-roboto/Roboto-Regular.ttf ${RPM_BUILD_ROOT}%{_datadir}/kodi/addons/skin.confluence/fonts/
+ln -sf %{_fontbasedir}/google-roboto/Roboto-Bold.ttf ${RPM_BUILD_ROOT}%{_datadir}/kodi/addons/skin.confluence/fonts/
 
 # Move man-pages into system dir
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
@@ -392,9 +407,6 @@ fi
 
 
 %changelog
-* Wed Jun 22 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.1
-- Kodi 17.0 alpha 1
-
 * Mon Apr 25 2016 Michael Cronenworth <mike@cchtml.com> - 16.1-1
 - Kodi 16.1 final
 
