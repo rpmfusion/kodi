@@ -1,4 +1,4 @@
-%global PRERELEASE b5
+%global PRERELEASE b6
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -8,7 +8,7 @@
 
 Name: kodi
 Version: 17.0
-Release: 0.8%{?dist}
+Release: 0.9%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -37,10 +37,6 @@ Patch1: kodi-16.0-versioning.patch
 
 # Drop DVD library support
 Patch2: kodi-17a2-libdvd.patch
-
-# Libcec 4.0 support
-# https://github.com/popcornmix/xbmc/commit/e2e1ba73de53e0f64baa2edc6a45263c0eb72f0b.patch
-Patch3: kodi-17b5-libcec4.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -100,6 +96,7 @@ BuildRequires: gperf
 BuildRequires: jasper-devel
 BuildRequires: java-devel
 BuildRequires: lame-devel
+BuildRequires: lcms2-devel
 BuildRequires: libXinerama-devel
 BuildRequires: libXmu-devel
 BuildRequires: libXtst-devel
@@ -260,9 +257,6 @@ library.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.libdvd
-%if 0%{?fedora} > 25
-%patch3 -p1 -b.libcec4
-%endif
 %if 0%{?_with_dvd}
 cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
 cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
@@ -416,6 +410,10 @@ fi
 
 
 %changelog
+* Sun Dec 11 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.9
+- Kodi 17 beta 6
+- Drop libcec patch, now upstream
+
 * Mon Oct 31 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.8
 - Kodi 17 beta 5
 - Include patch for libcec 4.0 support
