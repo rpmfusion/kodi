@@ -107,7 +107,7 @@ BuildRequires: libbluray-devel
 BuildRequires: libcap-devel
 BuildRequires: libcdio-devel
 %if 0%{?_with_libcec}
-%if 0%{?fedora} > 25
+%if 0%{?fedora} > 24
 BuildRequires: libcec-devel >= 4.0.0
 %else
 BuildRequires: libcec-devel < 4.0.0
@@ -189,7 +189,7 @@ Requires: dejavu-sans-fonts
 Requires: libbluray%{?_isa}
 %endif
 %if 0%{?_with_libcec}
-%if 0%{?fedora} > 25
+%if 0%{?fedora} > 24
 Requires: libcec%{?_isa} >= 4.0.0
 %else
 Requires: libcec%{?_isa} < 4.0.0
