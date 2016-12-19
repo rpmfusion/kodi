@@ -1,4 +1,4 @@
-%global PRERELEASE b6
+%global PRERELEASE b7
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -8,7 +8,7 @@
 
 Name: kodi
 Version: 17.0
-Release: 0.9%{?dist}
+Release: 0.10%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -410,6 +410,9 @@ fi
 
 
 %changelog
+* Mon Dec 19 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.10
+- Kodi 17 beta 7
+
 * Sun Dec 11 2016 Michael Cronenworth <mike@cchtml.com> - 17.0-0.9
 - Kodi 17 beta 6
 - Drop libcec patch, now upstream
