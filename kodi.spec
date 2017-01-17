@@ -1,4 +1,4 @@
-%global PRERELEASE rc2
+%global PRERELEASE rc3
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -37,6 +37,9 @@ Patch1: kodi-16.0-versioning.patch
 
 # Drop DVD library support
 Patch2: kodi-17a2-libdvd.patch
+
+# Build issue, fixed upstream
+Patch3: kodi-17.0rc3-AEDefines.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -257,6 +260,7 @@ library.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.libdvd
+%patch3 -p1 -b.aedefines
 %if 0%{?_with_dvd}
 cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
 cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
@@ -323,6 +327,9 @@ desktop-file-install \
  --dir=${RPM_BUILD_ROOT}%{_datadir}/applications \
  $RPM_BUILD_ROOT%{_datadir}/applications/kodi.desktop
 
+# Stop shipping the duplicate xsession file
+rm -f $RPM_BUILD_ROOT/%{_datadir}/xsessions/xbmc.desktop
+
 # Normally we are expected to build these manually. But since we are using
 # the system Python interpreter, we also want to use the system libraries
 install -d $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib
@@ -352,7 +359,9 @@ fi
 %posttrans
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 if [ ! -L %{_libdir}/xbmc ] ; then
-    rmdir %{_libdir}/xbmc %{_datadir}/xbmc
+    if [ -d %{_libdir}/xbmc ] ; then
+        rmdir %{_libdir}/xbmc %{_datadir}/xbmc
+    fi
     ln -s kodi ${RPM_BUILD_ROOT}%{_libdir}/xbmc
     ln -s kodi ${RPM_BUILD_ROOT}%{_datadir}/xbmc
 fi
@@ -360,7 +369,9 @@ fi
 
 %posttrans devel
 if [ ! -L %{_includedir}/xbmc ] ; then
-    rmdir %{_includedir}/xbmc
+    if [ -d %{_includedir}/xbmc ] ; then
+        rmdir %{_includedir}/xbmc
+    fi
     ln -s kodi ${RPM_BUILD_ROOT}%{_includedir}/xbmc
 fi
 
@@ -377,7 +388,6 @@ fi
 %{_datadir}/kodi
 %ghost %{_datadir}/xbmc
 %{_datadir}/xsessions/kodi.desktop
-%{_datadir}/xsessions/xbmc.desktop
 %{_datadir}/applications/kodi.desktop
 %{_datadir}/icons/hicolor/*/*/*.png
 %{_mandir}/man1/kodi.1.gz
@@ -410,6 +420,11 @@ fi
 
 
 %changelog
+* Mon Jan 16 2017 Michael Cronenworth <mike@cchtml.com> - 17.0-0.12.rc3
+- Kodi 17 RC3
+- Check for new installs (RFBZ#4409)
+- Drop the XBMC xsession file (RFBZ#4422)
+
 * Wed Jan 04 2017 Michael Cronenworth <mike@cchtml.com> - 17.0-0.11.rc2
 - Kodi 17 RC2
 
