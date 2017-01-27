@@ -1,4 +1,4 @@
-%global PRERELEASE rc3
+%global PRERELEASE rc4
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -37,9 +37,6 @@ Patch1: kodi-16.0-versioning.patch
 
 # Drop DVD library support
 Patch2: kodi-17a2-libdvd.patch
-
-# Build issue, fixed upstream
-Patch3: kodi-17.0rc3-AEDefines.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -260,7 +257,6 @@ library.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.libdvd
-%patch3 -p1 -b.aedefines
 %if 0%{?_with_dvd}
 cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
 cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
@@ -420,6 +416,9 @@ fi
 
 
 %changelog
+* Fri Jan 27 2017 Michael Cronenworth <mike@cchtml.com> - 17.0-0.12.rc4
+- Kodi 17 RC4
+
 * Mon Jan 16 2017 Michael Cronenworth <mike@cchtml.com> - 17.0-0.12.rc3
 - Kodi 17 RC3
 - Check for new installs (RFBZ#4409)
