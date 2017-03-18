@@ -55,7 +55,7 @@ Patch2: kodi-17a2-libdvd.patch
 
 # Upstream does not support ppc64
 # ARM support is restricted to one GPU per build
-ExcludeArch: %{arm} ppc64
+ExclusiveArch: i686 x86_64
 
 BuildRequires: SDL2-devel
 BuildRequires: SDL_image-devel
