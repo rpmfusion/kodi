@@ -8,7 +8,7 @@
 
 Name: kodi
 Version: 17.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -416,6 +416,9 @@ fi
 
 
 %changelog
+* Sun Mar 19 2017 RPM Fusion Release Engineering <kwizart@rpmfusion.org> - 17.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Thu Feb 02 2017 Michael Cronenworth <mike@cchtml.com> - 17.0-1
 - Kodi 17.0 final
 
