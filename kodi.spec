@@ -8,7 +8,7 @@
 
 Name: kodi
 Version: 17.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -416,6 +416,9 @@ fi
 
 
 %changelog
+* Sat Apr 29 2017 Leigh Scott <leigh123linux@googlemail.com> - 17.1-2
+- Rebuild for ffmpeg update
+
 * Tue Mar 28 2017 Michael Cronenworth <mike@cchtml.com> - 17.1-1
 - Kodi 17.1 final
 
