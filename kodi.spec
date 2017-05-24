@@ -7,8 +7,8 @@
 %global _with_dvd 0
 
 Name: kodi
-Version: 17.1
-Release: 2%{?dist}
+Version: 17.2
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -25,11 +25,13 @@ Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 Source1: kodi-generate-tarball-xz.sh
 
 %if 0%{?_with_dvd}
-# kodi uses modified libdvd{nav,read} source and downloads at build time
+# kodi uses modified libdvd{css,nav,read} source and downloads at build time
 # wget -O kodi-libdvdnav-master.tar.gz https://github.com/xbmc/libdvdnav/archive/master.tar.gz
 Source2: kodi-libdvdnav-master.tar.gz
 # wget -O kodi-libdvdread-master.tar.gz https://github.com/xbmc/libdvdread/archive/master.tar.gz
 Source3: kodi-libdvdread-master.tar.gz
+# wget -O kodi-libdvdcss-master.tar.gz https://github.com/xbmc/libdvdcss/archive/master.tar.gz
+Source4: kodi-libdvdcss-master.tar.gz
 %endif
 
 # Set program version parameters
@@ -256,10 +258,12 @@ library.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-%patch2 -p1 -b.libdvd
 %if 0%{?_with_dvd}
 cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
 cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
+cp -p %{SOURCE4} tools/depends/target/libdvdcss/libdvdcss-master.tar.gz
+%else
+%patch2 -p1 -b.libdvd
 %endif
 
 
@@ -290,7 +294,9 @@ chmod +x bootstrap
 %else
 --disable-ssh \
 %endif
+%if ! 0%{?_with_dvd}
 --disable-optical-drive \
+%endif
 --disable-optimizations --disable-debug \
 %ifnarch %{arm}
 --enable-gl \
@@ -416,6 +422,9 @@ fi
 
 
 %changelog
+* Wed May 24 2017 Michael Cronenworth <mike@cchtml.com> - 17.2-1
+- Kodi 17.2 final
+
 * Sat Apr 29 2017 Leigh Scott <leigh123linux@googlemail.com> - 17.1-2
 - Rebuild for ffmpeg update
 
