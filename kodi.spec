@@ -7,7 +7,7 @@
 %global _with_dvd 0
 
 Name: kodi
-Version: 17.2
+Version: 17.3
 Release: 1%{?dist}
 Summary: Media center
 
@@ -422,6 +422,9 @@ fi
 
 
 %changelog
+* Wed May 31 2017 Michael Cronenworth <mike@cchtml.com> - 17.3-1
+- Kodi 17.3 final
+
 * Wed May 24 2017 Michael Cronenworth <mike@cchtml.com> - 17.2-1
 - Kodi 17.2 final
 
