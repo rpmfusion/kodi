@@ -7,7 +7,7 @@
 %global _with_dvd 0
 
 Name: kodi
-Version: 17.3
+Version: 17.4
 Release: 1%{?dist}
 Summary: Media center
 
@@ -37,8 +37,10 @@ Source4: kodi-libdvdcss-master.tar.gz
 # Set program version parameters
 Patch1: kodi-16.0-versioning.patch
 
+%if 0%{?_with_dvd} == 0
 # Drop DVD library support
 Patch2: kodi-17a2-libdvd.patch
+%endif
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -294,7 +296,7 @@ chmod +x bootstrap
 %else
 --disable-ssh \
 %endif
-%if ! 0%{?_with_dvd}
+%if 0%{?_with_dvd} == 0
 --disable-optical-drive \
 %endif
 --disable-optimizations --disable-debug \
@@ -422,6 +424,9 @@ fi
 
 
 %changelog
+* Wed Aug 23 2017 Michael Cronenworth <mike@cchtml.com> - 17.4-1
+- Kodi 17.4 final
+
 * Wed May 31 2017 Michael Cronenworth <mike@cchtml.com> - 17.3-1
 - Kodi 17.3 final
 
