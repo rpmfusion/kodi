@@ -7,7 +7,7 @@
 %global _with_dvd 0
 
 Name: kodi
-Version: 17.4
+Version: 17.5
 Release: 1%{?dist}
 Summary: Media center
 
@@ -174,7 +174,7 @@ BuildRequires: python-pillow
 BuildRequires: sqlite-devel
 BuildRequires: swig
 BuildRequires: systemd-devel
-BuildRequires: taglib-devel >= 1.8
+BuildRequires: taglib-devel >= 1.10
 BuildRequires: tinyxml-devel
 BuildRequires: tre-devel
 BuildRequires: trousers-devel
@@ -424,6 +424,9 @@ fi
 
 
 %changelog
+* Wed Oct 25 2017 Michael Cronenworth <mike@cchtml.com> - 17.5-1
+- Kodi 17.5 final
+
 * Wed Aug 23 2017 Michael Cronenworth <mike@cchtml.com> - 17.4-1
 - Kodi 17.4 final
 
