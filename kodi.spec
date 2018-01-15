@@ -8,7 +8,7 @@
 
 Name: kodi
 Version: 17.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -424,6 +424,9 @@ fi
 
 
 %changelog
+* Mon Jan 15 2018 Nicolas Chauvet <kwizart@gmail.com> - 17.6-2
+- Rebuilt for VA-API 1.0.0
+
 * Fri Nov 17 2017 Michael Cronenworth <mike@cchtml.com> - 17.6-1
 - Kodi 17.6 final
 
