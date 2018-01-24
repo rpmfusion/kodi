@@ -10,7 +10,7 @@
 # * dvd - Include optical drive support and DVD decryption
 #
 # Default: Do not ship DVD decryption for legal reasons
-%bcond_with dvd 0
+%bcond_with dvd
 
 Name: kodi
 Version: 17.6
@@ -324,7 +324,7 @@ chmod +x bootstrap
 %endif
 CFLAGS="$RPM_OPT_FLAGS -fPIC -I/usr/include/afpfs-ng/ -I/usr/include/samba-4.0/ -D__STDC_CONSTANT_MACROS" \
 CXXFLAGS="$RPM_OPT_FLAGS -fPIC -I/usr/include/afpfs-ng/ -I/usr/include/samba-4.0/ -D__STDC_CONSTANT_MACROS" \
-LDFLAGS="$RPM_LD_FLAGS -fPIC" \
+LDFLAGS="`echo "$RPM_LD_FLAGS -fPIC" | sed -e 's/-Wl,-z,defs//'`" \
 ASFLAGS=-fPIC
 
 make %{?_smp_mflags} V=1
