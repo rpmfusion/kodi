@@ -1,0 +1,445 @@
+From 18265df6ad3134afbdaf9b09d937f7a5a16cb84c Mon Sep 17 00:00:00 2001
+From: Michael Cronenworth <mike@cchtml.com>
+Date: Wed, 24 Jan 2018 09:24:04 -0600
+Subject: [PATCH] ffmpeg: Initial support for ffmpeg 3.5
+
+- Renamed variables to current names
+- Removal of deprecated API types
+
+Most of this stuff was deprecated years ago.
+
+Signed-off-by: Michael Cronenworth <mike@cchtml.com>
+---
+ xbmc/cdrip/EncoderFFmpeg.cpp                       |  4 +--
+ xbmc/cores/AudioEngine/Encoders/AEEncoderFFmpeg.h  |  2 +-
+ .../AudioEngine/Engines/ActiveAE/ActiveAE.cpp      |  2 +-
+ .../Engines/ActiveAE/ActiveAEFilter.cpp            |  6 ++--
+ .../DVDCodecs/Audio/DVDAudioCodecFFmpeg.cpp        |  6 ++--
+ .../DVDCodecs/Overlay/DVDOverlayCodecFFmpeg.cpp    |  2 +-
+ .../VideoPlayer/DVDCodecs/Video/DVDVideoCodec.h    |  5 ----
+ .../DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp        | 34 ++--------------------
+ .../DVDCodecs/Video/DVDVideoPPFFmpeg.cpp           |  5 +---
+ xbmc/cores/VideoPlayer/DVDCodecs/Video/VAAPI.cpp   |  4 +--
+ .../VideoPlayer/DVDDemuxers/DVDDemuxClient.cpp     |  6 ++--
+ .../VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp     |  6 ++--
+ .../VideoPlayer/DVDDemuxers/DVDDemuxUtils.cpp      |  4 +--
+ xbmc/cores/omxplayer/OMXAudioCodecOMX.cpp          |  8 ++---
+ xbmc/cores/omxplayer/OMXVideoCodec.h               |  5 ----
+ xbmc/guilib/FFmpegImage.cpp                        |  2 +-
+ xbmc/utils/BitstreamConverter.cpp                  | 12 ++++----
+ 17 files changed, 36 insertions(+), 77 deletions(-)
+
+diff --git a/xbmc/cdrip/EncoderFFmpeg.cpp b/xbmc/cdrip/EncoderFFmpeg.cpp
+index 86f56ae2a6..f8a5370fdb 100644
+--- a/xbmc/cdrip/EncoderFFmpeg.cpp
++++ b/xbmc/cdrip/EncoderFFmpeg.cpp
+@@ -119,8 +119,8 @@ bool CEncoderFFmpeg::Init(audioenc_callbacks &callbacks)
+ 
+   if(m_Format->oformat->flags & AVFMT_GLOBALHEADER)
+   {
+-    m_CodecCtx->flags |= CODEC_FLAG_GLOBAL_HEADER;
+-    m_Format->flags   |= CODEC_FLAG_GLOBAL_HEADER;
++    m_CodecCtx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
++    m_Format->flags   |= AV_CODEC_FLAG_GLOBAL_HEADER;
+   }
+ 
+   switch(m_iInBitsPerSample)
+diff --git a/xbmc/cores/AudioEngine/Encoders/AEEncoderFFmpeg.h b/xbmc/cores/AudioEngine/Encoders/AEEncoderFFmpeg.h
+index 11c2e10b08..6bb40f285e 100644
+--- a/xbmc/cores/AudioEngine/Encoders/AEEncoderFFmpeg.h
++++ b/xbmc/cores/AudioEngine/Encoders/AEEncoderFFmpeg.h
+@@ -56,7 +56,7 @@ private:
+   SwrContext *m_SwrCtx;
+   CAEChannelInfo m_Layout;
+   AVPacket m_Pkt;
+-  uint8_t m_Buffer[8 + FF_MIN_BUFFER_SIZE];
++  uint8_t m_Buffer[8 + AV_INPUT_BUFFER_MIN_SIZE];
+   int m_BufferSize;
+   int m_OutputSize;
+   double m_OutputRatio;
+diff --git a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
+index a1ea0791f4..54e5c1d830 100644
+--- a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
++++ b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
+@@ -2955,7 +2955,7 @@ IAESound *CActiveAE::MakeSound(const std::string& file)
+   int fileSize = sound->GetFileSize();
+ 
+   fmt_ctx = avformat_alloc_context();
+-  unsigned char* buffer = (unsigned char*)av_malloc(SOUNDBUFFER_SIZE+FF_INPUT_BUFFER_PADDING_SIZE);
++  unsigned char* buffer = (unsigned char*)av_malloc(SOUNDBUFFER_SIZE+AV_INPUT_BUFFER_PADDING_SIZE);
+   io_ctx = avio_alloc_context(buffer, SOUNDBUFFER_SIZE, 0,
+                                             sound, CActiveAESound::Read, NULL, CActiveAESound::Seek);
+   io_ctx->max_packet_size = sound->GetChunkSize();
+diff --git a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEFilter.cpp b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEFilter.cpp
+index a4c3a51df3..8085d94c77 100644
+--- a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEFilter.cpp
++++ b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEFilter.cpp
+@@ -91,8 +91,8 @@ bool CActiveAEFilter::CreateFilterGraph()
+     return false;
+   }
+ 
+-  AVFilter* srcFilter = avfilter_get_by_name("abuffer");
+-  AVFilter* outFilter = avfilter_get_by_name("abuffersink");
++  const AVFilter* srcFilter = avfilter_get_by_name("abuffer");
++  const AVFilter* outFilter = avfilter_get_by_name("abuffersink");
+ 
+   std::string args = StringUtils::Format("time_base=1/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%" PRIx64,
+                                          m_sampleRate,
+@@ -121,7 +121,7 @@ bool CActiveAEFilter::CreateFilterGraph()
+ 
+ bool CActiveAEFilter::CreateAtempoFilter()
+ {
+-  AVFilter *atempo;
++  const AVFilter *atempo;
+ 
+   atempo = avfilter_get_by_name("atempo");
+   m_pFilterCtxAtempo = avfilter_graph_alloc_filter(m_pFilterGraph, atempo, "atempo");
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Audio/DVDAudioCodecFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Audio/DVDAudioCodecFFmpeg.cpp
+index f5880cc25b..78712c9ed6 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Audio/DVDAudioCodecFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Audio/DVDAudioCodecFFmpeg.cpp
+@@ -82,8 +82,8 @@ bool CDVDAudioCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
+   m_pCodecContext->debug = 0;
+   m_pCodecContext->workaround_bugs = 1;
+ 
+-  if (pCodec->capabilities & CODEC_CAP_TRUNCATED)
+-    m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
++  if (pCodec->capabilities & AV_CODEC_CAP_TRUNCATED)
++    m_pCodecContext->flags |= AV_CODEC_FLAG_TRUNCATED;
+ 
+   m_matrixEncoding = AV_MATRIX_ENCODING_NONE;
+   m_channels = 0;
+@@ -98,7 +98,7 @@ bool CDVDAudioCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
+ 
+   if( hints.extradata && hints.extrasize > 0 )
+   {
+-    m_pCodecContext->extradata = (uint8_t*)av_mallocz(hints.extrasize + FF_INPUT_BUFFER_PADDING_SIZE);
++    m_pCodecContext->extradata = (uint8_t*)av_mallocz(hints.extrasize + AV_INPUT_BUFFER_PADDING_SIZE);
+     if(m_pCodecContext->extradata)
+     {
+       m_pCodecContext->extradata_size = hints.extrasize;
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecFFmpeg.cpp
+index 3a080d06c9..8ab62db5ec 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayCodecFFmpeg.cpp
+@@ -73,7 +73,7 @@ bool CDVDOverlayCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &optio
+   if( hints.extradata && hints.extrasize > 0 )
+   {
+     m_pCodecContext->extradata_size = hints.extrasize;
+-    m_pCodecContext->extradata = (uint8_t*)av_mallocz(hints.extrasize + FF_INPUT_BUFFER_PADDING_SIZE);
++    m_pCodecContext->extradata = (uint8_t*)av_mallocz(hints.extrasize + AV_INPUT_BUFFER_PADDING_SIZE);
+     memcpy(m_pCodecContext->extradata, hints.extradata, hints.extrasize);
+ 
+     // start parsing of extra data - create a copy to be safe and make it zero-terminating to avoid access violations!
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodec.h b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodec.h
+index a2da9de437..5392231aa6 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodec.h
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodec.h
+@@ -149,11 +149,6 @@ struct DVDVideoUserData
+ 
+ // DVP_FLAG 0x00000100 - 0x00000f00 is in use by libmpeg2!
+ 
+-#define DVP_QSCALE_UNKNOWN          0
+-#define DVP_QSCALE_MPEG1            1
+-#define DVP_QSCALE_MPEG2            2
+-#define DVP_QSCALE_H264             3
+-
+ class CDVDStreamInfo;
+ class CDVDCodecOption;
+ class CDVDCodecOptions;
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
+index df2445d295..1a35ea0724 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
+@@ -382,16 +382,6 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
+   else
+     m_decoderState = STATE_SW_SINGLE;
+ 
+-#if defined(TARGET_DARWIN_IOS)
+-  // ffmpeg with enabled neon will crash and burn if this is enabled
+-  m_pCodecContext->flags &= CODEC_FLAG_EMU_EDGE;
+-#else
+-  if (pCodec->id != AV_CODEC_ID_H264 && pCodec->capabilities & CODEC_CAP_DR1
+-      && pCodec->id != AV_CODEC_ID_VP8
+-     )
+-    m_pCodecContext->flags |= CODEC_FLAG_EMU_EDGE;
+-#endif
+-
+   // if we don't do this, then some codecs seem to fail.
+   m_pCodecContext->coded_height = hints.height;
+   m_pCodecContext->coded_width = hints.width;
+@@ -400,7 +390,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
+   if( hints.extradata && hints.extrasize > 0 )
+   {
+     m_pCodecContext->extradata_size = hints.extrasize;
+-    m_pCodecContext->extradata = (uint8_t*)av_mallocz(hints.extrasize + FF_INPUT_BUFFER_PADDING_SIZE);
++    m_pCodecContext->extradata = (uint8_t*)av_mallocz(hints.extrasize + AV_INPUT_BUFFER_PADDING_SIZE);
+     memcpy(m_pCodecContext->extradata, hints.extradata, hints.extrasize);
+   }
+ 
+@@ -882,24 +872,6 @@ bool CDVDVideoCodecFFmpeg::GetPictureCommon(DVDVideoPicture* pDvdVideoPicture)
+   else
+     pDvdVideoPicture->color_range = 0;
+ 
+-  int qscale_type;
+-  pDvdVideoPicture->qp_table = av_frame_get_qp_table(m_pFrame, &pDvdVideoPicture->qstride, &qscale_type);
+-
+-  switch (qscale_type)
+-  {
+-  case FF_QSCALE_TYPE_MPEG1:
+-    pDvdVideoPicture->qscale_type = DVP_QSCALE_MPEG1;
+-    break;
+-  case FF_QSCALE_TYPE_MPEG2:
+-    pDvdVideoPicture->qscale_type = DVP_QSCALE_MPEG2;
+-    break;
+-  case FF_QSCALE_TYPE_H264:
+-    pDvdVideoPicture->qscale_type = DVP_QSCALE_H264;
+-    break;
+-  default:
+-    pDvdVideoPicture->qscale_type = DVP_QSCALE_UNKNOWN;
+-  }
+-
+   if (pDvdVideoPicture->iRepeatPicture)
+     pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
+   else
+@@ -989,8 +961,8 @@ int CDVDVideoCodecFFmpeg::FilterOpen(const std::string& filters, bool scale)
+     return -1;
+   }
+ 
+-  AVFilter* srcFilter = avfilter_get_by_name("buffer");
+-  AVFilter* outFilter = avfilter_get_by_name("buffersink"); // should be last filter in the graph for now
++  const AVFilter* srcFilter = avfilter_get_by_name("buffer");
++  const AVFilter* outFilter = avfilter_get_by_name("buffersink"); // should be last filter in the graph for now
+ 
+   std::string args = StringUtils::Format("%d:%d:%d:%d:%d:%d:%d",
+                                         m_pCodecContext->width,
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoPPFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoPPFFmpeg.cpp
+index 73b914f864..f367a534b1 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoPPFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoPPFFmpeg.cpp
+@@ -132,15 +132,12 @@ bool CDVDVideoPPFFmpeg::Process(DVDVideoPicture* pPicture)
+     }
+   }
+ 
+-  int pict_type = (m_pSource->qscale_type != DVP_QSCALE_MPEG1) ?
+-                   PP_PICT_TYPE_QP2 : 0;
+-
+   pp_postprocess((const uint8_t**)m_pSource->data, m_pSource->iLineSize,
+                 m_pTarget->data, m_pTarget->iLineSize,
+                 m_pSource->iWidth, m_pSource->iHeight,
+                 m_pSource->qp_table, m_pSource->qstride,
+                 m_pMode, m_pContext,
+-                pict_type); //m_pSource->iFrameType);
++                0); //m_pSource->iFrameType);
+ 
+   //Copy frame information over to target, but make sure it is set as allocated should decoder have forgotten
+   m_pTarget->iFlags = m_pSource->iFlags | DVP_FLAG_ALLOCATED;
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/VAAPI.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/VAAPI.cpp
+index 2f6502561d..b69cb61827 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/VAAPI.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/VAAPI.cpp
+@@ -3090,8 +3090,8 @@ bool CFFmpegPostproc::Init(EINTERLACEMETHOD method)
+     return false;
+   }
+ 
+-  AVFilter* srcFilter = avfilter_get_by_name("buffer");
+-  AVFilter* outFilter = avfilter_get_by_name("buffersink");
++  const AVFilter* srcFilter = avfilter_get_by_name("buffer");
++  const AVFilter* outFilter = avfilter_get_by_name("buffersink");
+ 
+   std::string args = StringUtils::Format("%d:%d:%d:%d:%d:%d:%d",
+                                         m_config.vidWidth,
+diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxClient.cpp b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxClient.cpp
+index 76c37a33fe..ab77abb7b4 100644
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxClient.cpp
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxClient.cpp
+@@ -25,7 +25,7 @@
+ #include "settings/Settings.h"
+ #include "../DVDClock.h"
+ 
+-#define FF_MAX_EXTRADATA_SIZE ((1 << 28) - FF_INPUT_BUFFER_PADDING_SIZE)
++#define FF_MAX_EXTRADATA_SIZE ((1 << 28) - AV_INPUT_BUFFER_PADDING_SIZE)
+ 
+ 
+ class CDemuxStreamClientInternal
+@@ -179,9 +179,9 @@ void CDVDDemuxClient::ParsePacket(DemuxPacket* pkt)
+       st->changes++;
+       st->disabled = false;
+       st->ExtraSize = len;
+-      st->ExtraData = new uint8_t[len+FF_INPUT_BUFFER_PADDING_SIZE];
++      st->ExtraData = new uint8_t[len+AV_INPUT_BUFFER_PADDING_SIZE];
+       memcpy(st->ExtraData, pkt->pData, len);
+-      memset((uint8_t*)st->ExtraData + len, 0 , FF_INPUT_BUFFER_PADDING_SIZE);
++      memset((uint8_t*)st->ExtraData + len, 0 , AV_INPUT_BUFFER_PADDING_SIZE);
+       stream->m_parser_split = false;
+     }
+   }
+diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+index 33d1e5ab62..f23e858825 100644
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+@@ -78,7 +78,7 @@ static const struct StereoModeConversionMap WmvToInternalStereoModeMap[] =
+   {}
+ };
+ 
+-#define FF_MAX_EXTRADATA_SIZE ((1 << 28) - FF_INPUT_BUFFER_PADDING_SIZE)
++#define FF_MAX_EXTRADATA_SIZE ((1 << 28) - AV_INPUT_BUFFER_PADDING_SIZE)
+ 
+ std::string CDemuxStreamAudioFFmpeg::GetStreamName()
+ {
+@@ -1881,12 +1881,12 @@ void CDVDDemuxFFmpeg::ParsePacket(AVPacket *pkt)
+       // Found extradata, fill it in. This will cause
+       // a new stream to be created and used.
+       st->codec->extradata_size = i;
+-      st->codec->extradata = (uint8_t*)av_malloc(st->codec->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
++      st->codec->extradata = (uint8_t*)av_malloc(st->codec->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
+       if (st->codec->extradata)
+       {
+         CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::Read() fetching extradata, extradata_size(%d)", st->codec->extradata_size);
+         memcpy(st->codec->extradata, pkt->data, st->codec->extradata_size);
+-        memset(st->codec->extradata + i, 0, FF_INPUT_BUFFER_PADDING_SIZE);
++        memset(st->codec->extradata + i, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+       }
+       else
+       {
+diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxUtils.cpp b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxUtils.cpp
+index df0f35bd49..10102a89d4 100644
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxUtils.cpp
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxUtils.cpp
+@@ -68,7 +68,7 @@ DemuxPacket* CDVDDemuxUtils::AllocateDemuxPacket(int iDataSize)
+         * Note, if the first 23 bits of the additional bytes are not 0 then damaged
+         * MPEG bitstreams could cause overread and segfault
+         */
+-      pPacket->pData =(uint8_t*)_aligned_malloc(iDataSize + FF_INPUT_BUFFER_PADDING_SIZE, 16);
++      pPacket->pData =(uint8_t*)_aligned_malloc(iDataSize + AV_INPUT_BUFFER_PADDING_SIZE, 16);
+       if (!pPacket->pData)
+       {
+         FreeDemuxPacket(pPacket);
+@@ -76,7 +76,7 @@ DemuxPacket* CDVDDemuxUtils::AllocateDemuxPacket(int iDataSize)
+       }
+ 
+       // reset the last 8 bytes to 0;
+-      memset(pPacket->pData + iDataSize, 0, FF_INPUT_BUFFER_PADDING_SIZE);
++      memset(pPacket->pData + iDataSize, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+     }
+ 
+     // setup defaults
+diff --git a/xbmc/cores/omxplayer/OMXAudioCodecOMX.cpp b/xbmc/cores/omxplayer/OMXAudioCodecOMX.cpp
+index 920ac4ab75..383f4f88cb 100644
+--- a/xbmc/cores/omxplayer/OMXAudioCodecOMX.cpp
++++ b/xbmc/cores/omxplayer/OMXAudioCodecOMX.cpp
+@@ -86,8 +86,8 @@ bool COMXAudioCodecOMX::Open(CDVDStreamInfo &hints)
+   m_pCodecContext->debug = 0;
+   m_pCodecContext->workaround_bugs = 1;
+ 
+-  if (pCodec->capabilities & CODEC_CAP_TRUNCATED)
+-    m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
++  if (pCodec->capabilities & AV_CODEC_CAP_TRUNCATED)
++    m_pCodecContext->flags |= AV_CODEC_FLAG_TRUNCATED;
+ 
+   m_channels = 0;
+   m_pCodecContext->channels = hints.channels;
+@@ -110,7 +110,7 @@ bool COMXAudioCodecOMX::Open(CDVDStreamInfo &hints)
+ 
+   if( hints.extradata && hints.extrasize > 0 )
+   {
+-    m_pCodecContext->extradata = (uint8_t*)av_mallocz(hints.extrasize + FF_INPUT_BUFFER_PADDING_SIZE);
++    m_pCodecContext->extradata = (uint8_t*)av_mallocz(hints.extrasize + AV_INPUT_BUFFER_PADDING_SIZE);
+     if(m_pCodecContext->extradata)
+     {
+       m_pCodecContext->extradata_size = hints.extrasize;
+@@ -222,7 +222,7 @@ int COMXAudioCodecOMX::GetData(BYTE** dst, double &dts, double &pts)
+ 
+   if (m_iBufferOutputAlloced < m_iBufferOutputUsed + outputSize)
+   {
+-     m_pBufferOutput = (BYTE*)av_realloc(m_pBufferOutput, m_iBufferOutputUsed + outputSize + FF_INPUT_BUFFER_PADDING_SIZE);
++     m_pBufferOutput = (BYTE*)av_realloc(m_pBufferOutput, m_iBufferOutputUsed + outputSize + AV_INPUT_BUFFER_PADDING_SIZE);
+      m_iBufferOutputAlloced = m_iBufferOutputUsed + outputSize;
+   }
+ 
+diff --git a/xbmc/cores/omxplayer/OMXVideoCodec.h b/xbmc/cores/omxplayer/OMXVideoCodec.h
+index d8063d05a2..0b9bdb804f 100644
+--- a/xbmc/cores/omxplayer/OMXVideoCodec.h
++++ b/xbmc/cores/omxplayer/OMXVideoCodec.h
+@@ -127,11 +127,6 @@ struct DVDVideoUserData
+ 
+ // DVP_FLAG 0x00000100 - 0x00000f00 is in use by libmpeg2!
+ 
+-#define DVP_QSCALE_UNKNOWN          0
+-#define DVP_QSCALE_MPEG1            1
+-#define DVP_QSCALE_MPEG2            2
+-#define DVP_QSCALE_H264             3
+-
+ class COMXStreamInfo;
+ class CDVDCodecOption;
+ class CDVDCodecOptions;
+diff --git a/xbmc/guilib/FFmpegImage.cpp b/xbmc/guilib/FFmpegImage.cpp
+index 15bae686fb..ee49824e54 100644
+--- a/xbmc/guilib/FFmpegImage.cpp
++++ b/xbmc/guilib/FFmpegImage.cpp
+@@ -551,7 +551,7 @@ bool CFFmpegImage::CreateThumbnailFromSurface(unsigned char* bufferin, unsigned
+   tdm.avOutctx->time_base.num = 1;
+   tdm.avOutctx->time_base.den = 1;
+   tdm.avOutctx->pix_fmt = jpg_output ? AV_PIX_FMT_YUVJ420P : AV_PIX_FMT_RGBA;
+-  tdm.avOutctx->flags = CODEC_FLAG_QSCALE;
++  tdm.avOutctx->flags = AV_CODEC_FLAG_QSCALE;
+   tdm.avOutctx->mb_lmin = tdm.avOutctx->qmin * FF_QP2LAMBDA;
+   tdm.avOutctx->mb_lmax = tdm.avOutctx->qmax * FF_QP2LAMBDA;
+   tdm.avOutctx->global_quality = tdm.avOutctx->qmin * FF_QP2LAMBDA;
+diff --git a/xbmc/utils/BitstreamConverter.cpp b/xbmc/utils/BitstreamConverter.cpp
+index d0a4c2098b..4330ee3569 100644
+--- a/xbmc/utils/BitstreamConverter.cpp
++++ b/xbmc/utils/BitstreamConverter.cpp
+@@ -686,13 +686,13 @@ bool CBitstreamConverter::BitstreamConvertInitAVC(void *in_extradata, int in_ext
+     unit_size = extradata[0] << 8 | extradata[1];
+     total_size += unit_size + 4;
+ 
+-    if (total_size > INT_MAX - FF_INPUT_BUFFER_PADDING_SIZE ||
++    if (total_size > INT_MAX - AV_INPUT_BUFFER_PADDING_SIZE ||
+       (extradata + 2 + unit_size) > ((uint8_t*)in_extradata + in_extrasize))
+     {
+       av_free(out);
+       return false;
+     }
+-    tmp = av_realloc(out, total_size + FF_INPUT_BUFFER_PADDING_SIZE);
++    tmp = av_realloc(out, total_size + AV_INPUT_BUFFER_PADDING_SIZE);
+     if (!tmp)
+     {
+       av_free(out);
+@@ -713,7 +713,7 @@ pps:
+   }
+ 
+   if (out)
+-    memset(out + total_size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
++    memset(out + total_size, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+ 
+   if (!sps_seen)
+       CLog::Log(LOGDEBUG, "SPS NALU missing or invalid. The resulting stream may not play");
+@@ -776,13 +776,13 @@ bool CBitstreamConverter::BitstreamConvertInitHEVC(void *in_extradata, int in_ex
+       }
+       total_size += unit_size + 4;
+ 
+-      if (total_size > INT_MAX - FF_INPUT_BUFFER_PADDING_SIZE ||
++      if (total_size > INT_MAX - AV_INPUT_BUFFER_PADDING_SIZE ||
+         (extradata + unit_size) > ((uint8_t*)in_extradata + in_extrasize))
+       {
+         av_free(out);
+         return false;
+       }
+-      tmp = av_realloc(out, total_size + FF_INPUT_BUFFER_PADDING_SIZE);
++      tmp = av_realloc(out, total_size + AV_INPUT_BUFFER_PADDING_SIZE);
+       if (!tmp)
+       {
+         av_free(out);
+@@ -796,7 +796,7 @@ bool CBitstreamConverter::BitstreamConvertInitHEVC(void *in_extradata, int in_ex
+   }
+ 
+   if (out)
+-    memset(out + total_size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
++    memset(out + total_size, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+ 
+   if (!sps_seen)
+       CLog::Log(LOGDEBUG, "SPS NALU missing or invalid. The resulting stream may not play");
+-- 
+2.14.3
+

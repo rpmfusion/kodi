@@ -4,11 +4,22 @@
 # use the line below for pre-releases
 #global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
-%global _with_dvd 0
+
+%if (0%{?fedora} > 27)
+#Rawhide has stopped defining this correctly
+%global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+%endif
+
+# We support hte following options:
+# --with,
+# * dvd - Include optical drive support and DVD decryption
+#
+# Default: Do not ship DVD decryption for legal reasons
+%bcond_with dvd 0
 
 Name: kodi
 Version: 17.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -24,7 +35,7 @@ Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 # ./kodi-generate-tarball-xz.sh
 Source1: kodi-generate-tarball-xz.sh
 
-%if 0%{?_with_dvd}
+%if %{with dvd}
 # kodi uses modified libdvd{css,nav,read} source and downloads at build time
 # wget -O kodi-libdvdnav-master.tar.gz https://github.com/xbmc/libdvdnav/archive/master.tar.gz
 Source2: kodi-libdvdnav-master.tar.gz
@@ -37,10 +48,13 @@ Source4: kodi-libdvdcss-master.tar.gz
 # Set program version parameters
 Patch1: kodi-16.0-versioning.patch
 
-%if 0%{?_with_dvd} == 0
+%if ! %{with dvd}
 # Drop DVD library support
 Patch2: kodi-17a2-libdvd.patch
 %endif
+
+# FFmpeg 3.5 support
+Patch3: kodi-17.6-ffmpeg-3.5.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -169,8 +183,8 @@ BuildRequires: nasm
 BuildRequires: pcre-devel
 BuildRequires: pixman-devel
 BuildRequires: pulseaudio-libs-devel
-BuildRequires: python-devel
-BuildRequires: python-pillow
+BuildRequires: python2-devel
+BuildRequires: python2-pillow
 BuildRequires: sqlite-devel
 BuildRequires: swig
 BuildRequires: systemd-devel
@@ -213,7 +227,7 @@ Requires: xorg-x11-utils
 
 # This is just symlinked to, but needed both at build-time
 # and for installation
-Requires: python-pillow%{?_isa}
+Requires: python2-pillow%{?_isa}
 
 
 %description
@@ -260,13 +274,14 @@ library.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-%if 0%{?_with_dvd}
+%if %{with dvd}
 cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
 cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
 cp -p %{SOURCE4} tools/depends/target/libdvdcss/libdvdcss-master.tar.gz
 %else
 %patch2 -p1 -b.libdvd
 %endif
+%patch3 -p1 -b.ffmpeg-3.5
 
 
 %build
@@ -296,7 +311,7 @@ chmod +x bootstrap
 %else
 --disable-ssh \
 %endif
-%if 0%{?_with_dvd} == 0
+%if ! %{with dvd}
 --disable-optical-drive \
 %endif
 --disable-optimizations --disable-debug \
@@ -349,19 +364,7 @@ mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
 mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
-%post
-/bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
-
-
-%postun
-if [ $1 -eq 0 ] ; then
-    /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
-    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-fi
-
-
 %posttrans
-/usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 if [ ! -L %{_libdir}/xbmc ] ; then
     if [ -d %{_libdir}/xbmc ] ; then
         rmdir %{_libdir}/xbmc %{_datadir}/xbmc
@@ -406,7 +409,7 @@ fi
 
 %files eventclients
 %license copying.txt LICENSE.GPL
-%python_sitelib/kodi
+%{python_sitelib}/kodi
 %dir %{_datadir}/pixmaps/kodi
 %{_datadir}/pixmaps/kodi/*.png
 %{_bindir}/kodi-ps3d
@@ -424,6 +427,10 @@ fi
 
 
 %changelog
+* Wed Jan 24 2018 Michael Cronenworth <mike@cchtml.com> - 17.6-4
+- ffmpeg-3.5 support
+- Make dvd support an rpm build conditional
+
 * Thu Jan 18 2018 Leigh Scott <leigh123linux@googlemail.com> - 17.6-3
 - Rebuilt for ffmpeg-3.5 git
 
