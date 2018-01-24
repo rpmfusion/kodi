@@ -5,11 +5,6 @@
 #global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 
-%if (0%{?fedora} > 27)
-#Rawhide has stopped defining this correctly
-%global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
-%endif
-
 # We support hte following options:
 # --with,
 # * dvd - Include optical drive support and DVD decryption
@@ -409,7 +404,7 @@ fi
 
 %files eventclients
 %license copying.txt LICENSE.GPL
-%{python_sitelib}/kodi
+%{python2_sitelib}/kodi
 %dir %{_datadir}/pixmaps/kodi
 %{_datadir}/pixmaps/kodi/*.png
 %{_bindir}/kodi-ps3d
