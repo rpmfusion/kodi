@@ -14,7 +14,7 @@
 
 Name: kodi
 Version: 17.6
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -422,6 +422,9 @@ fi
 
 
 %changelog
+* Tue Feb 06 2018 Leigh Scott <leigh123linux@googlemail.com> - 17.6-5
+- Rebuild for boost-1.66
+
 * Wed Jan 24 2018 Michael Cronenworth <mike@cchtml.com> - 17.6-4
 - ffmpeg-3.5 support
 - Make dvd support an rpm build conditional
