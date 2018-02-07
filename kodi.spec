@@ -284,6 +284,7 @@ chmod +x bootstrap
 ./bootstrap
 # Can't use export nor %%configure (implies using export), because
 # the Makefile pile up *FLAGS in this case.
+export PYTHON=/usr/bin/python%{python2_version}
 
 ./configure \
 --prefix=%{_prefix} --bindir=%{_bindir} --includedir=%{_includedir} \
