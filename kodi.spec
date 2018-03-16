@@ -1,20 +1,20 @@
-#global PRERELEASE rc4
-%global DIRVERSION %{version}
+%global PRERELEASE a1
+#global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
-#global DIRVERSION %{version}%{PRERELEASE}
+%global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 
 # We support hte following options:
 # --with,
-# * dvd - Include optical drive support and DVD decryption
+# * dvdcss - Include DVD decryption support
 #
 # Default: Do not ship DVD decryption for legal reasons
-%bcond_with dvd
+%bcond_with dvdcss
 
 Name: kodi
-Version: 17.6
-Release: 7%{?dist}
+Version: 18.0
+Release: 0.0.a1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -30,26 +30,21 @@ Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 # ./kodi-generate-tarball-xz.sh
 Source1: kodi-generate-tarball-xz.sh
 
-%if %{with dvd}
 # kodi uses modified libdvd{css,nav,read} source and downloads at build time
-# wget -O kodi-libdvdnav-master.tar.gz https://github.com/xbmc/libdvdnav/archive/master.tar.gz
-Source2: kodi-libdvdnav-master.tar.gz
-# wget -O kodi-libdvdread-master.tar.gz https://github.com/xbmc/libdvdread/archive/master.tar.gz
-Source3: kodi-libdvdread-master.tar.gz
-# wget -O kodi-libdvdcss-master.tar.gz https://github.com/xbmc/libdvdcss/archive/master.tar.gz
-Source4: kodi-libdvdcss-master.tar.gz
+# wget -O kodi-libdvdnav-6.0.0-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdnav/archive/6.0.0-Leia-Alpha-1.tar.gz
+Source2: kodi-libdvdnav-6.0.0-Leia-Alpha-1.tar.gz
+# wget -O kodi-libdvdread-6.0.0-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdread/archive/6.0.0-Leia-Alpha-1.tar.gz
+Source3: kodi-libdvdread-6.0.0-Leia-Alpha-1.tar.gz
+%if %{with dvdcss}
+# wget -O kodi-libdvdcss-6.0.0-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdcss/archive/master.tar.gz
+Source4: kodi-libdvdcss-6.0.0-Leia-Alpha-1.tar.gz
 %endif
 
 # Set program version parameters
-Patch1: kodi-16.0-versioning.patch
+Patch1: kodi-18.0-versioning.patch
 
-%if ! %{with dvd}
-# Drop DVD library support
-Patch2: kodi-17a2-libdvd.patch
-%endif
-
-# FFmpeg 3.5 support
-Patch3: kodi-17.6-ffmpeg-3.5.patch
+# stop using ancient, internal types
+Patch2: kodi-18a1-wrapper.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -67,8 +62,8 @@ Patch3: kodi-17.6-ffmpeg-3.5.patch
 %endif
 
 # Upstream does not support ppc64
-# ARM support is restricted to one GPU per build
-ExclusiveArch: i686 x86_64
+# ARM 32-bit support requires neon
+ExclusiveArch: %{ix86} x86_64 aarch64
 
 BuildRequires: SDL2-devel
 BuildRequires: SDL_image-devel
@@ -94,6 +89,7 @@ BuildRequires: ffmpeg-devel
 %endif
 BuildRequires: flac-devel
 BuildRequires: flex
+BuildRequires: fmt-devel
 BuildRequires: fontconfig-devel
 BuildRequires: fontpackages-devel
 BuildRequires: freetype-devel
@@ -103,6 +99,9 @@ BuildRequires: gettext-devel
 %else
 BuildRequires: gettext-autopoint
 %endif
+BuildRequires: gcc
+BuildRequires: gcc-c++
+BuildRequires: giflib-devel
 BuildRequires: glew-devel
 BuildRequires: glib2-devel
 BuildRequires: gperf
@@ -131,6 +130,7 @@ BuildRequires: libcrystalhd-devel
 %endif
 BuildRequires: libcurl-devel
 BuildRequires: libdca-devel
+BuildRequires: libidn2-devel
 %if 0%{?el6}
 BuildRequires: libjpeg-devel
 %else
@@ -180,6 +180,7 @@ BuildRequires: pixman-devel
 BuildRequires: pulseaudio-libs-devel
 BuildRequires: python2-devel
 BuildRequires: python2-pillow
+BuildRequires: rapidjson-devel
 BuildRequires: sqlite-devel
 BuildRequires: swig
 BuildRequires: systemd-devel
@@ -269,64 +270,20 @@ library.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-%if %{with dvd}
-cp -p %{SOURCE2} tools/depends/target/libdvdnav/libdvdnav-master.tar.gz
-cp -p %{SOURCE3} tools/depends/target/libdvdread/libdvdread-master.tar.gz
-cp -p %{SOURCE4} tools/depends/target/libdvdcss/libdvdcss-master.tar.gz
-%else
-%patch2 -p1 -b.libdvd
-%endif
-%patch3 -p1 -b.ffmpeg-3.5
+%patch2 -p1 -b.wrapper
 
 
 %build
-chmod +x bootstrap
-./bootstrap
-# Can't use export nor %%configure (implies using export), because
-# the Makefile pile up *FLAGS in this case.
-export PYTHON=/usr/bin/python%{python2_version}
-
-./configure \
---prefix=%{_prefix} --bindir=%{_bindir} --includedir=%{_includedir} \
---libdir=%{_libdir} --datadir=%{_datadir} \
---with-lirc-device=/var/run/lirc/lircd \
-%if 0%{?_with_external_ffmpeg}
---with-ffmpeg=shared \
+%cmake \
+%if ! %{with dvdcss}
+  -DENABLE_DVDCSS=OFF \
+  -DLIBDVDCSS_URL=%{SOURCE4} \
 %endif
-%if 0%{?_with_wayland}
---enable-wayland \
-%endif
---enable-pulse \
-%if 0%{?_with_libcec}
---enable-libcec \
-%else
---disable-libcec \
-%endif
-%if 0%{?_with_libssh}
---enable-ssh \
-%else
---disable-ssh \
-%endif
-%if ! %{with dvd}
---disable-optical-drive \
-%endif
---disable-optimizations --disable-debug \
-%ifnarch %{arm}
---enable-gl \
---disable-gles \
---enable-vdpau \
-%else
---enable-gles \
---disable-vdpau \
---disable-vaapi \
-%ifarch armv7hl \
---enable-tegra \
-%endif
-%endif
-CFLAGS="$RPM_OPT_FLAGS -fPIC -I/usr/include/afpfs-ng/ -I/usr/include/samba-4.0/ -D__STDC_CONSTANT_MACROS" \
-CXXFLAGS="$RPM_OPT_FLAGS -fPIC -I/usr/include/afpfs-ng/ -I/usr/include/samba-4.0/ -D__STDC_CONSTANT_MACROS" \
-LDFLAGS="`echo "$RPM_LD_FLAGS -fPIC" | sed -e 's/-Wl,-z,defs//'`" \
-ASFLAGS=-fPIC
+  -DENABLE_EVENTCLIENTS=ON \
+  -DENABLE_INTERNAL_CROSSGUID=OFF \
+  -DLIRC_DEVICE=/var/run/lirc/lircd \
+  -DLIBDVDNAV_URL=%{SOURCE2} \
+  -DLIBDVDREAD_URL=%{SOURCE3}
 
 make %{?_smp_mflags} V=1
 
@@ -334,7 +291,6 @@ make %{?_smp_mflags} V=1
 %install
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
-make -C tools/EventClients DESTDIR=$RPM_BUILD_ROOT install
 # remove the doc files from unversioned /usr/share/doc/xbmc, they should be in versioned docdir
 rm -r $RPM_BUILD_ROOT/%{_datadir}/doc/
 
@@ -360,36 +316,14 @@ mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
 mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
-%posttrans
-if [ ! -L %{_libdir}/xbmc ] ; then
-    if [ -d %{_libdir}/xbmc ] ; then
-        rmdir %{_libdir}/xbmc %{_datadir}/xbmc
-    fi
-    ln -s kodi ${RPM_BUILD_ROOT}%{_libdir}/xbmc
-    ln -s kodi ${RPM_BUILD_ROOT}%{_datadir}/xbmc
-fi
-
-
-%posttrans devel
-if [ ! -L %{_includedir}/xbmc ] ; then
-    if [ -d %{_includedir}/xbmc ] ; then
-        rmdir %{_includedir}/xbmc
-    fi
-    ln -s kodi ${RPM_BUILD_ROOT}%{_includedir}/xbmc
-fi
-
-
 %files
 %license copying.txt LICENSE.GPL
 %doc CONTRIBUTING.md README.md docs
 %{_bindir}/kodi
 %{_bindir}/kodi-standalone
-%{_bindir}/xbmc
-%{_bindir}/xbmc-standalone
+%{_bindir}/TexturePacker
 %{_libdir}/kodi
-%ghost %{_libdir}/xbmc
 %{_datadir}/kodi
-%ghost %{_datadir}/xbmc
 %{_datadir}/xsessions/kodi.desktop
 %{_datadir}/applications/kodi.desktop
 %{_datadir}/icons/hicolor/*/*/*.png
@@ -400,7 +334,6 @@ fi
 
 %files devel
 %{_includedir}/kodi
-%ghost %{_includedir}/xbmc
 
 
 %files eventclients
@@ -408,13 +341,11 @@ fi
 %{python2_sitelib}/kodi
 %dir %{_datadir}/pixmaps/kodi
 %{_datadir}/pixmaps/kodi/*.png
-%{_bindir}/kodi-ps3d
 %{_bindir}/kodi-ps3remote
 %{_bindir}/kodi-send
 %{_bindir}/kodi-wiiremote
 %{_mandir}/man1/kodi-ps3remote.1.gz
 %{_mandir}/man1/kodi-send.1.gz
-%{_mandir}/man1/kodi-standalone.1.gz
 %{_mandir}/man1/kodi-wiiremote.1.gz
 
 
@@ -423,6 +354,9 @@ fi
 
 
 %changelog
+* Fri Mar 16 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.0.a1
+- Kodi 18.0 alpha 1
+
 * Thu Mar 08 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 17.6-7
 - Rebuilt for new ffmpeg snapshot
 
