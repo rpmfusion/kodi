@@ -36,8 +36,8 @@ Source2: kodi-libdvdnav-6.0.0-Leia-Alpha-1.tar.gz
 # wget -O kodi-libdvdread-6.0.0-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdread/archive/6.0.0-Leia-Alpha-1.tar.gz
 Source3: kodi-libdvdread-6.0.0-Leia-Alpha-1.tar.gz
 %if %{with dvdcss}
-# wget -O kodi-libdvdcss-6.0.0-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdcss/archive/master.tar.gz
-Source4: kodi-libdvdcss-6.0.0-Leia-Alpha-1.tar.gz
+# wget -O kodi-libdvdcss-1.4.1-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.1-Leia-Alpha-1.tar.gz
+Source4: kodi-libdvdcss-1.4.1-Leia-Alpha-1.tar.gz
 %endif
 
 # Set program version parameters
