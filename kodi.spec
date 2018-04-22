@@ -98,6 +98,7 @@ BuildRequires: fontconfig-devel
 BuildRequires: fontpackages-devel
 BuildRequires: freetype-devel
 BuildRequires: fribidi-devel
+BuildRequires: gcc-c++
 %if 0%{?el6}
 BuildRequires: gettext-devel
 %else
