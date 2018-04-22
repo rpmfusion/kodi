@@ -51,6 +51,9 @@ Patch2: kodi-17a2-libdvd.patch
 # FFmpeg 3.5 support
 Patch3: kodi-17.6-ffmpeg-3.5.patch
 
+# Prevent panic when compiled with GCC8
+Patch4: kodi-17.6-gcc8-empty_m_vertex.patch
+
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
 # (libbluray in EPEL 6 is too old.)
@@ -278,6 +281,7 @@ cp -p %{SOURCE4} tools/depends/target/libdvdcss/libdvdcss-master.tar.gz
 %patch2 -p1 -b.libdvd
 %endif
 %patch3 -p1 -b.ffmpeg-3.5
+%patch4 -p1 -b.gcc8-mvertex
 
 
 %build
