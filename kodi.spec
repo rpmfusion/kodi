@@ -14,7 +14,7 @@
 
 Name: kodi
 Version: 17.6
-Release: 7%{?dist}
+Release: 8%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -50,6 +50,9 @@ Patch2: kodi-17a2-libdvd.patch
 
 # FFmpeg 3.5 support
 Patch3: kodi-17.6-ffmpeg-3.5.patch
+
+# https://trac.kodi.tv/ticket/17850
+Patch4: kodi-17.6-array-segfault.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -277,6 +280,7 @@ cp -p %{SOURCE4} tools/depends/target/libdvdcss/libdvdcss-master.tar.gz
 %patch2 -p1 -b.libdvd
 %endif
 %patch3 -p1 -b.ffmpeg-3.5
+%patch4 -p1 -b.array-segfault
 
 
 %build
@@ -423,6 +427,9 @@ fi
 
 
 %changelog
+* Mon Apr 23 2018 Michael Cronenworth <mike@cchtml.com> - 17.6-8
+- Add patch for crash on startup (RFBZ#4863)
+
 * Thu Mar 08 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 17.6-7
 - Rebuilt for new ffmpeg snapshot
 

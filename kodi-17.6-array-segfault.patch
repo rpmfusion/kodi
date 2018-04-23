@@ -1,0 +1,18 @@
+--- a/xbmc/guilib/GUIFontTTFGL.cpp
++++ b/xbmc/guilib/GUIFontTTFGL.cpp
+@@ -147,9 +147,12 @@ void CGUIFontTTFGL::LastEnd()
+ #ifdef HAS_GL
+   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+ 
+-  glColorPointer   (4, GL_UNSIGNED_BYTE, sizeof(SVertex), (char*)&m_vertex[0] + offsetof(SVertex, r));
+-  glVertexPointer  (3, GL_FLOAT        , sizeof(SVertex), (char*)&m_vertex[0] + offsetof(SVertex, x));
+-  glTexCoordPointer(2, GL_FLOAT        , sizeof(SVertex), (char*)&m_vertex[0] + offsetof(SVertex, u));
++  if (!m_vertex.empty())
++  {
++    glColorPointer   (4, GL_UNSIGNED_BYTE, sizeof(SVertex), (char*)&m_vertex[0] + offsetof(SVertex, r));
++    glVertexPointer  (3, GL_FLOAT        , sizeof(SVertex), (char*)&m_vertex[0] + offsetof(SVertex, x));
++    glTexCoordPointer(2, GL_FLOAT        , sizeof(SVertex), (char*)&m_vertex[0] + offsetof(SVertex, u));
++  }
+   glEnableClientState(GL_COLOR_ARRAY);
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
