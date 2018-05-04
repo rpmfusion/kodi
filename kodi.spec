@@ -12,6 +12,17 @@
 # Default: Do not ship DVD decryption for legal reasons
 %bcond_with dvd
 
+# Optional deps (not in EPEL)
+%if 0%{?fedora}
+# (libbluray in EPEL 6 is too old.)
+%global _with_libbluray 1
+%global _with_cwiid 1
+%global _with_libssh 1
+%global _with_libcec 1
+%global _with_external_ffmpeg 1
+%global _with_wayland 0
+%endif
+
 Name: kodi
 Version: 17.6
 Release: 9%{?dist}
@@ -62,17 +73,6 @@ Patch4: kodi-17.6-array-segfault.patch
 # Fixes broken audio that started with FFmpeg 3.4
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=881536
 Patch5: kodi-17.6-ffmpeg-3.4.patch
-
-# Optional deps (not in EPEL)
-%if 0%{?fedora}
-# (libbluray in EPEL 6 is too old.)
-%global _with_libbluray 1
-%global _with_cwiid 1
-%global _with_libssh 1
-%global _with_libcec 1
-%global _with_external_ffmpeg 1
-%global _with_wayland 0
-%endif
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
