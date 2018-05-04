@@ -12,9 +12,20 @@
 # Default: Do not ship DVD decryption for legal reasons
 %bcond_with dvdcss
 
+# Optional deps (not in EPEL)
+%if 0%{?fedora}
+# (libbluray in EPEL 6 is too old.)
+%global _with_libbluray 1
+%global _with_cwiid 1
+%global _with_libssh 1
+%global _with_libcec 1
+%global _with_external_ffmpeg 1
+%global _with_wayland 0
+%endif
+
 Name: kodi
 Version: 18.0
-Release: 0.0.a1%{?dist}
+Release: 0.1.a1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -40,22 +51,19 @@ Source3: kodi-libdvdread-6.0.0-Leia-Alpha-1.tar.gz
 Source4: kodi-libdvdcss-1.4.1-Leia-Alpha-1.tar.gz
 %endif
 
+%if ! 0%{?_with_external_ffmpeg}
+# wget -O ffmpeg-3.4.1-Leia-Alpha-1.tar.gz https://github.com/xbmc/FFmpeg/archive/3.4.1-Leia-Alpha-1.tar.gz
+Source5: ffmpeg-3.4.1-Leia-Alpha-1.tar.gz
+%endif
+
 # Set program version parameters
 Patch1: kodi-18.0-versioning.patch
 
 # stop using ancient, internal types
 Patch2: kodi-18a1-wrapper.patch
 
-# Optional deps (not in EPEL)
-%if 0%{?fedora}
-# (libbluray in EPEL 6 is too old.)
-%global _with_libbluray 1
-%global _with_cwiid 1
-%global _with_libssh 1
-%global _with_libcec 1
-%global _with_external_ffmpeg 1
-%global _with_wayland 0
-%endif
+# fix assert at startup
+Patch3: kodi-18a1-assert.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -271,13 +279,18 @@ library.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.wrapper
+%patch3 -p1 -b.assert
 
 
 %build
 %cmake \
-%if ! %{with dvdcss}
-  -DENABLE_DVDCSS=OFF \
+%if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
+%else
+  -DENABLE_DVDCSS=OFF \
+%endif
+%if ! 0%{?_with_external_ffmpeg}
+  -DFFMPEG_URL=%{SOURCE5} \
 %endif
   -DENABLE_EVENTCLIENTS=ON \
   -DENABLE_INTERNAL_CROSSGUID=OFF \
@@ -354,6 +367,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Thu May 03 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.1.a1
+- Add patch to fix assert on start.
+
 * Fri Mar 16 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.0.a1
 - Kodi 18.0 alpha 1
 
