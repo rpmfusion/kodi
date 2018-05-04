@@ -14,7 +14,7 @@
 
 Name: kodi
 Version: 17.6
-Release: 8%{?dist}
+Release: 9%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -40,6 +40,11 @@ Source3: kodi-libdvdread-master.tar.gz
 Source4: kodi-libdvdcss-master.tar.gz
 %endif
 
+%if ! 0%{?_with_external_ffmpeg}
+# wget -O ffmpeg-3.1.11-Krypton-17.5.tar.gz https://github.com/xbmc/FFmpeg/archive/3.1.11-Krypton-17.5.tar.gz
+Source5: ffmpeg-3.1.11-Krypton-17.5.tar.gz
+%endif
+
 # Set program version parameters
 Patch1: kodi-16.0-versioning.patch
 
@@ -53,6 +58,10 @@ Patch3: kodi-17.6-ffmpeg-3.5.patch
 
 # https://trac.kodi.tv/ticket/17850
 Patch4: kodi-17.6-array-segfault.patch
+
+# Fixes broken audio that started with FFmpeg 3.4
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=881536
+Patch5: kodi-17.6-ffmpeg-3.4.patch
 
 # Optional deps (not in EPEL)
 %if 0%{?fedora}
@@ -94,6 +103,8 @@ BuildRequires: expat-devel
 BuildRequires: faad2-devel
 %if 0%{?_with_external_ffmpeg}
 BuildRequires: ffmpeg-devel
+%else
+BuildRequires: libidn2-devel
 %endif
 BuildRequires: flac-devel
 BuildRequires: flex
@@ -279,7 +290,12 @@ cp -p %{SOURCE4} tools/depends/target/libdvdcss/libdvdcss-master.tar.gz
 %else
 %patch2 -p1 -b.libdvd
 %endif
+%if 0%{?_with_external_ffmpeg}
 %patch3 -p1 -b.ffmpeg-3.5
+%patch5 -p1 -b.ffmpeg-3.4
+%else
+cp -p %{SOURCE5} tools/depends/target/ffmpeg/
+%endif
 %patch4 -p1 -b.array-segfault
 
 
@@ -427,6 +443,9 @@ fi
 
 
 %changelog
+* Thu May 03 2018 Michael Cronenworth <mike@cchtml.com> - 17.6-9
+- Add patch for audio skipping (RFBZ#4882)
+
 * Mon Apr 23 2018 Michael Cronenworth <mike@cchtml.com> - 17.6-8
 - Add patch for crash on startup (RFBZ#4863)
 
