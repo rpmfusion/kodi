@@ -1,4 +1,4 @@
-%global PRERELEASE a1
+%global PRERELEASE a2
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -25,7 +25,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.1.a1%{?dist}
+Release: 0.2.a2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -59,11 +59,8 @@ Source5: ffmpeg-3.4.1-Leia-Alpha-1.tar.gz
 # Set program version parameters
 Patch1: kodi-18.0-versioning.patch
 
-# stop using ancient, internal types
-Patch2: kodi-18a1-wrapper.patch
-
 # fix assert at startup
-Patch3: kodi-18a1-assert.patch
+Patch2: kodi-18a1-assert.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -275,11 +272,18 @@ This package contains the development header files for the eventclients
 library.
 
 
+%package firewalld
+Summary: FirewallD metadata files for Kodi
+Requires: firewalld-filesystem
+
+%description firewalld
+This package contains FirewallD files for Kodi.
+
+
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-%patch2 -p1 -b.wrapper
-%patch3 -p1 -b.assert
+%patch2 -p1 -b.assert
 
 
 %build
@@ -366,7 +370,17 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 %{_includedir}/kodi/xbmcclient.h
 
 
+%files firewalld
+%license copying.txt LICENSE.GPL
+%{_prefix}/lib/firewalld/services/kodi-eventserver.xml
+%{_prefix}/lib/firewalld/services/kodi-http.xml
+%{_prefix}/lib/firewalld/services/kodi-jsonrpc.xml
+
+
 %changelog
+* Sun Jun 24 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.2.a2
+- Kodi 18.0 alpha 2
+
 * Thu May 03 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.1.a1
 - Add patch to fix assert on start.
 
