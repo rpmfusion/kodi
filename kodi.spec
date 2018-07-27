@@ -300,7 +300,8 @@ This package contains FirewallD files for Kodi.
   -DENABLE_INTERNAL_CROSSGUID=OFF \
   -DLIRC_DEVICE=/var/run/lirc/lircd \
   -DLIBDVDNAV_URL=%{SOURCE2} \
-  -DLIBDVDREAD_URL=%{SOURCE3}
+  -DLIBDVDREAD_URL=%{SOURCE3} \
+  -DPYTHON_EXECUTABLE=%{__python2}
 
 make %{?_smp_mflags} V=1
 
@@ -321,9 +322,9 @@ rm -f $RPM_BUILD_ROOT/%{_datadir}/xsessions/xbmc.desktop
 # Normally we are expected to build these manually. But since we are using
 # the system Python interpreter, we also want to use the system libraries
 install -d $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib
-ln -s %{python_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib/PIL
+ln -s %{python2_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib/PIL
 #install -d $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib
-#ln -s %{python_sitearch}/pysqlite2 $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib/pysqlite2
+#ln -s %{python2_sitearch}/pysqlite2 $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib/pysqlite2
 
 # Use external font files instead of bundled ones
 ln -sf %{_fontbasedir}/dejavu/DejaVuSans-Bold.ttf ${RPM_BUILD_ROOT}%{_datadir}/kodi/addons/skin.estouchy/fonts/
