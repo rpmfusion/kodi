@@ -275,6 +275,7 @@ library.
 %package firewalld
 Summary: FirewallD metadata files for Kodi
 Requires: firewalld-filesystem
+Requires(post): firewalld-filesystem
 
 %description firewalld
 This package contains FirewallD files for Kodi.
@@ -332,6 +333,10 @@ ln -sf %{_fontbasedir}/dejavu/DejaVuSans-Bold.ttf ${RPM_BUILD_ROOT}%{_datadir}/k
 # Move man-pages into system dir
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
 mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
+
+
+%post firewalld
+%firewalld_reload
 
 
 %files
