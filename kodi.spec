@@ -25,7 +25,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.3.a2%{?dist}
+Release: 0.4.a2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -384,6 +384,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Sun Aug 19 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.4.a2
+- Rebuilt for Fedora 29 Mass Rebuild binutils issue
+
 * Thu Jul 26 2018 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 18.0-0.3.a2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
