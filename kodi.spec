@@ -22,6 +22,11 @@
 %global _with_external_ffmpeg 1
 %global _with_wayland 1
 %endif
+%if 0%{?_with_wayland}
+%global kodi_backends x11 wayland gbm
+%else
+%global kodi_backends x11 gbm
+%endif
 
 Name: kodi
 Version: 18.0
@@ -138,6 +143,7 @@ BuildRequires: libcrystalhd-devel
 BuildRequires: libcurl-devel
 BuildRequires: libdca-devel
 BuildRequires: libidn2-devel
+BuildRequires: libinput-devel
 %if 0%{?el6}
 BuildRequires: libjpeg-devel
 %else
@@ -181,6 +187,7 @@ BuildRequires: mariadb-devel
 BuildRequires: mesa-libEGL-devel
 BuildRequires: mesa-libGLES-devel
 %endif
+BuildRequires: mesa-libgbm-devel
 BuildRequires: nasm
 BuildRequires: pcre-devel
 BuildRequires: pixman-devel
@@ -203,6 +210,24 @@ BuildRequires: waylandpp-devel
 BuildRequires: yajl-devel
 BuildRequires: zlib-devel
 
+# Install all backends, users can remove them individually
+Requires: %{name}-common = %{version}
+Requires: %{name}-gbm = %{version}
+Requires: %{name}-wayland = %{version}
+Requires: %{name}-x11 = %{version}
+
+
+%description
+Kodi is a free cross-platform media-player jukebox and entertainment hub.
+Kodi can play a spectrum of of multimedia formats, and featuring playlist,
+audio visualizations, slideshow, and weather forecast functions, together
+third-party plugins.
+
+This is a meta package.
+
+
+%package common
+Summary: Common Kodi files and binaries
 Requires: dejavu-sans-fonts
 # need explicit requires for these packages
 # as they are dynamically loaded via XBMC's arcane
@@ -233,17 +258,12 @@ Requires: xorg-x11-utils
 # and for installation
 Requires: python2-pillow%{?_isa}
 
-
-%description
-Kodi is a free cross-platform media-player jukebox and entertainment hub.
-Kodi can play a spectrum of of multimedia formats, and featuring playlist,
-audio visualizations, slideshow, and weather forecast functions, together
-third-party plugins.
+%description common
+Common Kodi files and binaries
 
 
 %package devel
 Summary: Development files needed to compile C programs against kodi
-Group: Development/Libraries
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Obsoletes: xbmc-devel < 14.0
 Provides: xbmc-devel = %{version}
@@ -284,6 +304,30 @@ Requires(post): firewalld-filesystem
 This package contains FirewallD files for Kodi.
 
 
+%package gbm
+Summary: Kodi binary for Generic Buffer Management
+
+
+%description gbm
+This package contains the Kodi binary for Generic Buffer Management.
+
+
+%package wayland
+Summary: Kodi binary for Wayland compositors
+
+
+%description wayland
+This package contains the Kodi binary for Wayland compositors.
+
+
+%package x11
+Summary: Kodi binary for X11 servers
+
+
+%description x11
+This package contains the Kodi binary for X11 servers.
+
+
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
@@ -291,8 +335,11 @@ This package contains FirewallD files for Kodi.
 
 
 %build
-mkdir {fedora-x11,fedora-other}
-pushd fedora-x11
+mkdir {fedora-gbm,fedora-wayland,fedora-x11}
+
+for BACKEND in %{kodi_backends}
+do
+    pushd fedora-$BACKEND
 %cmake \
 %if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
@@ -308,51 +355,27 @@ pushd fedora-x11
   -DLIBDVDNAV_URL=%{SOURCE2} \
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python2} \
-  ../
-
-cmake --build . -- VERBOSE=1 %{?_smp_mflags}
-popd
-
-%if 0%{?_with_wayland}
-pushd fedora-other
-%cmake \
-%if %{with dvdcss}
-  -DLIBDVDCSS_URL=%{SOURCE4} \
-%else
-  -DENABLE_DVDCSS=OFF \
-%endif
-%if ! 0%{?_with_external_ffmpeg}
-  -DFFMPEG_URL=%{SOURCE5} \
-%endif
-  -DENABLE_EVENTCLIENTS=ON \
-  -DENABLE_INTERNAL_CROSSGUID=OFF \
-  -DLIRC_DEVICE=/var/run/lirc/lircd \
-  -DLIBDVDNAV_URL=%{SOURCE2} \
-  -DLIBDVDREAD_URL=%{SOURCE3} \
-  -DPYTHON_EXECUTABLE=%{__python2} \
+  -DCORE_PLATFORM_NAME=$BACKEND \
 %ifarch x86_64 i686
-  -DCORE_PLATFORM_NAME=wayland \
   -DWAYLAND_RENDER_SYSTEM=gl \
+  -DGBM_RENDER_SYSTEM=gl \
 %else
-  -DCORE_PLATFORM_NAME=gbm \
+  -DWAYLAND_RENDER_SYSTEM=gles \
   -DGBM_RENDER_SYSTEM=gles \
 %endif
   ../
-
-cmake --build . -- VERBOSE=1 %{?_smp_mflags}
-popd
-%endif
+    cmake --build . -- VERBOSE=1 %{?_smp_mflags}
+    popd
+done
 
 
 %install
-pushd fedora-x11
-make DESTDIR=$RPM_BUILD_ROOT install
-popd
-%if 0%{?_with_wayland}
-pushd fedora-other
-make DESTDIR=$RPM_BUILD_ROOT install
-popd
-%endif
+for BACKEND in %{kodi_backends}
+do
+    pushd fedora-$BACKEND
+    make DESTDIR=$RPM_BUILD_ROOT install
+    popd
+done
 
 # remove the doc files from unversioned /usr/share/doc/xbmc, they should be in versioned docdir
 rm -r $RPM_BUILD_ROOT/%{_datadir}/doc/
@@ -384,12 +407,17 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %files
+
+
+%files common
 %license LICENSE.md LICENSES/
 %doc README.md docs
 %{_bindir}/kodi
 %{_bindir}/kodi-standalone
 %{_bindir}/TexturePacker
-%{_libdir}/kodi/
+%dir %{_libdir}/kodi/
+%{_libdir}/kodi/addons/
+%{_libdir}/kodi/system/
 %{_datadir}/kodi/
 %{_datadir}/xsessions/kodi.desktop
 %{_datadir}/applications/kodi.desktop
@@ -427,9 +455,22 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 %{_prefix}/lib/firewalld/services/kodi-jsonrpc.xml
 
 
+%files gbm
+%{_libdir}/kodi/kodi-gbm
+
+
+%files wayland
+%{_libdir}/kodi/kodi-wayland
+
+
+%files x11
+%{_libdir}/kodi/kodi-x11
+%{_libdir}/kodi/kodi-xrandr
+
+
 %changelog
 * Tue Aug 28 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.6.b1
-- Include wayland on x86 and GBM on ARM
+- Build wayland and GBM binaries
 
 * Tue Aug 28 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.5.b1
 - Kodi 18.0 beta 1 v2
