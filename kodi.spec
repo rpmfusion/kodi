@@ -1,4 +1,4 @@
-%global PRERELEASE a2
+%global PRERELEASE b1v2
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -25,7 +25,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.4.a2%{?dist}
+Release: 0.5.b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -42,18 +42,18 @@ Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 Source1: kodi-generate-tarball-xz.sh
 
 # kodi uses modified libdvd{css,nav,read} source and downloads at build time
-# wget -O kodi-libdvdnav-6.0.0-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdnav/archive/6.0.0-Leia-Alpha-1.tar.gz
-Source2: kodi-libdvdnav-6.0.0-Leia-Alpha-1.tar.gz
-# wget -O kodi-libdvdread-6.0.0-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdread/archive/6.0.0-Leia-Alpha-1.tar.gz
-Source3: kodi-libdvdread-6.0.0-Leia-Alpha-1.tar.gz
+# wget -O kodi-libdvdnav-6.0.0-Leia-Alpha-3.tar.gz https://github.com/xbmc/libdvdnav/archive/6.0.0-Leia-Alpha-3.tar.gz
+Source2: kodi-libdvdnav-6.0.0-Leia-Alpha-3.tar.gz
+# wget -O kodi-libdvdread-6.0.0-Leia-Alpha-3.tar.gz https://github.com/xbmc/libdvdread/archive/6.0.0-Leia-Alpha-3.tar.gz
+Source3: kodi-libdvdread-6.0.0-Leia-Alpha-3.tar.gz
 %if %{with dvdcss}
-# wget -O kodi-libdvdcss-1.4.1-Leia-Alpha-1.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.1-Leia-Alpha-1.tar.gz
-Source4: kodi-libdvdcss-1.4.1-Leia-Alpha-1.tar.gz
+# wget -O kodi-libdvdcss-1.4.1-Leia-Alpha-3.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.1-Leia-Alpha-3.tar.gz
+Source4: kodi-libdvdcss-1.4.1-Leia-Alpha-3.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-3.4.1-Leia-Alpha-1.tar.gz https://github.com/xbmc/FFmpeg/archive/3.4.1-Leia-Alpha-1.tar.gz
-Source5: ffmpeg-3.4.1-Leia-Alpha-1.tar.gz
+# wget -O ffmpeg-4.0.2-Leia-Alpha3.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.2-Leia-Alpha3.tar.gz
+Source5: ffmpeg-4.0.2-Leia-Alpha3.tar.gz
 %endif
 
 # Set program version parameters
@@ -93,12 +93,14 @@ BuildRequires: faad2-devel
 BuildRequires: ffmpeg-devel
 %endif
 BuildRequires: flac-devel
+BuildRequires: flatbuffers-devel
 BuildRequires: flex
 BuildRequires: fmt-devel
 BuildRequires: fontconfig-devel
 BuildRequires: fontpackages-devel
 BuildRequires: freetype-devel
 BuildRequires: fribidi-devel
+BuildRequires: fstrcmp-devel
 %if 0%{?el6}
 BuildRequires: gettext-devel
 %else
@@ -340,8 +342,8 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %files
-%license copying.txt LICENSE.GPL
-%doc CONTRIBUTING.md README.md docs
+%license LICENSE.md LICENSES/
+%doc README.md docs
 %{_bindir}/kodi
 %{_bindir}/kodi-standalone
 %{_bindir}/TexturePacker
@@ -360,7 +362,7 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %files eventclients
-%license copying.txt LICENSE.GPL
+%license LICENSE.md LICENSES/
 %{python2_sitelib}/kodi
 %dir %{_datadir}/pixmaps/kodi
 %{_datadir}/pixmaps/kodi/*.png
@@ -377,13 +379,16 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %files firewalld
-%license copying.txt LICENSE.GPL
+%license LICENSE.md LICENSES/
 %{_prefix}/lib/firewalld/services/kodi-eventserver.xml
 %{_prefix}/lib/firewalld/services/kodi-http.xml
 %{_prefix}/lib/firewalld/services/kodi-jsonrpc.xml
 
 
 %changelog
+* Tue Aug 28 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.5.b1
+- Kodi 18.0 beta 1 v2
+
 * Sun Aug 19 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.4.a2
 - Rebuilt for Fedora 29 Mass Rebuild binutils issue
 
