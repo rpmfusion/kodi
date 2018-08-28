@@ -20,12 +20,12 @@
 %global _with_libssh 1
 %global _with_libcec 1
 %global _with_external_ffmpeg 1
-%global _with_wayland 0
+%global _with_wayland 1
 %endif
 
 Name: kodi
 Version: 18.0
-Release: 0.5.b1%{?dist}
+Release: 0.6.b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -170,7 +170,7 @@ BuildRequires: libvdpau-devel
 %endif
 BuildRequires: libvorbis-devel
 %if 0%{?_with_wayland}
-BuildRequires: libwayland-client-devel
+BuildRequires: libxkbcommon-devel
 %endif
 BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
@@ -197,7 +197,8 @@ BuildRequires: tre-devel
 BuildRequires: trousers-devel
 BuildRequires: wavpack-devel
 %if 0%{?_with_wayland}
-BuildRequires: weston-devel
+BuildRequires: wayland-protocols-devel
+BuildRequires: waylandpp-devel
 %endif
 BuildRequires: yajl-devel
 BuildRequires: zlib-devel
@@ -290,6 +291,8 @@ This package contains FirewallD files for Kodi.
 
 
 %build
+mkdir {fedora-x11,fedora-other}
+pushd fedora-x11
 %cmake \
 %if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
@@ -304,14 +307,53 @@ This package contains FirewallD files for Kodi.
   -DLIRC_DEVICE=/var/run/lirc/lircd \
   -DLIBDVDNAV_URL=%{SOURCE2} \
   -DLIBDVDREAD_URL=%{SOURCE3} \
-  -DPYTHON_EXECUTABLE=%{__python2}
+  -DPYTHON_EXECUTABLE=%{__python2} \
+  ../
 
-make %{?_smp_mflags} V=1
+cmake --build . -- VERBOSE=1 %{?_smp_mflags}
+popd
+
+%if 0%{?_with_wayland}
+pushd fedora-other
+%cmake \
+%if %{with dvdcss}
+  -DLIBDVDCSS_URL=%{SOURCE4} \
+%else
+  -DENABLE_DVDCSS=OFF \
+%endif
+%if ! 0%{?_with_external_ffmpeg}
+  -DFFMPEG_URL=%{SOURCE5} \
+%endif
+  -DENABLE_EVENTCLIENTS=ON \
+  -DENABLE_INTERNAL_CROSSGUID=OFF \
+  -DLIRC_DEVICE=/var/run/lirc/lircd \
+  -DLIBDVDNAV_URL=%{SOURCE2} \
+  -DLIBDVDREAD_URL=%{SOURCE3} \
+  -DPYTHON_EXECUTABLE=%{__python2} \
+%ifarch x86_64 i686
+  -DCORE_PLATFORM_NAME=wayland \
+  -DWAYLAND_RENDER_SYSTEM=gl \
+%else
+  -DCORE_PLATFORM_NAME=gbm \
+  -DGBM_RENDER_SYSTEM=gles \
+%endif
+  ../
+
+cmake --build . -- VERBOSE=1 %{?_smp_mflags}
+popd
+%endif
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
+pushd fedora-x11
 make DESTDIR=$RPM_BUILD_ROOT install
+popd
+%if 0%{?_with_wayland}
+pushd fedora-other
+make DESTDIR=$RPM_BUILD_ROOT install
+popd
+%endif
+
 # remove the doc files from unversioned /usr/share/doc/xbmc, they should be in versioned docdir
 rm -r $RPM_BUILD_ROOT/%{_datadir}/doc/
 
@@ -347,8 +389,8 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 %{_bindir}/kodi
 %{_bindir}/kodi-standalone
 %{_bindir}/TexturePacker
-%{_libdir}/kodi
-%{_datadir}/kodi
+%{_libdir}/kodi/
+%{_datadir}/kodi/
 %{_datadir}/xsessions/kodi.desktop
 %{_datadir}/applications/kodi.desktop
 %{_datadir}/icons/hicolor/*/*/*.png
@@ -386,6 +428,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Tue Aug 28 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.6.b1
+- Include wayland on x86 and GBM on ARM
+
 * Tue Aug 28 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.5.b1
 - Kodi 18.0 beta 1 v2
 
