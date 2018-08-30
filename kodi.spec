@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.6.b1%{?dist}
+Release: 0.7.b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -210,11 +210,10 @@ BuildRequires: waylandpp-devel
 BuildRequires: yajl-devel
 BuildRequires: zlib-devel
 
-# Install all backends, users can remove them individually
+# Install major backends, users can remove them individually
 Requires: %{name}-common = %{version}
-Requires: %{name}-gbm = %{version}
-Requires: %{name}-wayland = %{version}
-Requires: %{name}-x11 = %{version}
+Requires: %{name}-wayland = %{version} if libwayland-server
+Requires: %{name}-x11 = %{version} if xorg-x11-server-Xorg
 
 
 %description
@@ -306,6 +305,7 @@ This package contains FirewallD files for Kodi.
 
 %package gbm
 Summary: Kodi binary for Generic Buffer Management
+Requires: %{name}-common = %{version}
 
 
 %description gbm
@@ -314,6 +314,7 @@ This package contains the Kodi binary for Generic Buffer Management.
 
 %package wayland
 Summary: Kodi binary for Wayland compositors
+Requires: %{name}-common = %{version}
 
 
 %description wayland
@@ -322,6 +323,7 @@ This package contains the Kodi binary for Wayland compositors.
 
 %package x11
 Summary: Kodi binary for X11 servers
+Requires: %{name}-common = %{version}
 
 
 %description x11
@@ -373,7 +375,7 @@ done
 for BACKEND in %{kodi_backends}
 do
     pushd fedora-$BACKEND
-    make DESTDIR=$RPM_BUILD_ROOT install
+    make DESTDIR=$RPM_BUILD_ROOT %{?_smp_mflags} install
     popd
 done
 
@@ -469,6 +471,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Thu Aug 30 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.7.b1
+- Update Requires for new split packages
+
 * Tue Aug 28 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.6.b1
 - Build wayland and GBM binaries
 
