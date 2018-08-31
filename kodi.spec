@@ -72,8 +72,7 @@ Patch2: kodi-18a1-assert.patch
 %endif
 
 # Upstream does not support ppc64
-# ARM 32-bit support requires neon
-ExclusiveArch: %{ix86} x86_64 aarch64
+ExcludeArch: %{power64} ppc64le
 
 BuildRequires: SDL2-devel
 BuildRequires: SDL_image-devel
