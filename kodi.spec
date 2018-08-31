@@ -67,6 +67,12 @@ Patch1: kodi-18.0-versioning.patch
 # fix assert at startup
 Patch2: kodi-18a1-assert.patch
 
+# Distro patches
+# Fix build on armv7hl without using neon by default
+# https://github.com/xbmc/xbmc/pull/14250
+Patch3: 0001-Add-neon-fpu-as-compiler-FLAGS.patch
+Patch4: 0002-Add-pragma-GGC-target-fpu-neon-for-MatrixGL.cpp.patch
+
 %ifarch x86_64 i686
 %global _with_crystalhd 1
 %endif
@@ -331,6 +337,8 @@ This package contains the Kodi binary for X11 servers.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.assert
+%patch3 -p1
+%patch4 -p1
 
 
 %build
