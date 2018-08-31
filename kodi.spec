@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.7.b1%{?dist}
+Release: 0.8.b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -211,9 +211,9 @@ BuildRequires: yajl-devel
 BuildRequires: zlib-devel
 
 # Install major backends, users can remove them individually
-Requires: %{name}-common = %{version}
-Requires: %{name}-wayland = %{version} if libwayland-server
-Requires: %{name}-x11 = %{version} if xorg-x11-server-Xorg
+Requires: %{name}-common = %{version}-%{release}
+Requires: (%{name}-wayland = %{version}-%{release} if libwayland-server)
+Requires: (%{name}-x11 = %{version}-%{release} if xorg-x11-server-Xorg)
 
 
 %description
@@ -305,7 +305,7 @@ This package contains FirewallD files for Kodi.
 
 %package gbm
 Summary: Kodi binary for Generic Buffer Management
-Requires: %{name}-common = %{version}
+Requires: %{name}-common = %{version}-%{release}
 
 
 %description gbm
@@ -314,7 +314,7 @@ This package contains the Kodi binary for Generic Buffer Management.
 
 %package wayland
 Summary: Kodi binary for Wayland compositors
-Requires: %{name}-common = %{version}
+Requires: %{name}-common = %{version}-%{release}
 
 
 %description wayland
@@ -323,7 +323,7 @@ This package contains the Kodi binary for Wayland compositors.
 
 %package x11
 Summary: Kodi binary for X11 servers
-Requires: %{name}-common = %{version}
+Requires: %{name}-common = %{version}-%{release}
 
 
 %description x11
@@ -471,6 +471,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Fri Aug 31 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.8.b1
+- Fix Requires and versioning in new split packages
+
 * Thu Aug 30 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.7.b1
 - Update Requires for new split packages
 
