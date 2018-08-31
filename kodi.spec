@@ -212,8 +212,8 @@ BuildRequires: zlib-devel
 
 # Install major backends, users can remove them individually
 Requires: %{name}-common = %{version}
-Requires: %{name}-wayland = %{version} if libwayland-server
-Requires: %{name}-x11 = %{version} if xorg-x11-server-Xorg
+Requires: (%{name}-wayland = %{version} if libwayland-server)
+Requires: (%{name}-x11 = %{version} if xorg-x11-server-Xorg)
 
 
 %description
