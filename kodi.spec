@@ -185,11 +185,8 @@ BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
 BuildRequires: lzo-devel
 BuildRequires: mariadb-devel
-# ARM uses GLES
-%ifarch %{arm}
 BuildRequires: mesa-libEGL-devel
 BuildRequires: mesa-libGLES-devel
-%endif
 BuildRequires: mesa-libgbm-devel
 BuildRequires: nasm
 BuildRequires: pcre-devel
