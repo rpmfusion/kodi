@@ -214,6 +214,7 @@ BuildRequires: zlib-devel
 Requires: %{name}-common = %{version}-%{release}
 Requires: (%{name}-wayland = %{version}-%{release} if libwayland-server)
 Requires: (%{name}-x11 = %{version}-%{release} if xorg-x11-server-Xorg)
+Requires: (%{name}-firewalld = %{version}-%{release} if firewalld)
 
 
 %description
