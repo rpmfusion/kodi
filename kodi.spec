@@ -67,13 +67,18 @@ Patch1: kodi-18.0-versioning.patch
 # fix assert at startup
 Patch2: kodi-18a1-assert.patch
 
+# Distro patches
+# Fix build on armv7hl without using neon by default
+# https://github.com/xbmc/xbmc/pull/14250
+Patch3: 0001-Add-neon-fpu-as-compiler-FLAGS.patch
+Patch4: 0002-Add-pragma-GGC-target-fpu-neon-for-MatrixGL.cpp.patch
+
 %ifarch x86_64 i686
 %global _with_crystalhd 1
 %endif
 
 # Upstream does not support ppc64
-# ARM 32-bit support requires neon
-ExclusiveArch: %{ix86} x86_64 aarch64
+ExcludeArch: %{power64} ppc64le
 
 BuildRequires: SDL2-devel
 BuildRequires: SDL_image-devel
@@ -170,10 +175,8 @@ BuildRequires: libssh-devel
 BuildRequires: libtiff-devel
 BuildRequires: libtool
 BuildRequires: libuuid-devel
-%ifnarch %{arm}
 BuildRequires: libva-devel
 BuildRequires: libvdpau-devel
-%endif
 BuildRequires: libvorbis-devel
 %if 0%{?_with_wayland}
 BuildRequires: libxkbcommon-devel
@@ -182,11 +185,8 @@ BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
 BuildRequires: lzo-devel
 BuildRequires: mariadb-devel
-# ARM uses GLES
-%ifarch %{arm}
 BuildRequires: mesa-libEGL-devel
 BuildRequires: mesa-libGLES-devel
-%endif
 BuildRequires: mesa-libgbm-devel
 BuildRequires: nasm
 BuildRequires: pcre-devel
@@ -214,6 +214,7 @@ BuildRequires: zlib-devel
 Requires: %{name}-common = %{version}-%{release}
 Requires: (%{name}-wayland = %{version}-%{release} if libwayland-server)
 Requires: (%{name}-x11 = %{version}-%{release} if xorg-x11-server-Xorg)
+Requires: (%{name}-firewalld = %{version}-%{release} if firewalld)
 
 
 %description
@@ -334,6 +335,8 @@ This package contains the Kodi binary for X11 servers.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.assert
+%patch3 -p1
+%patch4 -p1
 
 
 %build

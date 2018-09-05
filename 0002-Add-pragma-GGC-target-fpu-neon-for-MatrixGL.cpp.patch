@@ -1,0 +1,41 @@
+From 2b7668a0f9de20c52fd3b9d12e90d2ac318ef26a Mon Sep 17 00:00:00 2001
+From: Nicolas Chauvet <kwizart@gmail.com>
+Date: Mon, 30 Jul 2018 15:32:18 +0200
+Subject: [PATCH 2/2] Add pragma GGC target fpu=neon for MatrixGL.cpp
+
+v2: uses pragma gcc only when using gcc
+
+Signed-off-by: Nicolas Chauvet <kwizart@gmail.com>
+---
+ xbmc/rendering/MatrixGL.cpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/xbmc/rendering/MatrixGL.cpp b/xbmc/rendering/MatrixGL.cpp
+index 8e9d944850..5b0e7e4928 100644
+--- a/xbmc/rendering/MatrixGL.cpp
++++ b/xbmc/rendering/MatrixGL.cpp
+@@ -129,6 +129,11 @@ void CMatrixGL::Rotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+ }
+ 
+ #if defined(HAS_NEON) && !defined(__LP64__)
++// This function requires neon fpu
++#if defined(__GNUC__)
++  #pragma GCC push_options
++  #pragma GCC target("fpu=neon")
++#endif
+ 
+ static inline void Matrix4Mul(float* src_mat_1, const float* src_mat_2)
+ {
+@@ -168,6 +173,9 @@ static inline void Matrix4Mul(float* src_mat_1, const float* src_mat_2)
+     : "memory", "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11" //clobber
+     );
+ }
++#if defined(__GNUC__)
++  #pragma GCC pop_options
++#endif
+ #endif
+ void CMatrixGL::MultMatrixf(const CMatrixGL &matrix) noexcept
+ {
+-- 
+2.17.1
+
