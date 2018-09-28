@@ -1,4 +1,4 @@
-%global PRERELEASE b1v2
+%global PRERELEASE b2
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.8.b1%{?dist}
+Release: 0.9.b2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -194,6 +194,7 @@ BuildRequires: pixman-devel
 BuildRequires: pulseaudio-libs-devel
 BuildRequires: python2-devel
 BuildRequires: python2-pillow
+BuildRequires: /usr/bin/pathfix.py
 BuildRequires: rapidjson-devel
 BuildRequires: sqlite-devel
 BuildRequires: swig
@@ -334,6 +335,15 @@ This package contains the Kodi binary for X11 servers.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.assert
+# Fix up Python shebangs
+pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
+  tools/EventClients/lib/python/zeroconf.py \
+  tools/EventClients/Clients/PS3BDRemote/ps3_remote.py \
+  tools/EventClients/lib/python/ps3/sixaxis.py \
+  tools/EventClients/lib/python/ps3/sixpair.py \
+  tools/EventClients/lib/python/ps3/sixwatch.py \
+  tools/EventClients/Clients/KodiSend/kodi-send.py \
+  tools/EventClients/lib/python/xbmcclient.py
 
 
 %build
@@ -471,6 +481,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Thu Sep 27 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.9.b2
+- Kodi 18.0 beta 2
+
 * Fri Aug 31 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.8.b1
 - Fix Requires and versioning in new split packages
 
