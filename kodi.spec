@@ -1,4 +1,4 @@
-%global PRERELEASE b2
+%global PRERELEASE b3
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.9.b2%{?dist}
+Release: 0.10.b3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -476,6 +476,12 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Thu Oct 11 2018 Nicolas Chauvet <kwizart@gmail.com> - 18.0-0.10.b3
+- Update to beta3
+- Enable arm build
+- Build EGL/GLES everywhere
+- Add firewalld sub-package when relevant
+
 * Thu Sep 27 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.9.b2
 - Kodi 18.0 beta 2
 
