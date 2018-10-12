@@ -93,6 +93,7 @@ BuildRequires: e2fsprogs-devel
 BuildRequires: enca-devel
 BuildRequires: expat-devel
 BuildRequires: faad2-devel
+BuildRequires: firewalld-filesystem
 %if 0%{?_with_external_ffmpeg}
 BuildRequires: ffmpeg-devel
 %endif
