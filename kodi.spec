@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.10.b3%{?dist}
+Release: 0.11.b3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -178,6 +178,7 @@ BuildRequires: libxkbcommon-devel
 %endif
 BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
+BuildRequires: lirc-devel
 BuildRequires: lzo-devel
 BuildRequires: mariadb-devel
 BuildRequires: mesa-libEGL-devel
@@ -477,6 +478,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Sat Oct 20 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.11.b3
+- Add BuildRequires lirc-devel (rfbz#5037)
+
 * Thu Oct 11 2018 Nicolas Chauvet <kwizart@gmail.com> - 18.0-0.10.b3
 - Update to beta3
 - Enable arm build
