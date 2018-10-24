@@ -72,7 +72,7 @@ Patch2: kodi-18a1-assert.patch
 %endif
 
 # Upstream does not support ppc64
-ExcludeArch: %{power64} ppc64le
+ExcludeArch: %{power64}
 
 BuildRequires: SDL2-devel
 BuildRequires: SDL_image-devel
