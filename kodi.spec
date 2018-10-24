@@ -1,4 +1,4 @@
-%global PRERELEASE b3
+%global PRERELEASE b4
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.11.b3%{?dist}
+Release: 0.12.b4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -478,6 +478,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Wed Oct 24 2018 Nicolas Chauvet <kwizart@gmail.com> - 18.0-0.12.b4
+- Update to beta4
+
 * Sat Oct 20 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.11.b3
 - Add BuildRequires lirc-devel (rfbz#5037)
 
