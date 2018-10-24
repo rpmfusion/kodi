@@ -331,7 +331,7 @@ This package contains the Kodi binary for X11 servers.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-%patch2 -p1 -b.assert
+#patch2 -p1 -b.assert
 # Fix up Python shebangs
 pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
   tools/EventClients/lib/python/zeroconf.py \
@@ -480,6 +480,7 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 %changelog
 * Wed Oct 24 2018 Nicolas Chauvet <kwizart@gmail.com> - 18.0-0.12.b4
 - Update to beta4
+- Fixup versioning
 
 * Sat Oct 20 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.11.b3
 - Add BuildRequires lirc-devel (rfbz#5037)
