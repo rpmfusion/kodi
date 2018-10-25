@@ -64,9 +64,6 @@ Source5: ffmpeg-4.0.2-Leia-Alpha3.tar.gz
 # Set program version parameters
 Patch1: kodi-18.0-versioning.patch
 
-# fix assert at startup
-Patch2: kodi-18a1-assert.patch
-
 %ifarch x86_64 i686
 %global _with_crystalhd 1
 %endif
@@ -331,7 +328,6 @@ This package contains the Kodi binary for X11 servers.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-#patch2 -p1 -b.assert
 # Fix up Python shebangs
 pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
   tools/EventClients/lib/python/zeroconf.py \
