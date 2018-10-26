@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.13.b4%{?dist}
+Release: 0.14.b4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -79,7 +79,7 @@ BuildRequires: avahi-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: boost-devel
 BuildRequires: bzip2-devel
-BuildRequires: cmake
+BuildRequires: cmake3
 BuildRequires: crossguid-devel
 %if 0%{?_with_cwiid}
 BuildRequires: cwiid-devel
@@ -182,6 +182,7 @@ BuildRequires: mesa-libEGL-devel
 BuildRequires: mesa-libGLES-devel
 BuildRequires: mesa-libgbm-devel
 BuildRequires: nasm
+BuildRequires: ninja-build
 BuildRequires: pcre-devel
 BuildRequires: pixman-devel
 BuildRequires: pulseaudio-libs-devel
@@ -345,7 +346,7 @@ mkdir {fedora-gbm,fedora-wayland,fedora-x11}
 for BACKEND in %{kodi_backends}
 do
     pushd fedora-$BACKEND
-%cmake \
+%cmake3 \
 %if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
 %else
@@ -354,6 +355,7 @@ do
 %if ! 0%{?_with_external_ffmpeg}
   -DFFMPEG_URL=%{SOURCE5} \
 %endif
+  -GNinja \
   -DENABLE_EVENTCLIENTS=ON \
   -DENABLE_INTERNAL_CROSSGUID=OFF \
   -DLIRC_DEVICE=/var/run/lirc/lircd \
@@ -369,7 +371,7 @@ do
   -DGBM_RENDER_SYSTEM=gles \
 %endif
   ../
-    cmake --build . -- VERBOSE=1 %{?_smp_mflags}
+    %ninja_build
     popd
 done
 
@@ -378,7 +380,7 @@ done
 for BACKEND in %{kodi_backends}
 do
     pushd fedora-$BACKEND
-    make DESTDIR=$RPM_BUILD_ROOT %{?_smp_mflags} install
+    %ninja_install
     popd
 done
 
@@ -474,6 +476,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Fri Oct 26 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.14.b4
+- Switch to ninja-build
+
 * Fri Oct 26 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.13.b4
 - Rebuild for fmt-5.2.1
 
