@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.12.b4%{?dist}
+Release: 0.13.b4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -474,6 +474,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Fri Oct 26 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.13.b4
+- Rebuild for fmt-5.2.1
+
 * Wed Oct 24 2018 Nicolas Chauvet <kwizart@gmail.com> - 18.0-0.12.b4
 - Update to beta4
 - Fixup versioning
