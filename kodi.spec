@@ -64,6 +64,9 @@ Source5: ffmpeg-4.0.2-Leia-Alpha3.tar.gz
 # Set program version parameters
 Patch1: kodi-18.0-versioning.patch
 
+# Prevent trousers from being linked, which breaks Samba
+Patch2: kodi-18-trousers.patch
+
 %ifarch x86_64 i686
 %global _with_crystalhd 1
 %endif
@@ -196,7 +199,6 @@ BuildRequires: systemd-devel
 BuildRequires: taglib-devel >= 1.10
 BuildRequires: tinyxml-devel
 BuildRequires: tre-devel
-BuildRequires: trousers-devel
 BuildRequires: wavpack-devel
 %if 0%{?_with_wayland}
 BuildRequires: wayland-protocols-devel
@@ -329,6 +331,7 @@ This package contains the Kodi binary for X11 servers.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
+%patch2 -p1 -b.trousers
 # Fix up Python shebangs
 pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
   tools/EventClients/lib/python/zeroconf.py \
