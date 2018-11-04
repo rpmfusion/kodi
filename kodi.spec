@@ -1,4 +1,4 @@
-%global PRERELEASE b4
+%global PRERELEASE b5
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.15.b4%{?dist}
+Release: 0.16.b5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -52,8 +52,8 @@ Source2: kodi-libdvdnav-6.0.0-Leia-Alpha-3.tar.gz
 # wget -O kodi-libdvdread-6.0.0-Leia-Alpha-3.tar.gz https://github.com/xbmc/libdvdread/archive/6.0.0-Leia-Alpha-3.tar.gz
 Source3: kodi-libdvdread-6.0.0-Leia-Alpha-3.tar.gz
 %if %{with dvdcss}
-# wget -O kodi-libdvdcss-1.4.1-Leia-Alpha-3.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.1-Leia-Alpha-3.tar.gz
-Source4: kodi-libdvdcss-1.4.1-Leia-Alpha-3.tar.gz
+# wget -O kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.2-Leia-Beta-5.tar.gz
+Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
@@ -479,6 +479,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Sun Nov 04 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.16.b5
+- Kodi 18.0 beta 5
+
 * Sat Nov 03 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.15.b4
 - Add patch to fix SMB browsing (RFBZ#5001)
 
