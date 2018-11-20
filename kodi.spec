@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.16.b5%{?dist}
+Release: 0.17.b5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -57,8 +57,8 @@ Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-4.0.2-Leia-Alpha3.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.2-Leia-Alpha3.tar.gz
-Source5: ffmpeg-4.0.2-Leia-Alpha3.tar.gz
+# wget -O ffmpeg-4.0.3-Leia-Beta5.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.3-Leia-Beta5.tar.gz
+Source5: ffmpeg-4.0.3-Leia-Beta5.tar.gz
 %endif
 
 # Set program version parameters
@@ -66,6 +66,10 @@ Patch1: kodi-18.0-versioning.patch
 
 # Prevent trousers from being linked, which breaks Samba
 Patch2: kodi-18-trousers.patch
+
+# Fix black bar area corruption
+# https://github.com/xbmc/xbmc/pull/14852
+Patch3: kodi-18-blackbars.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -96,6 +100,8 @@ BuildRequires: faad2-devel
 BuildRequires: firewalld-filesystem
 %if 0%{?_with_external_ffmpeg}
 BuildRequires: ffmpeg-devel
+%else
+BuildRequires: trousers-devel
 %endif
 BuildRequires: flac-devel
 BuildRequires: flatbuffers-devel
@@ -332,6 +338,7 @@ This package contains the Kodi binary for X11 servers.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.trousers
+%patch3 -p1 -b.blackbars
 # Fix up Python shebangs
 pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
   tools/EventClients/lib/python/zeroconf.py \
@@ -479,6 +486,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Mon Nov 19 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.17.b5
+- Add patch to fix video calibration
+
 * Sun Nov 04 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.16.b5
 - Kodi 18.0 beta 5
 
