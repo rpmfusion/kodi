@@ -1,4 +1,4 @@
-%global PRERELEASE b5
+%global PRERELEASE rc1
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.17.b5%{?dist}
+Release: 0.18.rc1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -66,10 +66,6 @@ Patch1: kodi-18.0-versioning.patch
 
 # Prevent trousers from being linked, which breaks Samba
 Patch2: kodi-18-trousers.patch
-
-# Fix black bar area corruption
-# https://github.com/xbmc/xbmc/pull/14852
-Patch3: kodi-18-blackbars.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -338,7 +334,6 @@ This package contains the Kodi binary for X11 servers.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.trousers
-%patch3 -p1 -b.blackbars
 # Fix up Python shebangs
 pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
   tools/EventClients/lib/python/zeroconf.py \
@@ -486,6 +481,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Fri Nov 23 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.18.rc1
+- Kodi 18.0 RC1
+
 * Mon Nov 19 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.17.b5
 - Add patch to fix video calibration
 
