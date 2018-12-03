@@ -1,4 +1,4 @@
-%global PRERELEASE rc1
+%global PRERELEASE rc2
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.19.rc1%{?dist}
+Release: 0.19.rc2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -481,8 +481,8 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
-* Fri Nov 30 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.19.rc1
-- Rebuild for tinyxml2
+* Mon Dec 03 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.19.rc2
+- Kodi 18.0 RC2
 
 * Fri Nov 23 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.18.rc1
 - Kodi 18.0 RC1
