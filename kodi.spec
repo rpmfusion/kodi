@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.19.rc2%{?dist}
+Release: 0.20.rc2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -481,6 +481,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Thu Dec 06 2018 Nicolas Chauvet <kwizart@gmail.com> - 18.0-0.20.rc2
+- Rebuilt for fmt
+
 * Mon Dec 03 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.19.rc2
 - Kodi 18.0 RC2
 
