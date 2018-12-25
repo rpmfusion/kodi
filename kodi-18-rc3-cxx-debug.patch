@@ -1,0 +1,42 @@
+From b3cd094fc4cf5386d76541ba159bbac438a3c715 Mon Sep 17 00:00:00 2001
+From: Philipp Kerling <pkerling@casix.org>
+Date: Fri, 21 Dec 2018 11:18:13 +0100
+Subject: [PATCH] [wayland] Fix unsafe iterator copy
+
+Copying the buffer iterator like this is actually unsafe since it might
+get invalidated by a later modification of the `std::set`. Instead,
+use the C pointer for lookup.
+
+Found with `-D_GLIBCXX_DEBUG`
+---
+ xbmc/windowing/wayland/WindowDecorator.cpp | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/xbmc/windowing/wayland/WindowDecorator.cpp b/xbmc/windowing/wayland/WindowDecorator.cpp
+index 874aaff13bcf..a44c6357b743 100644
+--- a/xbmc/windowing/wayland/WindowDecorator.cpp
++++ b/xbmc/windowing/wayland/WindowDecorator.cpp
+@@ -967,10 +967,21 @@ void CWindowDecorator::CommitAllBuffers()
+     if (emplaceResult.second)
+     {
+       // Buffer was not pending already
+-      auto iter = emplaceResult.first;
+-      wlBuffer.on_release() = [this, iter]()
++      auto wlBufferC = reinterpret_cast<wl_buffer*> (wlBuffer.c_ptr());
++      // We can refer to the buffer neither by iterator (might be invalidated) nor by
++      // capturing the C++ instance in the lambda (would create a reference loop and
++      // never allow the object to be freed), so use the raw pointer for now
++      wlBuffer.on_release() = [this, wlBufferC]()
+       {
+         CSingleLock lock(m_pendingBuffersMutex);
++        // Construct a dummy object for searching the set
++        wayland::buffer_t findDummy(wlBufferC, wayland::proxy_t::wrapper_type::foreign);
++        auto iter = m_pendingBuffers.find(findDummy);
++        if (iter == m_pendingBuffers.end())
++        {
++          throw std::logic_error("Cannot release buffer that is not pending");
++        }
++
+         // Do not erase again until buffer is reattached (should not happen anyway, just to be safe)
+         // const_cast is OK since changing the function pointer does not affect
+         // the key in the set

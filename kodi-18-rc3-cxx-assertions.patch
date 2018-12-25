@@ -1,0 +1,66 @@
+From 9605e2ff352b0785c52ac135b35b1ed914b57e21 Mon Sep 17 00:00:00 2001
+From: Philipp Kerling <pkerling@casix.org>
+Date: Fri, 21 Dec 2018 11:15:43 +0100
+Subject: [PATCH] [guilib] Fix out-of-bounds vector access when "drawing" empty
+ text
+
+If the text to draw is empty, the vertex vector in CGUIFontTTFBase::
+DrawTextInternal stays empty and is handed like that to the lib-specific
+functions which might not handle that. Specifically, CGUIFontTTFGL::
+CreateVertexBuffer accessed the vertex vector without bounds checking
+(detected by `-D_GLIBCXX_ASSERTIONS`). As there is nothing to do for
+drawing an empty text anyway, just bail out early.
+Also add some extra checking to be safe in the future.
+---
+ xbmc/guilib/GUIFontTTF.cpp   | 5 +++++
+ xbmc/guilib/GUIFontTTFGL.cpp | 7 ++++++-
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/xbmc/guilib/GUIFontTTF.cpp b/xbmc/guilib/GUIFontTTF.cpp
+index acad2fcb76f3..906db44dadff 100644
+--- a/xbmc/guilib/GUIFontTTF.cpp
++++ b/xbmc/guilib/GUIFontTTF.cpp
+@@ -352,6 +352,11 @@ void CGUIFontTTFBase::End()
+ 
+ void CGUIFontTTFBase::DrawTextInternal(float x, float y, const std::vector<UTILS::Color> &colors, const vecText &text, uint32_t alignment, float maxPixelWidth, bool scrolling)
+ {
++  if (text.empty())
++  {
++    return;
++  }
++
+   Begin();
+ 
+   uint32_t rawAlignment = alignment;
+diff --git a/xbmc/guilib/GUIFontTTFGL.cpp b/xbmc/guilib/GUIFontTTFGL.cpp
+index db51eb4bdd7d..f87afae0afac 100644
+--- a/xbmc/guilib/GUIFontTTFGL.cpp
++++ b/xbmc/guilib/GUIFontTTFGL.cpp
+@@ -23,6 +23,8 @@
+ #endif
+ #include "rendering/MatrixGL.h"
+ 
++#include <cassert>
++
+ // stuff for freetype
+ #include <ft2build.h>
+ #include FT_FREETYPE_H
+@@ -280,6 +282,9 @@ void CGUIFontTTFGL::LastEnd()
+ 
+ CVertexBuffer CGUIFontTTFGL::CreateVertexBuffer(const std::vector<SVertex> &vertices) const
+ {
++  assert(!vertices.empty());
++  assert(vertices.size() % 4 == 0);
++
+   // Generate a unique buffer object name and put it in bufferHandle
+   GLuint bufferHandle;
+   glGenBuffers(1, &bufferHandle);
+@@ -288,7 +293,7 @@ CVertexBuffer CGUIFontTTFGL::CreateVertexBuffer(const std::vector<SVertex> &vert
+   // Create a data store for the buffer object bound to the GL_ARRAY_BUFFER
+   // binding point (i.e. our buffer object) and initialise it from the
+   // specified client-side pointer
+-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof (SVertex), &vertices[0], GL_STATIC_DRAW);
++  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof (SVertex), vertices.data(), GL_STATIC_DRAW);
+   // Unbind GL_ARRAY_BUFFER
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+ 
