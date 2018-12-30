@@ -1,4 +1,4 @@
-%global PRERELEASE rc3
+%global PRERELEASE rc4
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.22.rc3%{?dist}
+Release: 0.23.rc4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -66,11 +66,6 @@ Patch1: kodi-18.0-versioning.patch
 
 # Prevent trousers from being linked, which breaks Samba
 Patch2: kodi-18-trousers.patch
-
-# Fix a few crashers due to Fedora c++ compiler flags. Will be included in rc4 / final.
-# https://github.com/xbmc/xbmc/pull/15104
-Patch100: kodi-18-rc3-cxx-assertions.patch
-Patch101: kodi-18-rc3-cxx-debug.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -339,8 +334,6 @@ This package contains the Kodi binary for X11 servers.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.trousers
-%patch100 -p1 -b.cxx-assertions
-%patch101 -p1 -b.cxx-debug
 # Fix up Python shebangs
 pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
   tools/EventClients/lib/python/zeroconf.py \
@@ -488,6 +481,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Sun Dec 30 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.23.rc4
+- Kodi 18.0 RC4
+
 * Tue Dec 25 2018 Michael Cronenworth <mike@cchtml.com> - 18.0-0.22.rc3
 - Add upstream patches to fix a few crashers
 
