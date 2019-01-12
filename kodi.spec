@@ -1,4 +1,4 @@
-%global PRERELEASE rc4
+%global PRERELEASE rc5
 #global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.23.rc4%{?dist}
+Release: 0.24.rc5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -481,6 +481,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Sat Jan 12 2019 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.24.rc5
+- Kodi 18.0 RC5
+
 * Sun Dec 30 2018 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.23.rc4
 - Kodi 18.0 RC4
 
