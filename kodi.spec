@@ -57,8 +57,8 @@ Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-4.0.3-Leia-Beta5.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.3-Leia-Beta5.tar.gz
-Source5: ffmpeg-4.0.3-Leia-Beta5.tar.gz
+# wget -O ffmpeg-4.0.3-Leia-RC5.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.3-Leia-RC5.tar.gz
+Source5: ffmpeg-4.0.3-Leia-RC5.tar.gz
 %endif
 
 # Set program version parameters
