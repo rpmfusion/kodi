@@ -1,8 +1,8 @@
-%global PRERELEASE rc5
-#global DIRVERSION %{version}
+#global PRERELEASE rc5
+%global DIRVERSION %{version}
 #global GITCOMMIT Gotham_r2-ge988513
 # use the line below for pre-releases
-%global DIRVERSION %{version}%{PRERELEASE}
+#global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 
 # We support hte following options:
@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.0
-Release: 0.24.rc5%{?dist}
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -481,6 +481,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Tue Jan 29 2019 Leigh Scott <leigh123linux@googlemail.com> - 18.0-1
+- Kodi 18.0 final
+
 * Sat Jan 12 2019 Leigh Scott <leigh123linux@googlemail.com> - 18.0-0.24.rc5
 - Kodi 18.0 RC5
 
