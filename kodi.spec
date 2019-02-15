@@ -171,6 +171,7 @@ BuildRequires: libssh-devel
 %endif
 BuildRequires: libtiff-devel
 BuildRequires: libtool
+BuildRequires: libunistring-devel
 BuildRequires: libuuid-devel
 BuildRequires: libva-devel
 BuildRequires: libvdpau-devel
