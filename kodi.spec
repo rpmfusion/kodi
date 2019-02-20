@@ -29,7 +29,7 @@
 %endif
 
 Name: kodi
-Version: 18.0
+Version: 18.1
 Release: 1%{?dist}
 Summary: Media center
 
@@ -482,6 +482,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Tue Feb 19 2019 Michael Cronenworth <mike@cchtml.com> - 18.1-1
+- Kodi 18.1 final
+
 * Tue Jan 29 2019 Leigh Scott <leigh123linux@googlemail.com> - 18.0-1
 - Kodi 18.0 final
 
