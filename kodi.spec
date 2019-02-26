@@ -67,6 +67,9 @@ Patch1: kodi-18.0-versioning.patch
 # Prevent trousers from being linked, which breaks Samba
 Patch2: kodi-18-trousers.patch
 
+# Fix an annobin issue happening only on aarch64
+Patch3: kodi-18-annobin-aarch64-workaround.patch
+
 %ifarch x86_64 i686
 %global _with_crystalhd 1
 %endif
@@ -335,6 +338,11 @@ This package contains the Kodi binary for X11 servers.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.trousers
+
+%ifarch aarch64
+%patch3 -p1 -b.innobinfix
+%endif
+
 # Fix up Python shebangs
 pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
   tools/EventClients/lib/python/zeroconf.py \
