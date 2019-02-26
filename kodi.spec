@@ -491,7 +491,7 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 %changelog
 * Tue Feb 26 2019 Nicolas Chauvet <kwizart@gmail.com> - 18.1-2
-- Apply patch by Gaël Stephan to fix kodi on aarch64 - rhbz#5171
+- Apply patch by Gaël Stephan to fix kodi on aarch64 - rfbz#5171
 
 * Tue Feb 19 2019 Michael Cronenworth <mike@cchtml.com> - 18.1-1
 - Kodi 18.1 final
