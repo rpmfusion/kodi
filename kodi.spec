@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -490,6 +490,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Mon Mar 04 2019 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 18.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
 * Tue Feb 26 2019 Nicolas Chauvet <kwizart@gmail.com> - 18.1-2
 - Apply patch by Gaël Stephan to fix kodi on aarch64 - rfbz#5171
 
