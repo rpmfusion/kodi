@@ -29,8 +29,8 @@
 %endif
 
 Name: kodi
-Version: 18.1
-Release: 3%{?dist}
+Version: 18.2
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -57,8 +57,8 @@ Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-4.0.3-Leia-RC5.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.3-Leia-RC5.tar.gz
-Source5: ffmpeg-4.0.3-Leia-RC5.tar.gz
+# wget -O ffmpeg-4.0.3-Leia-18.2.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.3-Leia-18.2.tar.gz
+Source5: ffmpeg-4.0.3-Leia-18.2.tar.gz
 %endif
 
 # Set program version parameters
@@ -490,6 +490,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Tue Apr 23 2019 Michael Cronenworth <mike@cchtml.com> - 18.2-1
+- Kodi 18.2 final
+
 * Mon Mar 04 2019 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 18.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
