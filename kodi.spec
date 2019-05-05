@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -369,6 +369,7 @@ do
 %if ! 0%{?_with_external_ffmpeg}
   -DFFMPEG_URL=%{SOURCE5} \
 %endif
+  -DCMAKE_BUILD_TYPE=Debug \
   -GNinja \
   -DENABLE_EVENTCLIENTS=ON \
   -DENABLE_INTERNAL_CROSSGUID=OFF \
@@ -490,6 +491,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Sun May 05 2019 Michael Cronenworth <mike@cchtml.com> - 18.2-2
+- Build with debugging symbols (rfbz#5248)
+
 * Tue Apr 23 2019 Michael Cronenworth <mike@cchtml.com> - 18.2-1
 - Kodi 18.2 final
 
