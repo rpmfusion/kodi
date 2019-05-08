@@ -30,7 +30,7 @@
 
 Name: kodi
 Version: 18.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -491,6 +491,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Wed May 08 2019 Leigh Scott <leigh123linux@gmail.com> - 18.2-4
+- Bump release for koji failed task
+
 * Mon May 06 2019 Michael Cronenworth <mike@cchtml.com> - 18.2-3
 - Release build with debugging symbols
 
