@@ -339,7 +339,7 @@ This package contains the Kodi binary for X11 servers.
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.trousers
 
-%if 0%{?fedora} > 29
+%ifarch aarch64
 %patch3 -p1 -b.innobinfix
 %endif
 
