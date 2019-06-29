@@ -16,7 +16,11 @@
 %if 0%{?fedora}
 # (libbluray in EPEL 6 is too old.)
 %global _with_libbluray 1
+%if 0%{?fedora} < 31
 %global _with_cwiid 1
+%else
+%global _with_cwiid 0
+%endif
 %global _with_libssh 1
 %global _with_libcec 1
 %global _with_external_ffmpeg 1
@@ -29,8 +33,8 @@
 %endif
 
 Name: kodi
-Version: 18.2
-Release: 4%{?dist}
+Version: 18.3
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -67,8 +71,8 @@ Patch1: kodi-18.0-versioning.patch
 # Prevent trousers from being linked, which breaks Samba
 Patch2: kodi-18-trousers.patch
 
-# Fix an annobin issue happening only on aarch64
-Patch3: kodi-18-annobin-aarch64-workaround.patch
+# Fix an annobin issue
+Patch3: kodi-18-annobin-workaround.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -339,7 +343,7 @@ This package contains the Kodi binary for X11 servers.
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.trousers
 
-%ifarch aarch64
+%if 0%{?fedora} > 29
 %patch3 -p1 -b.innobinfix
 %endif
 
@@ -491,6 +495,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
 
 %changelog
+* Sat Jun 29 2019 Michael Cronenworth <mike@cchtml.com> - 18.3-1
+- Kodi 18.3 final
+
 * Wed May 08 2019 Leigh Scott <leigh123linux@gmail.com> - 18.2-4
 - Bump release for koji failed task
 
