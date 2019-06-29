@@ -464,10 +464,14 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 %{_datadir}/pixmaps/kodi/*.png
 %{_bindir}/kodi-ps3remote
 %{_bindir}/kodi-send
+%if 0%{?_with_cwiid}
 %{_bindir}/kodi-wiiremote
+%endif
 %{_mandir}/man1/kodi-ps3remote.1.gz
 %{_mandir}/man1/kodi-send.1.gz
+%if 0%{?_with_cwiid}
 %{_mandir}/man1/kodi-wiiremote.1.gz
+%endif
 
 
 %files eventclients-devel
