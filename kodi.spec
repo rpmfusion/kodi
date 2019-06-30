@@ -427,6 +427,11 @@ ln -sf %{_fontbasedir}/dejavu/DejaVuSans-Bold.ttf ${RPM_BUILD_ROOT}%{_datadir}/k
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
 mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 
+# Remove wiiremote man page if support was disabled
+%if ! 0%{?_with_cwiid}
+rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1.gz
+%endif
+
 
 %post firewalld
 %firewalld_reload
