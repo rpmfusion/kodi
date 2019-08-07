@@ -34,7 +34,7 @@
 
 Name: kodi
 Version: 18.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -504,6 +504,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Wed Aug 07 2019 Leigh Scott <leigh123linux@gmail.com> - 18.3-2
+- Rebuild for new ffmpeg version
+
 * Sat Jun 29 2019 Michael Cronenworth <mike@cchtml.com> - 18.3-1
 - Kodi 18.3 final
 
