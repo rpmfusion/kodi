@@ -1,0 +1,931 @@
+From 56e1017bb319bab7d0510ca672c9488ac5ce11a1 Mon Sep 17 00:00:00 2001
+From: Arpit Nandwani <arpit.nandwani@gmail.com>
+Date: Tue, 6 Jun 2017 21:37:55 +0530
+Subject: [PATCH] python3 implementation
+
+* Updated all the files from old function names to new function names as
+  given in pydocs - http://py3c.readthedocs.io/en/latest/reference.html
+* changed char to wchar_t
+* File pointer (FILE *) updated
+* Updated ob_type to be called by multi layered PyObject
+* Removed tp_compare since it's depreciated
+* Updated definitions for InitModule
+* Updated the Python3 Android Script
+* Updated the GIL acquisition and release statements
+* Updated module initialization from init<module> to PyInit_<module> and added the new modules to built-in library through PyImport_AppendInitTab
+* Charset Conversion From char To wchar_t
+* Updated Python WSGI Invoker
+---
+ cmake/modules/FindPython.cmake                |  10 +-
+ xbmc/interfaces/python/AddonPythonInvoker.cpp |  39 ++++---
+ .../python/ContextItemAddonInvoker.cpp        |   3 +-
+ xbmc/interfaces/python/LanguageHook.cpp       |   4 +-
+ xbmc/interfaces/python/PythonInvoker.cpp      | 108 +++++++++++-------
+ xbmc/interfaces/python/PythonInvoker.h        |   6 +-
+ .../interfaces/python/PythonSwig.cpp.template |  57 ++++-----
+ xbmc/interfaces/python/XBPython.cpp           |  30 +++--
+ xbmc/interfaces/python/swig.cpp               |  28 ++---
+ .../python/typemaps/python.Tuple.intm         |   2 +-
+ .../python/typemaps/python.buffer.intm        |   6 +-
+ .../python/typemaps/python.string.outtm       |   2 +-
+ .../python/typemaps/python.vector.intm        |   2 +-
+ .../python/HTTPPythonWsgiInvoker.cpp          |  36 +++---
+ 14 files changed, 177 insertions(+), 156 deletions(-)
+
+diff --git a/cmake/modules/FindPython.cmake b/cmake/modules/FindPython.cmake
+index 213b17c62937..6c78a77cbc6d 100644
+--- a/cmake/modules/FindPython.cmake
++++ b/cmake/modules/FindPython.cmake
+@@ -6,12 +6,12 @@
+ # PYTHON_LIBRARIES - The python libraries
+ 
+ if(PKG_CONFIG_FOUND)
+-  pkg_check_modules(PC_PYTHON python>=2.7 QUIET)
++  pkg_check_modules(PC_PYTHON python3>=3.5 QUIET)
+ endif()
+ 
+-find_program(PYTHON_EXECUTABLE python ONLY_CMAKE_FIND_ROOT_PATH)
+-find_library(PYTHON_LIBRARY NAMES python2.7 PATHS ${PC_PYTHON_LIBDIR})
+-find_path(PYTHON_INCLUDE_DIR NAMES Python.h PATHS ${PC_PYTHON_INCLUDE_DIRS} ${DEPENDS_PATH}/include/python2.7)
++find_program(PYTHON_EXECUTABLE python3 ONLY_CMAKE_FIND_ROOT_PATH)
++find_library(PYTHON_LIBRARY NAMES python3.7 python3.6 python3.5 PATHS ${PC_PYTHON_LIBDIR})
++find_path(PYTHON_INCLUDE_DIR NAMES Python.h PATHS ${PC_PYTHON_INCLUDE_DIRS})
+ 
+ if(KODI_DEPENDSBUILD)
+   find_library(FFI_LIBRARY ffi REQUIRED)
+@@ -25,7 +25,7 @@ if(KODI_DEPENDSBUILD)
+ 
+   set(PYTHON_LIBRARIES ${PYTHON_LIBRARY} ${FFI_LIBRARY} ${EXPAT_LIBRARY} ${INTL_LIBRARY} ${GMP_LIBRARY} ${PYTHON_DEP_LIBRARIES})
+ else()
+-  find_package(PythonLibs 2.7 REQUIRED)
++  find_package(PythonLibs 3.5 REQUIRED)
+   list(APPEND PYTHON_LIBRARIES ${PC_PYTHON_STATIC_LIBRARIES})
+ endif()
+ 
+diff --git a/xbmc/interfaces/python/AddonPythonInvoker.cpp b/xbmc/interfaces/python/AddonPythonInvoker.cpp
+index 7bfdf41aa816..bc9ec093f346 100644
+--- a/xbmc/interfaces/python/AddonPythonInvoker.cpp
++++ b/xbmc/interfaces/python/AddonPythonInvoker.cpp
+@@ -36,14 +36,14 @@
+ 
+ #define RUNSCRIPT_SETUPTOOLS_HACK \
+   "" \
+-  "import imp,sys\n" \
++  "import types,sys\n" \
+   "pkg_resources_code = \\\n" \
+   "\"\"\"\n" \
+   "def resource_filename(__name__,__path__):\n" \
+   "  return __path__\n" \
+   "\"\"\"\n" \
+-  "pkg_resources = imp.new_module('pkg_resources')\n" \
+-  "exec pkg_resources_code in pkg_resources.__dict__\n" \
++  "pkg_resources = types.ModuleType('pkg_resources')\n" \
++  "exec(pkg_resources_code, pkg_resources.__dict__)\n" \
+   "sys.modules['pkg_resources'] = pkg_resources\n" \
+   ""
+ 
+@@ -64,12 +64,12 @@
+ #endif
+ 
+ namespace PythonBindings {
+-  void initModule_xbmcdrm(void);
+-  void initModule_xbmcgui(void);
+-  void initModule_xbmc(void);
+-  void initModule_xbmcplugin(void);
+-  void initModule_xbmcaddon(void);
+-  void initModule_xbmcvfs(void);
++PyObject* PyInit_Module_xbmcdrm(void);
++PyObject* PyInit_Module_xbmcgui(void);
++PyObject* PyInit_Module_xbmc(void);
++PyObject* PyInit_Module_xbmcplugin(void);
++PyObject* PyInit_Module_xbmcaddon(void);
++PyObject* PyInit_Module_xbmcvfs(void);
+ }
+ 
+ using namespace PythonBindings;
+@@ -82,17 +82,24 @@ typedef struct
+ 
+ static PythonModule PythonModules[] =
+   {
+-    { "xbmcdrm",    initModule_xbmcdrm    },
+-    { "xbmcgui",    initModule_xbmcgui    },
+-    { "xbmc",       initModule_xbmc       },
+-    { "xbmcplugin", initModule_xbmcplugin },
+-    { "xbmcaddon",  initModule_xbmcaddon  },
+-    { "xbmcvfs",    initModule_xbmcvfs    }
++    { "xbmcdrm",    PyInit_Module_xbmcdrm    },
++    { "xbmcgui",    PyInit_Module_xbmcgui    },
++    { "xbmc",       PyInit_Module_xbmc       },
++    { "xbmcplugin", PyInit_Module_xbmcplugin },
++    { "xbmcaddon",  PyInit_Module_xbmcaddon  },
++    { "xbmcvfs",    PyInit_Module_xbmcvfs    }
+   };
+ 
+ CAddonPythonInvoker::CAddonPythonInvoker(ILanguageInvocationHandler *invocationHandler)
+   : CPythonInvoker(invocationHandler)
+-{ }
++{
++  PyImport_AppendInittab("xbmcdrm", PyInit_Module_xbmcdrm);
++  PyImport_AppendInittab("xbmcgui", PyInit_Module_xbmcgui);
++  PyImport_AppendInittab("xbmc", PyInit_Module_xbmc);
++  PyImport_AppendInittab("xbmcplugin", PyInit_Module_xbmcplugin);
++  PyImport_AppendInittab("xbmcaddon", PyInit_Module_xbmcaddon);
++  PyImport_AppendInittab("xbmcvfs", PyInit_Module_xbmcvfs);
++}
+ 
+ CAddonPythonInvoker::~CAddonPythonInvoker() = default;
+ 
+diff --git a/xbmc/interfaces/python/ContextItemAddonInvoker.cpp b/xbmc/interfaces/python/ContextItemAddonInvoker.cpp
+index 04afef41fc85..b962d92bc68c 100644
+--- a/xbmc/interfaces/python/ContextItemAddonInvoker.cpp
++++ b/xbmc/interfaces/python/ContextItemAddonInvoker.cpp
+@@ -32,8 +32,7 @@ void CContextItemAddonInvoker::onPythonModuleInitialization(void* moduleDict)
+   {
+     XBMCAddon::xbmcgui::ListItem* arg = new XBMCAddon::xbmcgui::ListItem(m_item);
+     PyObject* pyItem = PythonBindings::makePythonInstance(arg, true);
+-    //! @bug libpython < 3.0 isn't const correct
+-    if (pyItem == Py_None || PySys_SetObject(const_cast<char*>("listitem"), pyItem) == -1)
++    if (pyItem == Py_None || PySys_SetObject("listitem", pyItem) == -1)
+     {
+       CLog::Log(LOGERROR, "CPythonInvoker(%d, %s): Failed to set sys parameter", GetId(), m_sourceFile.c_str());
+       //FIXME: we should really abort execution
+diff --git a/xbmc/interfaces/python/LanguageHook.cpp b/xbmc/interfaces/python/LanguageHook.cpp
+index 41b18bd7fb4e..5ddc1ccd6c2e 100644
+--- a/xbmc/interfaces/python/LanguageHook.cpp
++++ b/xbmc/interfaces/python/LanguageHook.cpp
+@@ -124,7 +124,7 @@ namespace XBMCAddon
+       // from the global dictionary
+       PyObject* pyid = PyDict_GetItemString(global_dict, "__xbmcaddonid__");
+       if (pyid)
+-        return PyString_AsString(pyid);
++        return PyUnicode_AsUTF8(pyid);
+       return "";
+     }
+ 
+@@ -139,7 +139,7 @@ namespace XBMCAddon
+       // from the global dictionary
+       PyObject* pyversion = PyDict_GetItemString(global_dict, "__xbmcapiversion__");
+       if (pyversion)
+-        return PyString_AsString(pyversion);
++        return PyUnicode_AsUTF8(pyversion);
+       return "";
+     }
+ 
+diff --git a/xbmc/interfaces/python/PythonInvoker.cpp b/xbmc/interfaces/python/PythonInvoker.cpp
+index 273f2f3d73e2..07fc5e7575b5 100644
+--- a/xbmc/interfaces/python/PythonInvoker.cpp
++++ b/xbmc/interfaces/python/PythonInvoker.cpp
+@@ -11,6 +11,15 @@
+ #include <iterator>
+ #include <osdefs.h>
+ 
++#if PY_VERSION_HEX >= 0x03080000
++# define Py_BUILD_CORE
++# undef HAVE_STD_ATOMIC
++/* for access to the fields of PyInterpreterState */
++#  include "internal/pycore_pystate.h"
++# undef Py_BUILD_CORE
++# define HAVE_STD_ATOMIC
++#endif
++
+ #include "PythonInvoker.h"
+ #include "Application.h"
+ #include "ServiceBroker.h"
+@@ -30,9 +30,7 @@
+ #include "interfaces/python/swig.h"
+ #include "interfaces/python/XBPython.h"
+ #include "threads/SingleLock.h"
+-#if defined(TARGET_WINDOWS)
+ #include "utils/CharsetConverter.h"
+-#endif // defined(TARGET_WINDOWS)
+ #include "utils/log.h"
+ #include "utils/StringUtils.h"
+ #include "utils/URIUtils.h"
+@@ -80,23 +78,23 @@ static const std::string getListOfAddonClassesAsString(XBMCAddon::AddonClass::Re
+   return message;
+ }
+ 
+-static std::vector<std::vector<char>> storeArgumentsCCompatible(std::vector<std::string> const & input)
++static std::vector<std::vector<wchar_t>> storeArgumentsCCompatible(std::vector<std::wstring> const& input)
+ {
+-  std::vector<std::vector<char>> output;
++  std::vector<std::vector<wchar_t>> output;
+   std::transform(input.begin(), input.end(), std::back_inserter(output),
+-                [](std::string const & i) { return std::vector<char>(i.c_str(), i.c_str() + i.length() + 1); });
++                 [](std::wstring const& i) { return std::vector<wchar_t>(i.c_str(), i.c_str() + i.length() + 1); });
+ 
+   if (output.empty())
+-    output.push_back(std::vector<char>(1u, '\0'));
++    output.push_back(std::vector<wchar_t>(1u, '\0'));
+ 
+   return output;
+ }
+ 
+-static std::vector<char *> getCPointersToArguments(std::vector<std::vector<char>> & input)
++static std::vector<wchar_t*> getCPointersToArguments(std::vector<std::vector<wchar_t>>& input)
+ {
+-  std::vector<char *> output;
++  std::vector<wchar_t*> output;
+   std::transform(input.begin(), input.end(), std::back_inserter(output),
+-                [](std::vector<char> & i) { return &i[0]; });
++                 [](std::vector<wchar_t>& i) { return &i[0]; });
+   return output;
+ }
+ 
+@@ -144,14 +144,26 @@
+ 
+ bool CPythonInvoker::execute(const std::string &script, const std::vector<std::string> &arguments)
+ {
++  std::vector<std::wstring> w_arguments;
++  for (auto argument : arguments)
++  {
++    std::wstring w_argument;
++    g_charsetConverter.utf8ToW(argument, w_argument);
++    w_arguments.push_back(w_argument);
++  }
++  return execute(script, w_arguments);
++}
++
++bool CPythonInvoker::execute(const std::string& script, const std::vector<std::wstring>& arguments)
++{
+   // copy the code/script into a local string buffer
+   m_sourceFile = script;
+   m_pythonPath.clear();
+ 
+   // copy the arguments into a local buffer
+   unsigned int argc = arguments.size();
+-  std::vector<std::vector<char>> argvStorage = storeArgumentsCCompatible(arguments);
+-  std::vector<char *> argv = getCPointersToArguments(argvStorage);
++  std::vector<std::vector<wchar_t>> argvStorage = storeArgumentsCCompatible(arguments);
++  std::vector<wchar_t*> argv = getCPointersToArguments(argvStorage);
+ 
+   CLog::Log(LOGDEBUG, "CPythonInvoker(%d, %s): start processing", GetId(), m_sourceFile.c_str());
+ 
+@@ -160,7 +172,8 @@
+   URIUtils::RemoveSlashAtEnd(scriptDir);
+ 
+   // get the global lock
+-  PyEval_AcquireLock();
++  extern PyThreadState* savestate;
++  PyEval_RestoreThread(savestate);
+   if (!m_threadState)
+   {
+     m_threadState = Py_NewInterpreter();
+@@ -219,21 +232,16 @@
+       for (int i = 0; i < PyList_Size(pathObj); i++)
+       {
+         PyObject *e = PyList_GetItem(pathObj, i); // borrowed ref, no need to delete
+-        if (e != NULL && PyString_Check(e))
+-          addNativePath(PyString_AsString(e)); // returns internal data, don't delete or modify
+-#ifdef TARGET_WINDOWS_STORE
+-                                               // uwp python operates unicodes
+-        else if (e != NULL && PyUnicode_Check(e))
+-        {
+-          PyObject *utf8 = PyUnicode_AsUTF8String(e);
+-          addNativePath(PyString_AsString(utf8));
+-          Py_DECREF(utf8);
+-        }
+-#endif
++        if (e != NULL && PyUnicode_Check(e))
++          addNativePath(PyUnicode_AsUTF8(e)); // returns internal data, don't delete or modify
+       }
+     }
+     else
+-      addNativePath(Py_GetPath());
++    {
++      std::string GetPath;
++      g_charsetConverter.wToUTF8(Py_GetPath(), GetPath);
++      addNativePath(GetPath);
++    }
+ 
+     Py_DECREF(sysMod); // release ref to sysMod
+ 
+@@ -244,8 +252,10 @@
+ #else // ! TARGET_WINDOWS
+     CLog::Log(LOGDEBUG, "CPythonInvoker(%d, %s): setting the Python path to %s", GetId(), m_sourceFile.c_str(), m_pythonPath.c_str());
+ #endif // ! TARGET_WINDOWS
+-    //! @bug libpython < 3.0 isn't const correct
+-    PySys_SetPath(const_cast<char*>(m_pythonPath.c_str()));
++
++    std::wstring pypath;
++    g_charsetConverter.utf8ToW(m_pythonPath, pypath);
++    PySys_SetPath(pypath.c_str());
+   }
+   else
+     // swap in my thread m_threadState
+@@ -268,8 +278,7 @@
+     stopping = m_stop;
+   }
+ 
+-  PyEval_AcquireLock();
+-  PyThreadState_Swap(m_threadState);
++  PyEval_AcquireThread((PyThreadState*)m_threadState);
+ 
+   bool failed = false;
+   std::string exceptionType, exceptionValue, exceptionTraceback;
+@@ -278,13 +285,11 @@ bool CPythonInvoker::execute(const std::string &script, const std::vector<std::s
+         return false;
+       }
+ #endif
+-      //! @bug libpython isn't const correct
+-      PyObject* file = PyFile_FromString(const_cast<char*>(nativeFilename.c_str()), const_cast<char*>("r"));
+-      FILE *fp = PyFile_AsFile(file);
++      FILE* fp = _Py_fopen(nativeFilename.c_str(), "r");
+ 
+       if (fp != NULL)
+       {
+-        PyObject *f = PyString_FromString(nativeFilename.c_str());
++        PyObject* f = PyUnicode_FromString(nativeFilename.c_str());
+         PyDict_SetItemString(moduleDict, "__file__", f);
+ 
+         onPythonModuleInitialization(moduleDict);
+@@ -415,6 +424,27 @@
+   PyRun_FileExFlags(static_cast<FILE*>(fp), script.c_str(), m_Py_file_input, static_cast<PyObject*>(moduleDict), static_cast<PyObject*>(moduleDict), 1, NULL);
+ }
+ 
++FILE* CPythonInvoker::PyFile_AsFileWithMode(PyObject* py_file, const char* mode)
++{
++  PyObject* ret = PyObject_CallMethod(py_file, "flush", "");
++  if (ret == NULL)
++    return NULL;
++  Py_DECREF(ret);
++
++  int fd = PyObject_AsFileDescriptor(py_file);
++  if (fd == -1)
++    return NULL;
++
++  FILE* f = fdopen(fd, mode);
++  if (f == NULL)
++  {
++    PyErr_SetFromErrno(PyExc_OSError);
++    return NULL;
++  }
++
++  return f;
++}
++
+ bool CPythonInvoker::stop(bool abort)
+ {
+   CSingleLock lock(m_critical);
+@@ -431,7 +461,7 @@
+ 
+       lock.Leave();
+ 
+-      PyEval_AcquireLock();
++      PyEval_RestoreThread((PyThreadState*)m_threadState);
+       PyThreadState* old = PyThreadState_Swap((PyThreadState*)m_threadState);
+ 
+       //tell xbmc.Monitor to call onAbortRequested()
+@@ -472,7 +502,7 @@
+     }
+ 
+     // grabbing the PyLock while holding the m_critical is asking for a deadlock
+-    PyEval_AcquireLock();
++    PyEval_RestoreThread((PyThreadState*)m_threadState);
+ 
+     lock.Enter();
+ 
+@@ -517,8 +547,7 @@
+   {
+     CLog::Log(LOGDEBUG, "%s(%d, %s)", __FUNCTION__, GetId(), m_sourceFile.c_str());
+ 
+-    PyEval_AcquireLock();
+-    PyThreadState_Swap(m_threadState);
++    PyEval_RestoreThread((PyThreadState*)m_threadState);
+ 
+     onDeinitialization();
+ 
+@@ -548,7 +577,7 @@
+ 
+     // set stopped event - this allows ::stop to run and kill remaining threads
+     // this event has to be fired without holding m_critical
+-    // also the GIL (PyEval_AcquireLock) must not be held
++    // also the GIL (PyEval_RestoreThread) must not be held
+     // if not obeyed there is still no deadlock because ::stop waits with timeout (smart one!)
+     m_stoppedEvent.Set();
+ 
+@@ -560,11 +585,11 @@ void CPythonInvoker::onPythonModuleInitialization(void* moduleDict)
+ 
+   PyObject *moduleDictionary = (PyObject *)moduleDict;
+ 
+-  PyObject *pyaddonid = PyString_FromString(m_addon->ID().c_str());
++  PyObject* pyaddonid = PyUnicode_FromString(m_addon->ID().c_str());
+   PyDict_SetItemString(moduleDictionary, "__xbmcaddonid__", pyaddonid);
+ 
+   ADDON::AddonVersion version = m_addon->GetDependencyVersion("xbmc.python");
+-  PyObject *pyxbmcapiversion = PyString_FromString(version.asString().c_str());
++  PyObject* pyxbmcapiversion = PyUnicode_FromString(version.asString().c_str());
+   PyDict_SetItemString(moduleDictionary, "__xbmcapiversion__", pyxbmcapiversion);
+ 
+   PyObject *pyinvokerid = PyLong_FromLong(GetId());
+@@ -613,8 +638,7 @@ bool CPythonInvoker::initializeModule(PythonModuleInitialization module)
+   if (module == NULL)
+     return false;
+ 
+-  module();
+-  return true;
++  return module() != nullptr;
+ }
+ 
+ void CPythonInvoker::getAddonModuleDeps(const ADDON::AddonPtr& addon, std::set<std::string>& paths)
+diff --git a/xbmc/interfaces/python/PythonInvoker.h b/xbmc/interfaces/python/PythonInvoker.h
+index 85072384e391..90c4a744986a 100644
+--- a/xbmc/interfaces/python/PythonInvoker.h
++++ b/xbmc/interfaces/python/PythonInvoker.h
+@@ -18,6 +18,7 @@
+ #include "threads/CriticalSection.h"
+ #include "threads/Event.h"
+ 
++typedef struct _object PyObject;
+ struct _ts;
+ 
+ class CPythonInvoker : public ILanguageInvoker
+@@ -26,7 +28,7 @@ class CPythonInvoker : public ILanguageInvoker
+ 
+   bool IsStopping() const override { return m_stop || ILanguageInvoker::IsStopping(); }
+ 
+-  typedef void (*PythonModuleInitialization)();
++  typedef PyObject* (*PythonModuleInitialization)();
+ 
+ protected:
+   // implementation of ILanguageInvoker
+@@ -61,6 +62,8 @@
+   void addPath(const std::string& path); // add path in UTF-8 encoding
+   void addNativePath(const std::string& path); // add path in system/Python encoding
+   void getAddonModuleDeps(const ADDON::AddonPtr& addon, std::set<std::string>& paths);
++  bool execute(const std::string& script, const std::vector<std::wstring>& arguments);
++  FILE* PyFile_AsFileWithMode(PyObject* py_file, const char* mode);
+ 
+   std::string m_pythonPath;
+   _ts *m_threadState;
+diff --git a/xbmc/interfaces/python/PythonSwig.cpp.template b/xbmc/interfaces/python/PythonSwig.cpp.template
+index 0a69b5aa3c7b..3379f1f16763 100644
+--- a/xbmc/interfaces/python/PythonSwig.cpp.template
++++ b/xbmc/interfaces/python/PythonSwig.cpp.template
+@@ -45,8 +45,8 @@
+      * of the native call to be returned to the python caller.
+      */
+     [ 'void' : 'Py_INCREF(Py_None);\n    ${result} = Py_None;',
+-      'long': '${result} = PyInt_FromLong(${api});',
+-      'unsigned long': '${result} = PyInt_FromLong(${api});',
++      'long': '${result} = PyLong_FromLong(${api});',
++      'unsigned long': '${result} = PyLong_FromLong(${api});',
+       'bool': '${result} = Py_BuildValue("b", ${api});',
+       'long long': '${result} = Py_BuildValue("L", ${api});',
+       'int': '${result} = Py_BuildValue("i", ${api});',
+@@ -54,7 +54,7 @@ Helper.setup(this,classes,
+       'double': '${result} = PyFloat_FromDouble(${api});',
+       'float': '${result} = Py_BuildValue("f", ${api});',
+       'std::string' : new File('typemaps/python.string.outtm'),
+-      'p.q(const).char' : '${result} = PyString_FromString(${api});',
++      'p.q(const).char' : '${result} = PyUnicode_FromString(${api});',
+       (Pattern.compile('''(p.){0,1}XbmcCommons::Buffer''')) : new File('typemaps/python.buffer.outtm'),
+       (Pattern.compile('''std::shared_ptr<\\(.*\\)>''')) : new File('typemaps/python.smart_ptr.outtm'),
+       (Pattern.compile('''std::unique_ptr<\\(.*\\)>''')) : new File('typemaps/python.smart_ptr.outtm'),
+@@ -79,15 +79,15 @@ Helper.setup(this,classes,
+       (Pattern.compile('''(p.){0,1}std::map<\\(.*\\)>''')) : new File('typemaps/python.map.intm'),
+       (Pattern.compile('''(r.){0,1}XBMCAddon::Dictionary<\\(.*\\)>''')) : new File('typemaps/python.dict.intm'),
+       (Pattern.compile('''p.void''')) : '${api} = (void*)${slarg};',
+-      'bool' : '${api} = (PyInt_AsLong(${slarg}) == 0L ? false : true);',
+-      'long' : '${api} = PyInt_AsLong(${slarg});',
++      'bool' : '${api} = (PyLong_AsLong(${slarg}) == 0L ? false : true);',
++      'long' : '${api} = PyLong_AsLong(${slarg});',
+       'unsigned long' : '${api} = PyLong_AsUnsignedLong(${slarg});',
+       'long long' : '${api} = PyLong_AsLongLong(${slarg});',
+       'unsigned long long' : '${api} = PyLong_AsUnsignedLongLong(${slarg});',
+-      'int' : '${api} = (int)PyInt_AsLong(${slarg});',
++      'int' : '${api} = (int)PyLong_AsLong(${slarg});',
+       'double' : '${api} = PyFloat_AsDouble(${slarg});',
+       'float' : '${api} = (float)PyFloat_AsDouble(${slarg});',
+-      'XBMCAddon::StringOrInt' : 'if (${slarg}) PyXBMCGetUnicodeString(${api},${slarg},PyInt_Check(${slarg}) || PyLong_Check(${slarg}) || PyFloat_Check(${slarg}),"${api}","${method.@name}");'
++      'XBMCAddon::StringOrInt' : 'if (${slarg}) PyXBMCGetUnicodeString(${api},${slarg},PyLong_Check(${slarg}) || PyLong_Check(${slarg}) || PyFloat_Check(${slarg}),"${api}","${method.@name}");'
+     ], '${api} = (${swigTypeParser.SwigType_str(ltype)})retrieveApiInstance(${slarg},"${ltype}","${helper.findNamespace(method)}","${helper.callingName(method)}");')
+ // ---------------------------------------------------------
+ 
+@@ -262,7 +262,7 @@ void doMethod(Node method, MethodType methodType)
+ 
+     return result; <% }
+     else { %>
+-    self->ob_type->tp_free((PyObject*)self);
++    (((PyObject*)(self))->ob_type)->tp_free((PyObject*)self);
+     <%
+     }
+     %>
+@@ -382,15 +382,6 @@ void doClassMethodInfo(Node clazz, List initTypeCalls)
+       System.err.println ("Warning: class ${fullClassName} has an inconsistent operator set. To get a as_mapping you must implement 'size' as well as operator[]")
+   }
+ 
+-  if (doComparator){
+-%>
+-  static int ${module.@name}_${classNameAsVariable}_cmp(PyObject* obj1, PyObject* obj2)
+-  {
+-    return PythonCompare<${fullClassName}>::compare(obj1,obj2,"p.${fullClassName}","${Helper.findNamespace(clazz)}","compare on ${fullClassName}");
+-  }
+-<%
+-  }
+-
+   if (doAsMapping)
+   {
+ %>
+@@ -653,22 +644,13 @@ void doClassMethodInfo(Node clazz, List initTypeCalls)
+     pythonType.tp_name = "${module.@name}.${clazz.@sym_name}";
+     pythonType.tp_basicsize = sizeof(PyHolder);
+     pythonType.tp_dealloc = (destructor)${module.@name}_${classNameAsVariable}_Dealloc; <%
+-  if (doComparator) { %>
+-    pythonType.tp_compare=${module.@name}_${classNameAsVariable}_cmp;<%
+-  }
++
+   if (clazz.@feature_python_rcmp) { %>
+     pythonType.tp_richcompare=(richcmpfunc)${module.@name}_${classNameAsVariable}_rcmp;<%
+   } %>
+ 
+-<%
+-  if (clazz.@feature_iterator) { %>
+-    pythonType.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_ITER;
+-<%
+-  }
+-  else { %>
+     pythonType.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+-<%
+-  } %>
++
+     pythonType.tp_doc = ${Helper.hasDoc(clazz) ? (classNameAsVariable + '__doc__') : 'NULL' };
+     pythonType.tp_methods = ${classNameAsVariable}_methods; <%
+   if (properties.size() > 0) { %>
+@@ -830,8 +812,7 @@ namespace PythonBindings
+         }
+ %>
+         XBMCAddon::Python::PyContext pyContext;
+-        //! @bug libpython < 3.4 isn't const correct
+-        PyObject_CallMethod(self,const_cast<char*>("${Helper.callingName(it)}"),const_cast<char*>("(${paramFormatStr})")<%
++        PyObject_CallMethod(self,"${Helper.callingName(it)}","(${paramFormatStr})"<%
+           params.each {
+              %>, py${it.@name} <%
+           }
+@@ -897,7 +878,16 @@ namespace PythonBindings
+     }
+   }
+ 
+-  void initModule_${module.@name}()
++  static struct PyModuleDef createModule
++  {
++      PyModuleDef_HEAD_INIT,
++      "${module.@name}",
++      "",
++      -1,
++      ${module.@name}_methods
++  };
++
++  PyObject *PyInit_Module_${module.@name}()
+   {
+     initTypes();
+ 
+@@ -908,8 +898,8 @@ namespace PythonBindings
+     Py_INCREF(&(Ty${it}_Type.pythonType));<%
+    }%>
+ 
+-    module = Py_InitModule("${module.@name}", ${module.@name}_methods);
+-    if (module == NULL) return;
++    module = PyModule_Create(&createModule);
++    if (module == NULL) return NULL;
+ 
+ <% classes.each { clazz -> %>
+     PyModule_AddObject(module, "${clazz.@sym_name}", (PyObject*)(&(Ty${PythonTools.getClassNameAsVariable(clazz)}_Type.pythonType)));<%
+@@ -929,6 +919,7 @@ namespace PythonBindings
+         'PyModule_AddIntConstant' : 'PyModule_AddStringConstant' %>
+    ${pyCall}(module,"${it.@sym_name}",${it.@value}); <%
+   } %>
++  return module;
+   }
+ 
+ } // end PythonBindings namespace for python type definitions
+diff --git a/xbmc/interfaces/python/XBPython.cpp b/xbmc/interfaces/python/XBPython.cpp
+index d411b1c57ef7..cd672bc7ee09 100644
+--- a/xbmc/interfaces/python/XBPython.cpp
++++ b/xbmc/interfaces/python/XBPython.cpp
+@@ -35,6 +35,8 @@
+ #include "interfaces/python/PythonInvoker.h"
+ #include "ServiceBroker.h"
+ 
++PyThreadState* savestate;
++
+ XBPython::XBPython()
+ {
+   m_bInitialized      = false;
+@@ -481,8 +483,7 @@ void XBPython::Finalize()
+     m_mainThreadState = NULL; // clear the main thread state before releasing the lock
+     {
+       CSingleExit exit(m_critSection);
+-      PyEval_AcquireLock();
+-      PyThreadState_Swap(curTs);
++      PyEval_AcquireThread(curTs);
+ 
+       Py_Finalize();
+       PyEval_ReleaseLock();
+@@ -498,7 +499,7 @@ void XBPython::Finalize()
+ #endif
+ #if defined(TARGET_POSIX) && !defined(TARGET_DARWIN) && !defined(TARGET_FREEBSD)
+     // we can't release it on windows, as this is done in UnloadPythonDlls() for win32 (see above).
+-    // The implementation for linux needs looking at - UnloadPythonDlls() currently only searches for "python26.dll"
++    // The implementation for linux needs looking at - UnloadPythonDlls() currently only searches for "python36.dll"
+     // The implementation for osx can never unload the python dylib.
+     DllLoaderContainer::ReleaseModule(m_pDll);
+ #endif
+@@ -567,7 +568,7 @@ bool XBPython::OnScriptInitialized(ILanguageInvoker *invoker)
+ #ifndef TARGET_POSIX
+     if (!FileExist("special://xbmc/system/python/DLLs/_socket.pyd") ||
+       !FileExist("special://xbmc/system/python/DLLs/_ssl.pyd") ||
+-      !FileExist("special://xbmc/system/python/DLLs/bz2.pyd") ||
++      !FileExist("special://xbmc/system/python/DLLs/_bz2.pyd") ||
+       !FileExist("special://xbmc/system/python/DLLs/pyexpat.pyd") ||
+       !FileExist("special://xbmc/system/python/DLLs/select.pyd") ||
+       !FileExist("special://xbmc/system/python/DLLs/unicodedata.pyd"))
+@@ -594,8 +595,8 @@ bool XBPython::OnScriptInitialized(ILanguageInvoker *invoker)
+     // check if we are running as real xbmc.app or just binary
+     if (!CUtil::GetFrameworksPath(true).empty())
+     {
+-      // using external python, it's build looking for xxx/lib/python2.6
+-      // so point it to frameworks which is where python2.6 is located
++      // using external python, it's build looking for xxx/lib/python3.7
++      // so point it to frameworks which is where python3.7 is located
+       setenv("PYTHONHOME", CSpecialProtocol::TranslatePath("special://frameworks").c_str(), 1);
+       setenv("PYTHONPATH", CSpecialProtocol::TranslatePath("special://frameworks").c_str(), 1);
+       CLog::Log(LOGDEBUG, "PYTHONHOME -> %s", CSpecialProtocol::TranslatePath("special://frameworks").c_str());
+@@ -619,25 +620,22 @@ bool XBPython::OnScriptInitialized(ILanguageInvoker *invoker)
+ #endif
+ #endif
+ 
+-    if (PyEval_ThreadsInitialized())
+-      PyEval_AcquireLock();
+-    else
+-      PyEval_InitThreads();
+-
+     Py_Initialize();
+-    PyEval_ReleaseLock();
+ 
+     // If this is not the first time we initialize Python, the interpreter
+     // lock already exists and we need to lock it as PyEval_InitThreads
+     // would not do that in that case.
+-    PyEval_AcquireLock();
+-    const char* python_argv[1] = { "" };
++    if (PyEval_ThreadsInitialized() && !PyGILState_Check())
++      PyEval_RestoreThread((PyThreadState*)m_mainThreadState);
++    else
++      PyEval_InitThreads();
++    const wchar_t* python_argv[1] = {L""};
+     //! @bug libpython isn't const correct
+-    PySys_SetArgv(1, const_cast<char**>(python_argv));
++    PySys_SetArgv(1, const_cast<wchar_t**>(python_argv));
+ 
+     if (!(m_mainThreadState = PyThreadState_Get()))
+       CLog::Log(LOGERROR, "Python threadstate is NULL.");
+-    PyEval_ReleaseLock();
++    savestate = PyEval_SaveThread();
+ 
+     m_bInitialized = true;
+   }
+diff --git a/xbmc/interfaces/python/swig.cpp b/xbmc/interfaces/python/swig.cpp
+index 88d0592c5d5d..71ffb69dc41b 100644
+--- a/xbmc/interfaces/python/swig.cpp
++++ b/xbmc/interfaces/python/swig.cpp
+@@ -18,7 +18,7 @@ namespace PythonBindings
+ {
+   TypeInfo::TypeInfo(const std::type_info& ti) : swigType(NULL), parentType(NULL), typeIndex(ti)
+   {
+-    static PyTypeObject py_type_object_header = { PyObject_HEAD_INIT(NULL) 0};
++    static PyTypeObject py_type_object_header = {PyVarObject_HEAD_INIT(NULL, 0)};
+     static int size = (long*)&(py_type_object_header.tp_name) - (long*)&py_type_object_header;
+     memcpy(&(this->pythonType), &py_type_object_header, size);
+   }
+@@ -52,18 +52,14 @@ namespace PythonBindings
+       // Python unicode objects are UCS2 or UCS4 depending on compilation
+       // options, wchar_t is 16-bit or 32-bit depending on platform.
+       // Avoid the complexity by just letting python convert the string.
+-      PyObject *utf8_pyString = PyUnicode_AsUTF8String(pObject);
+ 
+-      if (utf8_pyString)
+-      {
+-        buf = PyString_AsString(utf8_pyString);
+-        Py_DECREF(utf8_pyString);
+-        return;
+-      }
++      buf = PyUnicode_AsUTF8(pObject);
++      return;
+     }
+-    if (PyString_Check(pObject))
++
++    if (PyBytes_Check(pObject)) // If pobject is of type Bytes
+     {
+-      buf = PyString_AsString(pObject);
++      buf = PyBytes_AsString(pObject);
+       return;
+     }
+ 
+@@ -167,26 +163,24 @@ namespace PythonBindings
+ 
+     // See https://docs.python.org/3/c-api/exceptions.html#c.PyErr_NormalizeException
+     PyErr_NormalizeException(&exc_type, &exc_value, &exc_traceback);
+-#if PY_MAJOR_VERSION > 2
+     if (exc_traceback != NULL) {
+       PyException_SetTraceback(exc_value, exc_traceback);
+     }
+-#endif
+ 
+     exceptionType.clear();
+     exceptionValue.clear();
+     exceptionTraceback.clear();
+ 
+-    if (exc_type != NULL && (pystring = PyObject_Str(exc_type)) != NULL && PyString_Check(pystring))
++    if (exc_type != NULL && (pystring = PyObject_Str(exc_type)) != NULL && PyUnicode_Check(pystring))
+     {
+-      char *str = PyString_AsString(pystring);
++      const char* str = PyUnicode_AsUTF8(pystring);
+       if (str != NULL)
+         exceptionType = str;
+ 
+       pystring = PyObject_Str(exc_value);
+       if (pystring != NULL)
+       {
+-        str = PyString_AsString(pystring);
++        str = PyUnicode_AsUTF8(pystring);
+         exceptionValue = str;
+       }
+ 
+@@ -199,7 +193,7 @@ namespace PythonBindings
+ 
+         if (tbList)
+         {
+-          PyObject *emptyString = PyString_FromString("");
++          PyObject* emptyString = PyUnicode_FromString("");
+           char method[] = "join";
+           char format[] = "O";
+           PyObject *strRetval = PyObject_CallMethod(emptyString, method, format, tbList);
+@@ -207,7 +201,7 @@ namespace PythonBindings
+ 
+           if (strRetval)
+           {
+-            str = PyString_AsString(strRetval);
++            str = PyUnicode_AsUTF8(strRetval);
+             if (str != NULL)
+               exceptionTraceback = str;
+             Py_DECREF(strRetval);
+diff --git a/xbmc/interfaces/python/typemaps/python.Tuple.intm b/xbmc/interfaces/python/typemaps/python.Tuple.intm
+index ee6afce9389f..c426856373ae 100644
+--- a/xbmc/interfaces/python/typemaps/python.Tuple.intm
++++ b/xbmc/interfaces/python/typemaps/python.Tuple.intm
+@@ -17,7 +17,7 @@
+       bool isTuple = PyObject_TypeCheck(${slarg},&PyTuple_Type);
+       if (!isTuple && !PyObject_TypeCheck(${slarg},&PyList_Type))
+         throw WrongTypeException("The parameter \"${api}\" must be either a Tuple or a List.");
+-      auto vecSize = (isTuple ? PyTuple_Size(${slarg}) : PyList_Size(${slarg}));
++      Py_ssize_t vecSize = (isTuple ? PyTuple_Size(${slarg}) : PyList_Size(${slarg}));
+ <%
+       types.eachWithIndex { curType, entryIndex ->
+ %>
+diff --git a/xbmc/interfaces/python/typemaps/python.buffer.intm b/xbmc/interfaces/python/typemaps/python.buffer.intm
+index d9bab4560a99..76c09cb78329 100644
+--- a/xbmc/interfaces/python/typemaps/python.buffer.intm
++++ b/xbmc/interfaces/python/typemaps/python.buffer.intm
+@@ -7,10 +7,10 @@
+  *  See LICENSES/README.md for more information.
+  */
+ %>
+-    if (PyString_Check(${slarg}))
++    if (PyUnicode_Check(${slarg}))
+     {
+-      const char* str = PyString_AsString(${slarg});
+-      size_t size = (size_t)PyString_Size(${slarg});
++      const char* str = PyUnicode_AsUTF8(${slarg});
++      size_t size = (size_t)PyUnicode_GetLength(${slarg});
+       ${api}.allocate(size);
+       ${api}.put(str,size);
+       ${api}.flip(); // prepare the buffer for reading from
+diff --git a/xbmc/interfaces/python/typemaps/python.string.outtm b/xbmc/interfaces/python/typemaps/python.string.outtm
+index 6e17f824318f..93c4971d40dc 100644
+--- a/xbmc/interfaces/python/typemaps/python.string.outtm
++++ b/xbmc/interfaces/python/typemaps/python.string.outtm
+@@ -8,4 +8,4 @@
+  */
+ %>${result} = <%
+   if(method.@feature_python_coerceToUnicode) { %>PyUnicode_DecodeUTF8(${api}.c_str(),${api}.size(),"replace");<% }
+-  else { %>PyString_FromStringAndSize(${api}.c_str(), ${api}.length());<% } %>
+\ No newline at end of file
++  else { %>PyUnicode_FromStringAndSize(${api}.c_str(), ${api}.length());<% } %>
+diff --git a/xbmc/interfaces/python/typemaps/python.vector.intm b/xbmc/interfaces/python/typemaps/python.vector.intm
+index c4b385e8cb5b..a479d748b160 100644
+--- a/xbmc/interfaces/python/typemaps/python.vector.intm
++++ b/xbmc/interfaces/python/typemaps/python.vector.intm
+@@ -20,7 +20,7 @@
+ 
+       <%  if (ispointer) print("${api} = new std::vector<${swigTypeParser.SwigType_str(vectype)}>();") %>
+       PyObject *pyentry${seq} = NULL;
+-      auto vecSize = (isTuple ? PyTuple_Size(${slarg}) : PyList_Size(${slarg}));
++      Py_ssize_t vecSize = (isTuple ? PyTuple_Size(${slarg}) : PyList_Size(${slarg}));
+       for(Py_ssize_t i = 0; i < vecSize; i++)
+       {
+         pyentry${seq} = (isTuple ? PyTuple_GetItem(${slarg}, i) : PyList_GetItem(${slarg}, i));
+diff --git a/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp b/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp
+index 573deae98686..3badf118522b 100644
+--- a/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp
++++ b/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp
+@@ -10,6 +10,8 @@
+ 
+ #include <utility>
+ 
++#include <Python.h>
++
+ #include "addons/Webinterface.h"
+ #include "interfaces/legacy/wsgi/WsgiErrorStream.h"
+ #include "interfaces/legacy/wsgi/WsgiInputStream.h"
+@@ -40,14 +42,14 @@
+ 
+ #define RUNSCRIPT_SETUPTOOLS_HACK \
+   "" \
+-  "import imp,sys\n" \
++  "import types,sys\n" \
+   "pkg_resources_code = \\\n" \
+   "\"\"\"\n" \
+   "def resource_filename(__name__,__path__):\n" \
+   "  return __path__\n" \
+   "\"\"\"\n" \
+-  "pkg_resources = imp.new_module('pkg_resources')\n" \
+-  "exec pkg_resources_code in pkg_resources.__dict__\n" \
++  "pkg_resources = types.ModuleType('pkg_resources')\n" \
++  "exec(pkg_resources_code, pkg_resources.__dict__)\n" \
+   "sys.modules['pkg_resources'] = pkg_resources\n" \
+   ""
+ 
+@@ -64,9 +66,9 @@
+ #endif
+ 
+ namespace PythonBindings {
+-  void initModule_xbmc(void);
+-  void initModule_xbmcaddon(void);
+-  void initModule_xbmcwsgi(void);
++PyObject* PyInit_Module_xbmc(void);
++PyObject* PyInit_Module_xbmcaddon(void);
++PyObject* PyInit_Module_xbmcwsgi(void);
+ }
+ 
+ using namespace PythonBindings;
+@@ -79,15 +81,19 @@ typedef struct
+ 
+ static PythonModule PythonModules[] =
+ {
+-  { "xbmc",           initModule_xbmc },
+-  { "xbmcaddon",      initModule_xbmcaddon  },
+-  { "xbmcwsgi",       initModule_xbmcwsgi }
++  { "xbmc",           PyInit_Module_xbmc },
++  { "xbmcaddon",      PyInit_Module_xbmcaddon },
++  { "xbmcwsgi",       PyInit_Module_xbmcwsgi }
+ };
+ 
+ CHTTPPythonWsgiInvoker::CHTTPPythonWsgiInvoker(ILanguageInvocationHandler* invocationHandler, HTTPPythonRequest* request)
+   : CHTTPPythonInvoker(invocationHandler, request),
+     m_wsgiResponse(NULL)
+-{ }
++{
++  PyImport_AppendInittab("xbmc", PyInit_Module_xbmc);
++  PyImport_AppendInittab("xbmcaddon", PyInit_Module_xbmcaddon);
++  PyImport_AppendInittab("xbmcwsgi", PyInit_Module_xbmcwsgi);
++}
+ 
+ CHTTPPythonWsgiInvoker::~CHTTPPythonWsgiInvoker()
+ {
+@@ -134,7 +140,7 @@ void CHTTPPythonWsgiInvoker::executeScript(FILE* fp, const std::string& script,
+   // get the script
+   std::string scriptName = URIUtils::GetFileName(script);
+   URIUtils::RemoveExtension(scriptName);
+-  pyScript = PyString_FromStringAndSize(scriptName.c_str(), scriptName.size());
++  pyScript = PyUnicode_FromStringAndSize(scriptName.c_str(), scriptName.size());
+   if (pyScript == NULL)
+   {
+     CLog::Log(LOGERROR, "CHTTPPythonWsgiInvoker: failed to convert script \"%s\" to python string", script.c_str());
+@@ -187,7 +189,7 @@
+     pyEnviron = PyDict_New();
+     for (std::map<std::string, std::string>::const_iterator cgiEnv = cgiEnvironment.begin(); cgiEnv != cgiEnvironment.end(); ++cgiEnv)
+     {
+-      PyObject* pyEnvEntry = PyString_FromStringAndSize(cgiEnv->second.c_str(), cgiEnv->second.size());
++      PyObject* pyEnvEntry = PyUnicode_FromStringAndSize(cgiEnv->second.c_str(), cgiEnv->second.size());
+       PyDict_SetItemString(pyEnviron, cgiEnv->first.c_str(), pyEnvEntry);
+       Py_DECREF(pyEnvEntry);
+     }
+@@ -271,8 +273,7 @@
+     // Call optional close method on iterator
+     if (PyObject_HasAttrString(pyResultIterator, "close") == 1)
+     {
+-      //! @bug libpython < 3.4 isn't const correct
+-      if (PyObject_CallMethod(pyResultIterator, const_cast<char*>("close"), NULL) == NULL)
++      if (PyObject_CallMethod(pyResultIterator, "close", NULL) == NULL)
+         CLog::Log(LOGERROR, "CHTTPPythonWsgiInvoker: failed to close iterator object for WSGI script \"%s\"", script.c_str());
+     }
+     Py_DECREF(pyResultIterator);
+@@ -398,7 +399,7 @@
+   }
+   {
+     // wsgi.url_scheme
+-    PyObject* pyValue = PyString_FromStringAndSize("http", 4);
++    PyObject* pyValue = PyUnicode_FromStringAndSize("http", 4);
+     PyDict_SetItemString(pyEnviron, "wsgi.url_scheme", pyValue);
+     Py_DECREF(pyValue);
+   }

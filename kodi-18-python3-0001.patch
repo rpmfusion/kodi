@@ -1,0 +1,54 @@
+From 7a03b40282942e6a4ae3467a7520f903f268c5ac Mon Sep 17 00:00:00 2001
+From: Arpit Nandwani <arpit.nandwani@gmail.com>
+Date: Wed, 19 Jul 2017 19:57:16 +0530
+Subject: [PATCH] Converted Virtual to Pure Virtual Functions
+
+---
+ xbmc/interfaces/python/PythonInvoker.cpp | 11 -----------
+ xbmc/interfaces/python/PythonInvoker.h   |  4 ++--
+ 2 files changed, 2 insertions(+), 13 deletions(-)
+
+diff --git a/xbmc/interfaces/python/PythonInvoker.cpp b/xbmc/interfaces/python/PythonInvoker.cpp
+index 538ad7100c28..273f2f3d73e2 100644
+--- a/xbmc/interfaces/python/PythonInvoker.cpp
++++ b/xbmc/interfaces/python/PythonInvoker.cpp
+@@ -535,12 +535,6 @@ void CPythonInvoker::onExecutionFailed()
+   ILanguageInvoker::onExecutionFailed();
+ }
+ 
+-std::map<std::string, CPythonInvoker::PythonModuleInitialization> CPythonInvoker::getModules() const
+-{
+-  static std::map<std::string, PythonModuleInitialization> modules;
+-  return modules;
+-}
+-
+ void CPythonInvoker::onInitialization()
+ {
+   XBMC_TRACE;
+@@ -642,11 +642,6 @@
+   }
+ }
+ 
+-const char* CPythonInvoker::getInitializationScript() const
+-{
+-  return NULL;
+-}
+-
+ void CPythonInvoker::initializeModules(const std::map<std::string, PythonModuleInitialization> &modules)
+ {
+   for (std::map<std::string, PythonModuleInitialization>::const_iterator module = modules.begin(); module != modules.end(); ++module)
+diff --git a/xbmc/interfaces/python/PythonInvoker.h b/xbmc/interfaces/python/PythonInvoker.h
+index b75cfc67e061..85072384e391 100644
+--- a/xbmc/interfaces/python/PythonInvoker.h
++++ b/xbmc/interfaces/python/PythonInvoker.h
+@@ -36,8 +36,8 @@ class CPythonInvoker : public ILanguageInvoker
+   void onExecutionFailed() override;
+ 
+   // custom virtual methods
+-  virtual std::map<std::string, PythonModuleInitialization> getModules() const;
+-  virtual const char* getInitializationScript() const;
++  virtual std::map<std::string, PythonModuleInitialization> getModules() const = 0;
++  virtual const char* getInitializationScript() const = 0;
+   virtual void onInitialization();
+   // actually a PyObject* but don't wanna draw Python.h include into the header
+   virtual void onPythonModuleInitialization(void* moduleDict);

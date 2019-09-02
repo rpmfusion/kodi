@@ -33,8 +33,8 @@
 %endif
 
 Name: kodi
-Version: 18.3
-Release: 2%{?dist}
+Version: 18.4
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -61,8 +61,8 @@ Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-4.0.3-Leia-18.2.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.3-Leia-18.2.tar.gz
-Source5: ffmpeg-4.0.3-Leia-18.2.tar.gz
+# wget -O ffmpeg-4.0.4-Leia-18.4.tar.gz https://github.com/xbmc/FFmpeg/archive/4.0.4-Leia-18.4.tar.gz
+Source5: ffmpeg-4.0.4-Leia-18.4.tar.gz
 %endif
 
 # Set program version parameters
@@ -73,6 +73,12 @@ Patch2: kodi-18-trousers.patch
 
 # Fix an annobin issue
 Patch3: kodi-18-annobin-workaround.patch
+
+# Python 3 support
+# https://github.com/xbmc/xbmc/commits/feature_python3
+# https://github.com/xbmc/xbmc/issues/16560
+Patch4: kodi-18-python3-0001.patch
+Patch5: kodi-18-python3-0002.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -199,8 +205,13 @@ BuildRequires: ninja-build
 BuildRequires: pcre-devel
 BuildRequires: pixman-devel
 BuildRequires: pulseaudio-libs-devel
+%if 0%{?fedora} > 31
+BuildRequires: python3-devel
+BuildRequires: python3-pillow
+%else
 BuildRequires: python2-devel
 BuildRequires: python2-pillow
+%endif
 BuildRequires: /usr/bin/pathfix.py
 BuildRequires: rapidjson-devel
 BuildRequires: sqlite-devel
@@ -263,7 +274,11 @@ Requires: xorg-x11-utils
 
 # This is just symlinked to, but needed both at build-time
 # and for installation
+%if 0%{?fedora} > 31
+Requires: python3-pillow%{?_isa}
+%else
 Requires: python2-pillow%{?_isa}
+%endif
 
 %description common
 Common Kodi files and binaries
@@ -347,8 +362,17 @@ This package contains the Kodi binary for X11 servers.
 %patch3 -p1 -b.innobinfix
 %endif
 
+%if 0%{?fedora} > 31
+%patch4 -p1 -b.python3-0001
+%patch5 -p1 -b.python3-0002
+%endif
+
 # Fix up Python shebangs
+%if 0%{?fedora} > 31
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
+%else
 pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
+%endif
   tools/EventClients/lib/python/zeroconf.py \
   tools/EventClients/Clients/PS3BDRemote/ps3_remote.py \
   tools/EventClients/lib/python/ps3/sixaxis.py \
@@ -380,7 +404,11 @@ do
   -DLIRC_DEVICE=/var/run/lirc/lircd \
   -DLIBDVDNAV_URL=%{SOURCE2} \
   -DLIBDVDREAD_URL=%{SOURCE3} \
+%if 0%{?fedora} > 31
+  -DPYTHON_EXECUTABLE=%{__python3} \
+%else
   -DPYTHON_EXECUTABLE=%{__python2} \
+%endif
   -DCORE_PLATFORM_NAME=$BACKEND \
 %ifarch x86_64 i686
   -DWAYLAND_RENDER_SYSTEM=gl \
@@ -416,7 +444,11 @@ rm -f $RPM_BUILD_ROOT/%{_datadir}/xsessions/xbmc.desktop
 # Normally we are expected to build these manually. But since we are using
 # the system Python interpreter, we also want to use the system libraries
 install -d $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib
+%if 0%{?fedora} > 31
+ln -s %{python3_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib/PIL
+%else
 ln -s %{python2_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib/PIL
+%endif
 #install -d $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib
 #ln -s %{python2_sitearch}/pysqlite2 $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib/pysqlite2
 
@@ -464,7 +496,11 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 %files eventclients
 %license LICENSE.md LICENSES/
+%if 0%{?fedora} > 31
+%{python3_sitelib}/kodi
+%else
 %{python2_sitelib}/kodi
+%endif
 %dir %{_datadir}/pixmaps/kodi
 %{_datadir}/pixmaps/kodi/*.png
 %{_bindir}/kodi-ps3remote
@@ -504,6 +540,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Mon Sep 02 2019 Michael Cronenworth <mike@cchtml.com> - 18.4-1
+- Kodi 18.4 final
+
 * Wed Aug 07 2019 Leigh Scott <leigh123linux@gmail.com> - 18.3-2
 - Rebuild for new ffmpeg version
 
