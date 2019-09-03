@@ -87,10 +87,9 @@ Patch5: kodi-18-python3-0002.patch
 # Upstream does not support ppc64
 ExcludeArch: %{power64}
 
-BuildRequires: SDL2-devel
-BuildRequires: SDL_image-devel
 BuildRequires: a52dec-devel
 BuildRequires: afpfs-ng-devel
+BuildRequires: alsa-lib-devel
 BuildRequires: avahi-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: boost-devel
@@ -138,6 +137,7 @@ BuildRequires: lame-devel
 BuildRequires: lcms2-devel
 BuildRequires: libXinerama-devel
 BuildRequires: libXmu-devel
+BuildRequires: libXrandr-devel
 BuildRequires: libXtst-devel
 BuildRequires: libass-devel >= 0.9.7
 %if 0%{?_with_libbluray}
@@ -380,6 +380,11 @@ pathfix.py -pni "%{__python2} %{py2_shbang_opts}" \
   tools/EventClients/lib/python/ps3/sixwatch.py \
   tools/EventClients/Clients/KodiSend/kodi-send.py \
   tools/EventClients/lib/python/xbmcclient.py
+
+%if 0%{?fedora} < 32
+# Fix python binary search
+sed -i 's/  pkg_check_modules(PC_PYTHON python>=2.7 QUIET)/  pkg_check_modules(PC_PYTHON python=2.7 QUIET)/' cmake/modules/FindPython.cmake
+%endif
 
 
 %build
