@@ -34,7 +34,7 @@
 
 Name: kodi
 Version: 18.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -545,6 +545,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Wed Sep 11 2019 Leigh Scott <leigh123linux@googlemail.com> - 18.4-2
+- Rebuild for new libnfs version
+
 * Mon Sep 02 2019 Michael Cronenworth <mike@cchtml.com> - 18.4-1
 - Kodi 18.4 final
 
