@@ -33,8 +33,8 @@
 %endif
 
 Name: kodi
-Version: 18.4
-Release: 2%{?dist}
+Version: 18.5
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -79,6 +79,9 @@ Patch3: kodi-18-annobin-workaround.patch
 # https://github.com/xbmc/xbmc/issues/16560
 Patch4: kodi-18-python3-0001.patch
 Patch5: kodi-18-python3-0002.patch
+
+# Fix missing include (gcc requirement)
+Patch6: kodi-18-assert.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -157,6 +160,7 @@ BuildRequires: libcrystalhd-devel
 %endif
 BuildRequires: libcurl-devel
 BuildRequires: libdca-devel
+BuildRequires: libdrm-devel
 BuildRequires: libidn2-devel
 BuildRequires: libinput-devel
 %if 0%{?el6}
@@ -367,6 +371,8 @@ This package contains the Kodi binary for X11 servers.
 %patch5 -p1 -b.python3-0002
 %endif
 
+%patch6 -p1 -b.assert
+
 # Fix up Python shebangs
 %if 0%{?fedora} > 31
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -545,6 +551,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sun Dec 22 2019 Michael Cronenworth <mike@cchtml.com> - 18.5-1
+- Kodi 18.5 final
+
 * Wed Sep 11 2019 Leigh Scott <leigh123linux@googlemail.com> - 18.4-2
 - Rebuild for new libnfs version
 
