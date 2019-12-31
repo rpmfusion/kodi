@@ -83,6 +83,9 @@ Patch5: kodi-18-python3-0002.patch
 # Fix missing include (gcc requirement)
 Patch6: kodi-18-assert.patch
 
+# Workaround for brp-mangle-shebangs behavior (RHBZ#1787088)
+Patch7: kodi-18-brp-mangle-shebangs.patch
+
 %ifarch x86_64 i686
 %global _with_crystalhd 1
 %endif
@@ -372,6 +375,7 @@ This package contains the Kodi binary for X11 servers.
 %endif
 
 %patch6 -p1 -b.assert
+%patch7 -p1 -b.brp-mangle-shebangs
 
 # Fix up Python shebangs
 %if 0%{?fedora} > 31
