@@ -34,7 +34,7 @@
 
 Name: kodi
 Version: 18.5
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -556,6 +556,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sat Feb 22 2020 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 18.5-3
+- Rebuild for ffmpeg-4.3 git
+
 * Tue Feb 04 2020 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 18.5-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
