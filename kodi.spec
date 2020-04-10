@@ -34,7 +34,7 @@
 
 Name: kodi
 Version: 18.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -556,6 +556,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Fri Apr 10 2020 Leigh Scott <leigh123linux@gmail.com> - 18.6-2
+- Rebuild for new libcdio version
+
 * Wed Mar 04 2020 Michael Cronenworth <mike@cchtml.com> - 18.6-1
 - Kodi 18.6 final
 
