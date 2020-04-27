@@ -34,7 +34,7 @@
 
 Name: kodi
 Version: 18.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -79,12 +79,20 @@ Patch3: kodi-18-annobin-workaround.patch
 # https://github.com/xbmc/xbmc/issues/16560
 Patch4: kodi-18-python3-0001.patch
 Patch5: kodi-18-python3-0002.patch
+# apply latest git master work for Python 3 crashing fixes
+Patch6: kodi-18-python3-0003.patch
 
 # Fix missing include (gcc requirement)
-Patch6: kodi-18-assert.patch
+Patch7: kodi-18-assert.patch
 
 # Workaround for brp-mangle-shebangs behavior (RHBZ#1787088)
-Patch7: kodi-18-brp-mangle-shebangs.patch
+Patch8: kodi-18-brp-mangle-shebangs.patch
+
+# libfmt change fixed an issue that broke Kodi, both libfmt and Kodi fixed it, but we can apply the Kodi-only fix
+# https://github.com/fmtlib/fmt/issues/1620
+# https://github.com/xbmc/xbmc/issues/17629
+# https://github.com/xbmc/xbmc/pull/17683
+Patch9: kodi-18-libfmt.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -372,10 +380,12 @@ This package contains the Kodi binary for X11 servers.
 %if 0%{?fedora} > 31
 %patch4 -p1 -b.python3-0001
 %patch5 -p1 -b.python3-0002
+%patch6 -p1 -b.python3-0003
 %endif
 
-%patch6 -p1 -b.assert
-%patch7 -p1 -b.brp-mangle-shebangs
+%patch7 -p1 -b.assert
+%patch8 -p1 -b.brp-mangle-shebangs
+%patch9 -p1 -b.libfmt
 
 # Fix up Python shebangs
 %if 0%{?fedora} > 31
@@ -556,6 +566,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sun Apr 26 2020 Michael Cronenworth <mike@cchtml.com> - 18.6-3
+- Python 3 and libfmt fixes
+
 * Fri Apr 10 2020 Leigh Scott <leigh123linux@gmail.com> - 18.6-2
 - Rebuild for new libcdio version
 
