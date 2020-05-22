@@ -33,8 +33,8 @@
 %endif
 
 Name: kodi
-Version: 18.6
-Release: 4%{?dist}
+Version: 18.7
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -529,6 +529,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Thu May 21 2020 Michael Cronenworth <mike@cchtml.com> - 18.7-1
+- Kodi 18.7 final
+
 * Mon May 18 2020 Michael Cronenworth <mike@cchtml.com> - 18.6-4
 - Link against python27
 
