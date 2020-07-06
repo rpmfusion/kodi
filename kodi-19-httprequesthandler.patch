@@ -1,0 +1,20 @@
+--- a/xbmc/network/httprequesthandler/HTTPRequestHandlerUtils.cpp	2020-07-05 15:50:53.000000000 -0500
++++ b/xbmc/network/httprequesthandler/HTTPRequestHandlerUtils.cpp	2020-07-06 18:19:35.362146987 -0500
+@@ -41,7 +41,7 @@ int HTTPRequestHandlerUtils::GetRequestH
+   if (connection == nullptr)
+     return -1;
+ 
+-  return MHD_get_connection_values(connection, kind, FillArgumentMap, &headerValues);
++  return MHD_get_connection_values(connection, kind, (MHD_KeyValueIterator)FillArgumentMap, &headerValues);
+ }
+ 
+ int HTTPRequestHandlerUtils::GetRequestHeaderValues(struct MHD_Connection *connection, enum MHD_ValueKind kind, std::multimap<std::string, std::string> &headerValues)
+@@ -49,7 +49,7 @@ int HTTPRequestHandlerUtils::GetRequestH
+   if (connection == nullptr)
+     return -1;
+ 
+-  return MHD_get_connection_values(connection, kind, FillArgumentMultiMap, &headerValues);
++  return MHD_get_connection_values(connection, kind, (MHD_KeyValueIterator)FillArgumentMultiMap, &headerValues);
+ }
+ 
+ bool HTTPRequestHandlerUtils::GetRequestedRanges(struct MHD_Connection *connection, uint64_t totalLength, CHttpRanges &ranges)

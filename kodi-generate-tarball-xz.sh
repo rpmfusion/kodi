@@ -1,15 +1,15 @@
 #!/bin/sh
 
-MAJORVERSION=18
-MINORVERSION=6
-#GITCOMMIT=e988513175fccca83f8b688bb77b932f6a403b96
-#GITSHORT=ge988513
-CODENAME=Leia
+MAJORVERSION=19
+MINORVERSION=0
+GITCOMMIT=b6daed5dc4f8ab6d0b50cc8bcb80bfb9e6a3e583
+GITSHORT=b6daed5
+CODENAME=Matrix
 
 VERSION=${MAJORVERSION}.${MINORVERSION}${GITSHORT:+-${GITSHORT}}
 
-GITHUBURL=https://github.com/xbmc/xbmc/zipball/$VERSION-$CODENAME
-#GITHUBURL=https://github.com/xbmc/xbmc/zipball/$GITCOMMIT
+#GITHUBURL=https://github.com/xbmc/xbmc/zipball/$VERSION-$CODENAME
+GITHUBURL=https://github.com/xbmc/xbmc/zipball/$GITCOMMIT
 
 # download zipball
 if [[ ! -f xbmc-$VERSION.zip ]]; then

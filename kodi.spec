@@ -1,7 +1,8 @@
 #global PRERELEASE rc5
-%global DIRVERSION %{version}
-#global GITCOMMIT Gotham_r2-ge988513
+#global DIRVERSION %{version}
+%global GITCOMMIT b6daed5
 # use the line below for pre-releases
+%global DIRVERSION %{version}-%{GITCOMMIT}
 #global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 
@@ -33,8 +34,8 @@
 %endif
 
 Name: kodi
-Version: 18.6
-Release: 3%{?dist}
+Version: 19.0
+Release: 0.20200705gitb6daed5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -66,7 +67,7 @@ Source5: ffmpeg-4.0.4-Leia-18.4.tar.gz
 %endif
 
 # Set program version parameters
-Patch1: kodi-18.0-versioning.patch
+Patch1: kodi-19-versioning.patch
 
 # Prevent trousers from being linked, which breaks Samba
 Patch2: kodi-18-trousers.patch
@@ -74,25 +75,15 @@ Patch2: kodi-18-trousers.patch
 # Fix an annobin issue
 Patch3: kodi-18-annobin-workaround.patch
 
-# Python 3 support
-# https://github.com/xbmc/xbmc/commits/feature_python3
-# https://github.com/xbmc/xbmc/issues/16560
-Patch4: kodi-18-python3-0001.patch
-Patch5: kodi-18-python3-0002.patch
-# apply latest git master work for Python 3 crashing fixes
-Patch6: kodi-18-python3-0003.patch
-
-# Fix missing include (gcc requirement)
-Patch7: kodi-18-assert.patch
-
 # Workaround for brp-mangle-shebangs behavior (RHBZ#1787088)
-Patch8: kodi-18-brp-mangle-shebangs.patch
+Patch4: kodi-18-brp-mangle-shebangs.patch
 
-# libfmt change fixed an issue that broke Kodi, both libfmt and Kodi fixed it, but we can apply the Kodi-only fix
-# https://github.com/fmtlib/fmt/issues/1620
-# https://github.com/xbmc/xbmc/issues/17629
-# https://github.com/xbmc/xbmc/pull/17683
-Patch9: kodi-18-libfmt.patch
+# GCC/libmicrohttpd casting fix
+Patch5: kodi-19-webserver.patch
+Patch6: kodi-19-httprequesthandler.patch
+
+# Python 3.9 fix
+Patch7: kodi-19-python.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -145,6 +136,7 @@ BuildRequires: giflib-devel
 BuildRequires: glew-devel
 BuildRequires: glib2-devel
 BuildRequires: gperf
+BuildRequires: gtest-devel
 BuildRequires: jasper-devel
 BuildRequires: java-devel
 BuildRequires: lame-devel
@@ -229,6 +221,7 @@ BuildRequires: python2-pillow
 %endif
 BuildRequires: /usr/bin/pathfix.py
 BuildRequires: rapidjson-devel
+BuildRequires: spdlog-devel
 BuildRequires: sqlite-devel
 BuildRequires: swig
 BuildRequires: systemd-devel
@@ -372,20 +365,11 @@ This package contains the Kodi binary for X11 servers.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.trousers
-
-%if 0%{?fedora} > 29
 %patch3 -p1 -b.innobinfix
-%endif
-
-%if 0%{?fedora} > 31
-%patch4 -p1 -b.python3-0001
-%patch5 -p1 -b.python3-0002
-%patch6 -p1 -b.python3-0003
-%endif
-
-%patch7 -p1 -b.assert
-%patch8 -p1 -b.brp-mangle-shebangs
-%patch9 -p1 -b.libfmt
+%patch4 -p1 -b.brp-mangle-shebangs
+%patch5 -p1 -b.webserver
+%patch6 -p1 -b.httprequesthandler
+%patch7 -p1 -b.python
 
 # Fix up Python shebangs
 %if 0%{?fedora} > 31
@@ -437,9 +421,11 @@ do
 %endif
   -DCORE_PLATFORM_NAME=$BACKEND \
 %ifarch x86_64 i686
+  -DX11_RENDER_SYSTEM=gl \
   -DWAYLAND_RENDER_SYSTEM=gl \
   -DGBM_RENDER_SYSTEM=gl \
 %else
+  -DX11_RENDER_SYSTEM=gles \
   -DWAYLAND_RENDER_SYSTEM=gles \
   -DGBM_RENDER_SYSTEM=gles \
 %endif
@@ -566,6 +552,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Mon Jul 06 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.20200705gitb6daed5
+- Initial version 19 snapshot
+
 * Sun Apr 26 2020 Michael Cronenworth <mike@cchtml.com> - 18.6-3
 - Python 3 and libfmt fixes
 
