@@ -5,6 +5,9 @@
 %global DIRVERSION %{version}-%{GITCOMMIT}
 #global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
+%ifarch %{arm}
+%global optflags %(echo %{optflags} | sed 's/-g /-g1 /')
+%endif
 
 # We support hte following options:
 # --with,
