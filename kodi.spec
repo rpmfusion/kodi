@@ -38,7 +38,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.20200705gitb6daed5%{?dist}
+Release: 0.20200706gitb6daed5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -533,6 +533,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sun Aug 02 2020 Leigh Scott <leigh123linux@gmail.com> - 19.0-0.20200706gitb6daed5
+- Rebuild for libfmt
+
 * Mon Jul 06 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.20200705gitb6daed5
 - Initial version 19 snapshot
 
