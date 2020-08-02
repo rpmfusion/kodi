@@ -1,3 +1,5 @@
+# Use old cmake macro
+%global __cmake_in_source_build 1
 #global PRERELEASE rc5
 #global DIRVERSION %{version}
 %global GITCOMMIT b6daed5
