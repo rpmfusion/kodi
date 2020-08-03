@@ -8,6 +8,8 @@
 #global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 %ifarch %{arm}
+# Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
+%global _lto_cflags %{nil}
 %global optflags %(echo %{optflags} | sed 's/-g /-g1 /')
 %endif
 
