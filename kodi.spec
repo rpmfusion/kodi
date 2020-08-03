@@ -384,10 +384,6 @@ sed -i 's/  pkg_check_modules(PC_PYTHON python>=2.7 QUIET)/  pkg_check_modules(P
 
 
 %build
-# Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
-%ifarch %{arm}
-%define _lto_cflags %{nil}
-%endif
 mkdir {fedora-gbm,fedora-wayland,fedora-x11}
 
 for BACKEND in %{kodi_backends}
