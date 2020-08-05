@@ -145,7 +145,12 @@ BuildRequires: glib2-devel
 BuildRequires: gperf
 BuildRequires: gtest-devel
 BuildRequires: jasper-devel
+%ifarch %{arm}
+# https://bugzilla.redhat.com/show_bug.cgi?id=1862977
+BuildRequires: java-1.8.0-devel
+%else
 BuildRequires: java-devel
+%endif
 BuildRequires: lame-devel
 BuildRequires: lcms2-devel
 BuildRequires: libXinerama-devel
