@@ -33,8 +33,8 @@
 %endif
 
 Name: kodi
-Version: 18.7
-Release: 2%{?dist}
+Version: 18.8
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -529,6 +529,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sat Aug 08 2020 Michael Cronenworth <mike@cchtml.com> - 18.8-1
+- Kodi 18.8 final
+
 * Fri Jul 03 2020 Michael Cronenworth <mike@cchtml.com> - 18.7-2
 - Rebuild for ffmpeg update (RFBZ#5688)
 
