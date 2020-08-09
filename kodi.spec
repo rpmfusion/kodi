@@ -1,11 +1,11 @@
 # Use old cmake macro
 %global __cmake_in_source_build 1
-#global PRERELEASE rc5
-#global DIRVERSION %{version}
-%global GITCOMMIT b6daed5
+%global PRERELEASE a1
+%global DIRVERSION %{version}
+#global GITCOMMIT db40b2a
 # use the line below for pre-releases
-%global DIRVERSION %{version}-%{GITCOMMIT}
-#global DIRVERSION %{version}%{PRERELEASE}
+#global DIRVERSION %{version}-%{GITCOMMIT}
+%global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 %ifarch %{arm}
 # Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.20200706gitb6daed5%{?dist}
+Release: 0.20200727gitdb40b2a%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -69,8 +69,8 @@ Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-4.3-Matrix-Alpha1.tar.gz https://github.com/xbmc/FFmpeg/archive/4.3-Matrix-Alpha1.tar.gz
-Source5: ffmpeg-4.3-Matrix-Alpha1.tar.gz
+# wget -O ffmpeg-4.3.1-Matrix-Alpha1-1.tar.gz https://github.com/xbmc/FFmpeg/archive/4.3.1-Matrix-Alpha1-1.tar.gz
+Source5: ffmpeg-4.3.1-Matrix-Alpha1-1.tar.gz
 %endif
 
 # Set program version parameters
@@ -85,12 +85,8 @@ Patch3: kodi-18-annobin-workaround.patch
 # Workaround for brp-mangle-shebangs behavior (RHBZ#1787088)
 Patch4: kodi-18-brp-mangle-shebangs.patch
 
-# GCC/libmicrohttpd casting fix
-Patch5: kodi-19-webserver.patch
-Patch6: kodi-19-httprequesthandler.patch
-
 # Python 3.9 fix
-Patch7: kodi-19-python.patch
+Patch5: kodi-19-python.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -174,6 +170,7 @@ BuildRequires: libcec-devel < 4.0.0
 BuildRequires: libcrystalhd-devel
 %endif
 BuildRequires: libcurl-devel
+BuildRequires: libdav1d-devel
 BuildRequires: libdca-devel
 BuildRequires: libdrm-devel
 BuildRequires: libidn2-devel
@@ -370,9 +367,7 @@ This package contains the Kodi binary for X11 servers.
 %patch2 -p1 -b.trousers
 %patch3 -p1 -b.innobinfix
 %patch4 -p1 -b.brp-mangle-shebangs
-%patch5 -p1 -b.webserver
-%patch6 -p1 -b.httprequesthandler
-%patch7 -p1 -b.python
+%patch5 -p1 -b.python
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -418,7 +413,7 @@ do
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME=$BACKEND \
-%ifarch x86_64 i686
+%ifarch x86_64 i686 %{arm}
   -DX11_RENDER_SYSTEM=gl \
   -DWAYLAND_RENDER_SYSTEM=gl \
   -DGBM_RENDER_SYSTEM=gl \
@@ -542,6 +537,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sat Aug 08 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.20200727gitdb40b2a
+- Kodi 19.0 alpha 1
+
 * Sun Aug 02 2020 Leigh Scott <leigh123linux@gmail.com> - 19.0-0.20200706gitb6daed5
 - Rebuild for libfmt
 
