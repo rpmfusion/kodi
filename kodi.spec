@@ -408,15 +408,9 @@ do
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME=$BACKEND \
-%ifarch x86_64 i686 %{arm}
   -DX11_RENDER_SYSTEM=gl \
   -DWAYLAND_RENDER_SYSTEM=gl \
   -DGBM_RENDER_SYSTEM=gl \
-%else
-  -DX11_RENDER_SYSTEM=gles \
-  -DWAYLAND_RENDER_SYSTEM=gles \
-  -DGBM_RENDER_SYSTEM=gles \
-%endif
   ../
     %ninja_build
     popd
