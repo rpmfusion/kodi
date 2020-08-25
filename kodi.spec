@@ -528,6 +528,8 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 %changelog
 * Tue Aug 25 2020 Nicolas Chauvet <kwizart@gmail.com> - 19.0-0.2.20200727gitdb40b2a
 - Update release tag
+- Revert java change to workaround glibc issue
+- Use gl by default on all arches
 
 * Sat Aug 08 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.20200727gitdb40b2a
 - Kodi 19.0 alpha 1
