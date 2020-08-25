@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.20200727gitdb40b2a%{?dist}
+Release: 0.2.20200727gitdb40b2a%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -537,6 +537,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Tue Aug 25 2020 Nicolas Chauvet <kwizart@gmail.com> - 19.0-0.2.20200727gitdb40b2a
+- Update release tag
+
 * Sat Aug 08 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.20200727gitdb40b2a
 - Kodi 19.0 alpha 1
 
