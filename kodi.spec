@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.2.20200727gitdb40b2a%{?dist}
+Release: 0.3.20200727gitdb40b2a%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -526,6 +526,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sun Sep 13 2020 Nicolas Chauvet <kwizart@gmail.com> - 19.0-0.3.20200727gitdb40b2a
+- rebuilt
+
 * Tue Aug 25 2020 Nicolas Chauvet <kwizart@gmail.com> - 19.0-0.2.20200727gitdb40b2a
 - Update release tag
 - Revert java change to workaround glibc issue
