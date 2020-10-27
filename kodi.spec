@@ -1,6 +1,6 @@
 # Use old cmake macro
 %global __cmake_in_source_build 1
-%global PRERELEASE a1
+%global PRERELEASE a2
 %global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.3.20200727gitdb40b2a%{?dist}
+Release: 0.4.20201005git54be31b%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -84,9 +84,6 @@ Patch3: kodi-18-annobin-workaround.patch
 
 # Workaround for brp-mangle-shebangs behavior (RHBZ#1787088)
 Patch4: kodi-18-brp-mangle-shebangs.patch
-
-# Python 3.9 fix
-Patch5: kodi-19-python.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -362,7 +359,6 @@ This package contains the Kodi binary for X11 servers.
 %patch2 -p1 -b.trousers
 %patch3 -p1 -b.innobinfix
 %patch4 -p1 -b.brp-mangle-shebangs
-%patch5 -p1 -b.python
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -526,6 +522,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Tue Oct 27 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.4.20201005git54be31b
+- Kodi 19.0 alpha 2
+
 * Sun Sep 13 2020 Nicolas Chauvet <kwizart@gmail.com> - 19.0-0.3.20200727gitdb40b2a
 - rebuilt
 

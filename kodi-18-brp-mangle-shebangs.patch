@@ -1,11 +1,11 @@
 --- kodi-18.5/cmake/scripts/linux/Install.cmake-orig	2019-11-16 12:12:49.000000000 +0100
 +++ kodi-18.5/cmake/scripts/linux/Install.cmake	2019-12-31 20:30:14.262789039 +0100
-@@ -200,7 +200,7 @@ if(ENABLE_EVENTCLIENTS)
+@@ -199,7 +199,7 @@
            COMPONENT kodi-eventclients-common)
  
    # Install kodi-eventclients-common python files
--  file(WRITE ${CMAKE_BINARY_DIR}/packages/deb/defs.py ICON_PATH="usr/share/pixmaps/${APP_NAME_LC}/")
-+  file(WRITE ${CMAKE_BINARY_DIR}/packages/deb/defs.py ICON_PATH="usr/share/pixmaps/${APP_NAME_LC}/"\n)
+-  file(WRITE ${CMAKE_BINARY_DIR}/packages/deb/defs.py ICON_PATH="/usr/share/pixmaps/${APP_NAME_LC}/")
++  file(WRITE ${CMAKE_BINARY_DIR}/packages/deb/defs.py ICON_PATH="/usr/share/pixmaps/${APP_NAME_LC}/"\n)
    install(PROGRAMS ${CMAKE_BINARY_DIR}/packages/deb/defs.py
                     ${CMAKE_SOURCE_DIR}/tools/EventClients/lib/python/__init__.py
                     ${CMAKE_SOURCE_DIR}/tools/EventClients/Clients/PS3BDRemote/ps3_remote.py
