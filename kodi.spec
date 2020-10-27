@@ -33,7 +33,7 @@
 %endif
 
 Name: kodi
-Version: 18.8
+Version: 18.9
 Release: 1%{?dist}
 Summary: Media center
 
@@ -529,6 +529,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Tue Oct 27 2020 Michael Cronenworth <mike@cchtml.com> - 18.9-1
+- Kodi 18.9 final
+
 * Sat Aug 08 2020 Michael Cronenworth <mike@cchtml.com> - 18.8-1
 - Kodi 18.8 final
 
