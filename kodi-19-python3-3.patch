@@ -1,0 +1,82 @@
+From c8b8eea771f03b0a4093ede5122621ac189928b1 Mon Sep 17 00:00:00 2001
+From: fuzzard <fuzzard@kodi.tv>
+Date: Sun, 20 Sep 2020 08:06:53 +1000
+Subject: [PATCH] remove further unused methods
+
+---
+ xbmc/interfaces/python/XBPython.cpp | 43 -----------------------------
+ xbmc/interfaces/python/XBPython.h   |  6 ----
+ 2 files changed, 49 deletions(-)
+
+diff --git a/xbmc/interfaces/python/XBPython.cpp b/xbmc/interfaces/python/XBPython.cpp
+index d5e8ff3fac2c..8ece5aacd4d2 100644
+--- a/xbmc/interfaces/python/XBPython.cpp
++++ b/xbmc/interfaces/python/XBPython.cpp
+@@ -417,49 +417,6 @@ void XBPython::OnNotification(const std::string& sender,
+   }
+ }
+ 
+-void XBPython::RegisterExtensionLib(LibraryLoader* pLib)
+-{
+-  if (!pLib)
+-    return;
+-
+-  CSingleLock lock(m_critSection);
+-
+-  CLog::Log(LOGDEBUG, "%s, adding %s (%p)", __FUNCTION__, pLib->GetName(), (void*)pLib);
+-  m_extensions.push_back(pLib);
+-}
+-
+-void XBPython::UnregisterExtensionLib(LibraryLoader* pLib)
+-{
+-  if (!pLib)
+-    return;
+-
+-  CSingleLock lock(m_critSection);
+-  CLog::Log(LOGDEBUG, "%s, removing %s (0x%p)", __FUNCTION__, pLib->GetName(), (void*)pLib);
+-  PythonExtensionLibraries::iterator iter = m_extensions.begin();
+-  while (iter != m_extensions.end())
+-  {
+-    if (*iter == pLib)
+-    {
+-      m_extensions.erase(iter);
+-      break;
+-    }
+-    ++iter;
+-  }
+-}
+-
+-void XBPython::UnloadExtensionLibs()
+-{
+-  CLog::Log(LOGDEBUG, "%s, clearing python extension libraries", __FUNCTION__);
+-  CSingleLock lock(m_critSection);
+-  PythonExtensionLibraries::iterator iter = m_extensions.begin();
+-  while (iter != m_extensions.end())
+-  {
+-    DllLoaderContainer::ReleaseModule(*iter);
+-    ++iter;
+-  }
+-  m_extensions.clear();
+-}
+-
+ void XBPython::Uninitialize()
+ {
+   // don't handle any more announcements as most scripts are probably already
+diff --git a/xbmc/interfaces/python/XBPython.h b/xbmc/interfaces/python/XBPython.h
+index 0037f67d3015..40077cd58715 100644
+--- a/xbmc/interfaces/python/XBPython.h
++++ b/xbmc/interfaces/python/XBPython.h
+@@ -102,13 +102,7 @@ class XBPython : public IPlayerCallback,
+ 
+   bool WaitForEvent(CEvent& hEvent, unsigned int milliseconds);
+ 
+-  void RegisterExtensionLib(LibraryLoader* pLib);
+-  void UnregisterExtensionLib(LibraryLoader* pLib);
+-  void UnloadExtensionLibs();
+-
+ private:
+-  void Finalize();
+-
+   CCriticalSection m_critSection;
+   void* m_mainThreadState;
+   bool m_bInitialized;

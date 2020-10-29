@@ -1,0 +1,66 @@
+From 78b8815313e55ee303ce02ff0958ba14a9585370 Mon Sep 17 00:00:00 2001
+From: fuzzard <fuzzard@kodi.tv>
+Date: Tue, 6 Oct 2020 18:26:02 +1000
+Subject: [PATCH] [PythonInvoker] Re-add support for Python 3.5-3.6
+
+---
+ xbmc/interfaces/python/PythonInvoker.cpp | 11 +++++++++++
+ xbmc/interfaces/python/XBPython.cpp      |  5 ++++-
+ 2 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/xbmc/interfaces/python/PythonInvoker.cpp b/xbmc/interfaces/python/PythonInvoker.cpp
+index 6b2697d5135c..07a66794ad08 100644
+--- a/xbmc/interfaces/python/PythonInvoker.cpp
++++ b/xbmc/interfaces/python/PythonInvoker.cpp
+@@ -182,8 +182,15 @@ bool CPythonInvoker::execute(const std::string& script, const std::vector<std::w
+   {
+     if (!m_threadState)
+     {
++#if PY_VERSION_HEX < 0x03070000
++      // this is a TOTAL hack. We need the GIL but we need to borrow a PyThreadState in order to get it
++      // as of Python 3.2 since PyEval_AcquireLock is deprecated
++      extern PyThreadState* savestate;
++      PyEval_RestoreThread(savestate);
++#else
+       PyThreadState* ts = PyThreadState_New(PyInterpreterState_Main());
+       PyEval_RestoreThread(ts);
++#endif
+       l_threadState = Py_NewInterpreter();
+       PyEval_ReleaseThread(l_threadState);
+       if (l_threadState == NULL)
+@@ -605,8 +612,12 @@ void CPythonInvoker::onExecutionDone()
+     // unregister the language hook
+     m_languageHook->UnregisterMe();
+ 
++#if PY_VERSION_HEX < 0x03070000
++    PyEval_ReleaseLock();
++#else
+     PyThreadState_Swap(PyInterpreterState_ThreadHead(PyInterpreterState_Main()));
+     PyEval_SaveThread();
++#endif
+ 
+     // set stopped event - this allows ::stop to run and kill remaining threads
+     // this event has to be fired without holding m_critical
+diff --git a/xbmc/interfaces/python/XBPython.cpp b/xbmc/interfaces/python/XBPython.cpp
+index 8ece5aacd4d2..3cef76ed24aa 100644
+--- a/xbmc/interfaces/python/XBPython.cpp
++++ b/xbmc/interfaces/python/XBPython.cpp
+@@ -36,6 +36,9 @@
+ 
+ #include <algorithm>
+ 
++// Only required for Py3 < 3.7
++PyThreadState* savestate;
++
+ XBPython::XBPython()
+ {
+   m_bInitialized = false;
+@@ -528,7 +531,7 @@ bool XBPython::OnScriptInitialized(ILanguageInvoker* invoker)
+ 
+     if (!(m_mainThreadState = PyThreadState_Get()))
+       CLog::Log(LOGERROR, "Python threadstate is NULL.");
+-    PyEval_SaveThread();
++    savestate = PyEval_SaveThread();
+ 
+     m_bInitialized = true;
+   }

@@ -1,0 +1,216 @@
+From 245a1914955409b3ab5361872caf0a96cbc28fc9 Mon Sep 17 00:00:00 2001
+From: fuzzard <fuzzard@kodi.tv>
+Date: Sun, 30 Aug 2020 15:21:38 +1000
+Subject: [PATCH] [Python] Cleanup
+
+---
+ xbmc/interfaces/python/PythonInvoker.cpp | 13 ++--
+ xbmc/interfaces/python/XBPython.cpp      | 77 +++++-------------------
+ xbmc/interfaces/python/XBPython.h        |  2 -
+ 3 files changed, 19 insertions(+), 73 deletions(-)
+
+diff --git a/xbmc/interfaces/python/PythonInvoker.cpp b/xbmc/interfaces/python/PythonInvoker.cpp
+index c559723a16f9..e00cc1ff8632 100644
+--- a/xbmc/interfaces/python/PythonInvoker.cpp
++++ b/xbmc/interfaces/python/PythonInvoker.cpp
+@@ -174,11 +174,8 @@ bool CPythonInvoker::execute(const std::string& script, const std::vector<std::w
+   {
+     if (!m_threadState)
+     {
+-      // TODO: Re-write everything.
+-      // this is a TOTAL hack. We need the GIL but we need to borrow a PyThreadState in order to get it
+-      // as of Python 3.2 since PyEval_AcquireLock is deprecated
+-      extern PyThreadState* savestate;
+-      PyEval_RestoreThread(savestate);
++      PyThreadState* ts = PyThreadState_New(PyInterpreterState_Main());
++      PyEval_RestoreThread(ts);
+       l_threadState = Py_NewInterpreter();
+       PyEval_ReleaseThread(l_threadState);
+       if (l_threadState == NULL)
+@@ -588,7 +585,8 @@ void CPythonInvoker::onExecutionDone()
+     // unregister the language hook
+     m_languageHook->UnregisterMe();
+ 
+-    PyEval_ReleaseLock();
++    PyThreadState_Swap(PyInterpreterState_ThreadHead(PyInterpreterState_Main()));
++    PyEval_SaveThread();
+ 
+     // set stopped event - this allows ::stop to run and kill remaining threads
+     // this event has to be fired without holding m_critical
+@@ -605,8 +603,7 @@ void CPythonInvoker::onExecutionDone()
+ 
+ void CPythonInvoker::onExecutionFailed()
+ {
+-  PyThreadState_Swap(NULL);
+-  PyEval_ReleaseLock();
++  PyEval_SaveThread();
+ 
+   setState(InvokerStateFailed);
+   CLog::Log(LOGERROR, "CPythonInvoker(%d, %s): abnormally terminating python thread", GetId(), m_sourceFile.c_str());
+diff --git a/xbmc/interfaces/python/XBPython.cpp b/xbmc/interfaces/python/XBPython.cpp
+index 047896ba481c..666ac17d3a47 100644
+--- a/xbmc/interfaces/python/XBPython.cpp
++++ b/xbmc/interfaces/python/XBPython.cpp
+@@ -26,7 +26,6 @@
+ #include "settings/AdvancedSettings.h"
+ #include "settings/SettingsComponent.h"
+ 
+-#include "threads/SystemClock.h"
+ #include "interfaces/AnnouncementManager.h"
+ 
+ #include "interfaces/legacy/Monitor.h"
+@@ -35,15 +34,11 @@
+ #include "interfaces/python/PythonInvoker.h"
+ #include "ServiceBroker.h"
+ 
+-PyThreadState* savestate;
+-
+ XBPython::XBPython()
+ {
+   m_bInitialized      = false;
+   m_mainThreadState   = NULL;
+   m_iDllScriptCounter = 0;
+-  m_endtime           = 0;
+-  m_pDll              = NULL;
+   m_vecPlayerCallbackList.clear();
+   m_vecMonitorCallbackList.clear();
+ 
+@@ -452,44 +447,6 @@ void XBPython::UnloadExtensionLibs()
+   m_extensions.clear();
+ }
+ 
+-// Always called with the lock held on m_critSection
+-void XBPython::Finalize()
+-{
+-  XBMC_TRACE;
+-  if (m_bInitialized)
+-  {
+-    CLog::Log(LOGINFO, "Python, unloading python shared library because no scripts are running anymore");
+-
+-    // set the m_bInitialized flag before releasing the lock. This will prevent
+-    // Other methods that rely on this flag from an incorrect interpretation.
+-    m_bInitialized    = false;
+-    PyThreadState* curTs = (PyThreadState*)m_mainThreadState;
+-    m_mainThreadState = NULL; // clear the main thread state before releasing the lock
+-    {
+-      CSingleExit exit(m_critSection);
+-      PyEval_AcquireThread(curTs);
+-
+-      Py_Finalize();
+-      PyEval_ReleaseLock();
+-    }
+-
+-#if !(defined(TARGET_DARWIN) || defined(TARGET_WINDOWS))
+-    UnloadExtensionLibs();
+-#endif
+-
+-    // first free all dlls loaded by python, after that unload python (this is done by UnloadPythonDlls
+-#if !(defined(TARGET_DARWIN) || defined(TARGET_WINDOWS))
+-    DllLoaderContainer::UnloadPythonDlls();
+-#endif
+-#if defined(TARGET_POSIX) && !defined(TARGET_DARWIN) && !defined(TARGET_FREEBSD)
+-    // we can't release it on windows, as this is done in UnloadPythonDlls() for win32 (see above).
+-    // The implementation for linux needs looking at - UnloadPythonDlls() currently only searches for "python36.dll"
+-    // The implementation for osx can never unload the python dylib.
+-    DllLoaderContainer::ReleaseModule(m_pDll);
+-#endif
+-  }
+-}
+-
+ void XBPython::Uninitialize()
+ {
+   // don't handle any more announcements as most scripts are probably already
+@@ -504,7 +461,7 @@ void XBPython::Uninitialize()
+   lock.Leave(); //unlock here because the python thread might lock when it exits
+ 
+   // cleanup threads that are still running
+-  tmpvec.clear(); // boost releases the XBPyThreads which, if deleted, calls OnScriptFinalized
++  tmpvec.clear();
+ }
+ 
+ void XBPython::Process()
+@@ -527,13 +484,7 @@ void XBPython::Process()
+     lock.Leave();
+ 
+     //delete scripts which are done
+-    tmpvec.clear(); // boost releases the XBPyThreads which, if deleted, calls OnScriptFinalized
+-
+-    CSingleLock l2(m_critSection);
+-    if(m_iDllScriptCounter == 0 && (XbmcThreads::SystemClockMillis() - m_endtime) > 10000 )
+-    {
+-      Finalize();
+-    }
++    tmpvec.clear();
+   }
+ }
+ 
+@@ -557,10 +508,6 @@ bool XBPython::OnScriptInitialized(ILanguageInvoker *invoker)
+     // at http://docs.python.org/using/cmdline.html#environment-variables
+ 
+ #if !defined(TARGET_WINDOWS) && !defined(TARGET_ANDROID)
+-    /* PYTHONOPTIMIZE is set off intentionally when using external Python.
+-    Reason for this is because we cannot be sure what version of Python
+-    was used to compile the various Python object files (i.e. .pyo,
+-    .pyc, etc.). */
+     // check if we are running as real xbmc.app or just binary
+     if (!CUtil::GetFrameworksPath(true).empty())
+     {
+@@ -591,20 +538,25 @@ bool XBPython::OnScriptInitialized(ILanguageInvoker *invoker)
+ 
+     Py_Initialize();
+ 
+-    // If this is not the first time we initialize Python, the interpreter
+-    // lock already exists and we need to lock it as PyEval_InitThreads
+-    // would not do that in that case.
+-    if (PyEval_ThreadsInitialized() && !PyGILState_Check())
++#if PY_VERSION_HEX < 0x03070000
++    // Python >= 3.7 Py_Initialize implicitly calls PyEval_InitThreads
++    // Python < 3.7 we have to manually call initthreads. 
++    // PyEval_InitThreads is a no-op on subsequent calls, No need to wrap in
++    // PyEval_ThreadsInitialized() check
++    PyEval_InitThreads();
++#endif
++
++    // Acquire GIL if thread doesn't currently hold.
++    if (!PyGILState_Check())
+       PyEval_RestoreThread((PyThreadState*)m_mainThreadState);
+-    else
+-      PyEval_InitThreads();
++
+     const wchar_t* python_argv[1] = {L""};
+     //! @bug libpython isn't const correct
+     PySys_SetArgv(1, const_cast<wchar_t**>(python_argv));
+ 
+     if (!(m_mainThreadState = PyThreadState_Get()))
+       CLog::Log(LOGERROR, "Python threadstate is NULL.");
+-    savestate = PyEval_SaveThread();
++    PyEval_SaveThread();
+ 
+     m_bInitialized = true;
+   }
+@@ -674,7 +626,6 @@ void XBPython::OnScriptFinalized(ILanguageInvoker *invoker)
+     m_iDllScriptCounter--;
+   else
+     CLog::Log(LOGERROR, "Python script counter attempted to become negative");
+-  m_endtime = XbmcThreads::SystemClockMillis();
+ }
+ 
+ ILanguageInvoker* XBPython::CreateInvoker()
+diff --git a/xbmc/interfaces/python/XBPython.h b/xbmc/interfaces/python/XBPython.h
+index ff4d93990fd0..2126d9011502 100644
+--- a/xbmc/interfaces/python/XBPython.h
++++ b/xbmc/interfaces/python/XBPython.h
+@@ -105,13 +105,11 @@ class XBPython :
+   void*             m_mainThreadState;
+   bool              m_bInitialized;
+   int               m_iDllScriptCounter; // to keep track of the total scripts running that need the dll
+-  unsigned int      m_endtime;
+ 
+   //Vector with list of threads used for running scripts
+   PyList              m_vecPyList;
+   PlayerCallbackList  m_vecPlayerCallbackList;
+   MonitorCallbackList m_vecMonitorCallbackList;
+-  LibraryLoader*      m_pDll;
+ 
+   // any global events that scripts should be using
+   CEvent m_globalEvent;
