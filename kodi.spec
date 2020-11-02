@@ -1,6 +1,6 @@
 # Use old cmake macro
 %global __cmake_in_source_build 1
-%global PRERELEASE a2
+%global PRERELEASE a3
 %global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.5.20201005git54be31b%{?dist}
+Release: 0.6.20201031gitbb0699d%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -84,13 +84,6 @@ Patch3: kodi-18-annobin-workaround.patch
 
 # Workaround for brp-mangle-shebangs behavior (RHBZ#1787088)
 Patch4: kodi-18-brp-mangle-shebangs.patch
-
-# Python 3.9 support
-Patch5: kodi-19-python3-0.patch
-Patch6: kodi-19-python3-1.patch
-Patch7: kodi-19-python3-2.patch
-Patch8: kodi-19-python3-3.patch
-Patch9: kodi-19-python3-4.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -366,11 +359,6 @@ This package contains the Kodi binary for X11 servers.
 %patch2 -p1 -b.trousers
 %patch3 -p1 -b.innobinfix
 %patch4 -p1 -b.brp-mangle-shebangs
-%patch5 -p1 -b.python39-0
-%patch6 -p1 -b.python39-1
-%patch7 -p1 -b.python39-2
-%patch8 -p1 -b.python39-3
-%patch9 -p1 -b.python39-4
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -416,9 +404,7 @@ do
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME=$BACKEND \
-  -DX11_RENDER_SYSTEM=gl \
-  -DWAYLAND_RENDER_SYSTEM=gl \
-  -DGBM_RENDER_SYSTEM=gl \
+  -DAPP_RENDER_SYSTEM=gl \
   ../
     %ninja_build
     popd
@@ -534,6 +520,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Mon Nov 02 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.6.20201031gitbb0699d
+- Kodi 19.0 alpha 3
+
 * Thu Oct 29 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.5.20201005git54be31b
 - Python 3.9 support
 
