@@ -232,24 +232,7 @@ BuildRequires: waylandpp-devel
 BuildRequires: yajl-devel
 BuildRequires: zlib-devel
 
-# Install major backends, users can remove them individually
-Requires: %{name}-common = %{version}-%{release}
-Requires: (%{name}-wayland = %{version}-%{release} if libwayland-server)
-Requires: (%{name}-x11 = %{version}-%{release} if xorg-x11-server-Xorg)
 Requires: (%{name}-firewalld = %{version}-%{release} if firewalld)
-
-
-%description
-Kodi is a free cross-platform media-player jukebox and entertainment hub.
-Kodi can play a spectrum of of multimedia formats, and featuring playlist,
-audio visualizations, slideshow, and weather forecast functions, together
-third-party plugins.
-
-This is a meta package.
-
-
-%package common
-Summary: Common Kodi files and binaries
 Requires: dejavu-sans-fonts
 # need explicit requires for these packages
 # as they are dynamically loaded via XBMC's arcane
@@ -280,8 +263,22 @@ Requires: xorg-x11-utils
 # and for installation
 Requires: python3-pillow%{?_isa}
 
-%description common
-Common Kodi files and binaries
+# https://github.com/xbmc/xbmc/pull/18534
+Provides: kodi-common = %{version}-%{release}
+Obsoletes: kodi-common < %{version}-%{release}
+Provides: kodi-gbm = %{version}-%{release}
+Obsoletes: kodi-gbm < %{version}-%{release}
+Provides: kodi-wayland = %{version}-%{release}
+Obsoletes: kodi-wayland < %{version}-%{release}
+Provides: kodi-x11 = %{version}-%{release}
+Obsoletes: kodi-x11 < %{version}-%{release}
+
+
+%description
+Kodi is a free cross-platform media-player jukebox and entertainment hub.
+Kodi can play a spectrum of of multimedia formats, and featuring playlist,
+audio visualizations, slideshow, and weather forecast functions, together
+third-party plugins.
 
 
 %package devel
@@ -326,33 +323,6 @@ Requires(post): firewalld-filesystem
 This package contains FirewallD files for Kodi.
 
 
-%package gbm
-Summary: Kodi binary for Generic Buffer Management
-Requires: %{name}-common = %{version}-%{release}
-
-
-%description gbm
-This package contains the Kodi binary for Generic Buffer Management.
-
-
-%package wayland
-Summary: Kodi binary for Wayland compositors
-Requires: %{name}-common = %{version}-%{release}
-
-
-%description wayland
-This package contains the Kodi binary for Wayland compositors.
-
-
-%package x11
-Summary: Kodi binary for X11 servers
-Requires: %{name}-common = %{version}-%{release}
-
-
-%description x11
-This package contains the Kodi binary for X11 servers.
-
-
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
@@ -377,11 +347,6 @@ sed -i 's/  pkg_check_modules(PC_PYTHON python>=2.7 QUIET)/  pkg_check_modules(P
 
 
 %build
-mkdir {fedora-gbm,fedora-wayland,fedora-x11}
-
-for BACKEND in %{kodi_backends}
-do
-    pushd fedora-$BACKEND
 %cmake3 \
 %if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
@@ -403,21 +368,14 @@ do
   -DLIBDVDNAV_URL=%{SOURCE2} \
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
-  -DCORE_PLATFORM_NAME=$BACKEND \
+  -DCORE_PLATFORM_NAME="%{kodi_backends}" \
   -DAPP_RENDER_SYSTEM=gl \
-  ../
-    %ninja_build
-    popd
-done
+  .
+%ninja_build
 
 
 %install
-for BACKEND in %{kodi_backends}
-do
-    pushd fedora-$BACKEND
-    %ninja_install
-    popd
-done
+%ninja_install
 
 # remove the doc files from unversioned /usr/share/doc/xbmc, they should be in versioned docdir
 rm -r $RPM_BUILD_ROOT/%{_datadir}/doc/
@@ -453,18 +411,13 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %files
-
-
-%files common
 %license LICENSE.md LICENSES/
 %doc README.md docs
 %{_bindir}/kodi
 %{_bindir}/kodi-standalone
 %{_bindir}/JsonSchemaBuilder
 %{_bindir}/TexturePacker
-%dir %{_libdir}/kodi/
-%{_libdir}/kodi/addons/
-%{_libdir}/kodi/system/
+%{_libdir}/kodi/
 %{_datadir}/kodi/
 %{_datadir}/xsessions/kodi.desktop
 %{_datadir}/applications/kodi.desktop
@@ -504,19 +457,6 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 %{_prefix}/lib/firewalld/services/kodi-eventserver.xml
 %{_prefix}/lib/firewalld/services/kodi-http.xml
 %{_prefix}/lib/firewalld/services/kodi-jsonrpc.xml
-
-
-%files gbm
-%{_libdir}/kodi/kodi-gbm
-
-
-%files wayland
-%{_libdir}/kodi/kodi-wayland
-
-
-%files x11
-%{_libdir}/kodi/kodi-x11
-%{_libdir}/kodi/kodi-xrandr
 
 
 %changelog
