@@ -1,6 +1,6 @@
 # Use old cmake macro
 %global __cmake_in_source_build 1
-%global PRERELEASE a3
+%global PRERELEASE b1
 %global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.6.20201031gitbb0699d%{?dist}
+Release: 0.7.20201119gitc08d72a%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -69,8 +69,8 @@ Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-4.3.1-Matrix-Alpha1-1.tar.gz https://github.com/xbmc/FFmpeg/archive/4.3.1-Matrix-Alpha1-1.tar.gz
-Source5: ffmpeg-4.3.1-Matrix-Alpha1-1.tar.gz
+# wget -O ffmpeg-4.3.1-Matrix-Beta1.tar.gz https://github.com/xbmc/FFmpeg/archive/4.3.1-Matrix-Beta1.tar.gz
+Source5: ffmpeg-4.3.1-Matrix-Beta1.tar.gz
 %endif
 
 # Set program version parameters
@@ -460,6 +460,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Fri Nov 20 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.7.20201119gitc08d72a
+- Kodi 19.0 beta 1
+
 * Mon Nov 02 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.6.20201031gitbb0699d
 - Kodi 19.0 alpha 3
 
