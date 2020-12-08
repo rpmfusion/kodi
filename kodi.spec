@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.7.20201119gitc08d72a%{?dist}
+Release: 0.8.20201207git8cc9e80%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -460,6 +460,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Mon Dec 07 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.8.20201207git8cc9e80
+- Kodi 19.0 beta 2
+
 * Fri Nov 20 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.7.20201119gitc08d72a
 - Kodi 19.0 beta 1
 
