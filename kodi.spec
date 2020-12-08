@@ -1,6 +1,6 @@
 # Use old cmake macro
 %global __cmake_in_source_build 1
-%global PRERELEASE b1
+%global PRERELEASE b2
 %global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
