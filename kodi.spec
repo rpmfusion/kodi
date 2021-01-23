@@ -1,6 +1,6 @@
 # Use old cmake macro
 %global __cmake_in_source_build 1
-%global PRERELEASE b2
+%global PRERELEASE RC1
 %global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.8.20201207git8cc9e80%{?dist}
+Release: 0.9.20210115git90a1e12%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -425,6 +425,7 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 %{_mandir}/man1/kodi.1.gz
 %{_mandir}/man1/kodi.bin.1.gz
 %{_mandir}/man1/kodi-standalone.1.gz
+%{_mandir}/man1/TexturePacker.1.gz
 
 
 %files devel
@@ -460,6 +461,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Fri Jan 22 2021 Michael Cronenworth <mike@cchtml.com> - 19.0-0.9.20210115git90a1e12
+- Kodi 19.0 RC1
+
 * Mon Dec 07 2020 Michael Cronenworth <mike@cchtml.com> - 19.0-0.8.20201207git8cc9e80
 - Kodi 19.0 beta 2
 
