@@ -1,11 +1,11 @@
 # Use old cmake macro
 %global __cmake_in_source_build 1
-%global PRERELEASE RC1
+#global PRERELEASE RC1
 %global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
 #global DIRVERSION %{version}-%{GITCOMMIT}
-%global DIRVERSION %{version}%{PRERELEASE}
+#global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 %ifarch %{arm}
 # Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 0.10.20210115git90a1e12%{?dist}
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -461,6 +461,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sat Feb 20 2021 Michael Cronenworth <mike@cchtml.com> - 19.0-1
+- Kodi 19.0 Final
+
 * Wed Feb 03 2021 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 19.0-0.10.20210115git90a1e12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
