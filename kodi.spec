@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -257,7 +257,11 @@ Requires: shairplay-libs%{?_isa}
 # needed when doing a minimal install, see
 # https://bugzilla.rpmfusion.org/show_bug.cgi?id=1844
 Requires: glx-utils
+%if 0%{?fedora} > 33
+Requires: xdpyinfo
+%else
 Requires: xorg-x11-utils
+%endif
 
 # This is just symlinked to, but needed both at build-time
 # and for installation
@@ -461,6 +465,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Thu Apr 22 2021 Michael Cronenworth <mike@cchtml.com> - 19.0-2
+- Update dependency on xdpyinfo (rfbz#5979)
+
 * Sat Feb 20 2021 Michael Cronenworth <mike@cchtml.com> - 19.0-1
 - Kodi 19.0 Final
 
