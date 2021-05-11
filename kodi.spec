@@ -41,8 +41,8 @@
 %endif
 
 Name: kodi
-Version: 19.0
-Release: 3%{?dist}
+Version: 19.1
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -456,6 +456,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Mon May 10 2021 Michael Cronenworth <mike@cchtml.com> - 19.1-1
+- Kodi 19.1 Final
+
 * Fri Apr 23 2021 Michael Cronenworth <mike@cchtml.com> - 19.0-3
 - Drop old dependencies
 
