@@ -42,7 +42,7 @@
 
 Name: kodi
 Version: 19.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -69,8 +69,8 @@ Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-4.3.1-Matrix-Beta1.tar.gz https://github.com/xbmc/FFmpeg/archive/4.3.1-Matrix-Beta1.tar.gz
-Source5: ffmpeg-4.3.1-Matrix-Beta1.tar.gz
+# wget -O ffmpeg-4.4-N-Alpha1.tar.gz https://github.com/xbmc/FFmpeg/archive/4.4-N-Alpha1.tar.gz
+Source5: ffmpeg-4.4-N-Alpha1.tar.gz
 %endif
 
 # Set program version parameters
@@ -84,6 +84,9 @@ Patch3: kodi-18-annobin-workaround.patch
 
 # Workaround for brp-mangle-shebangs behavior (RHBZ#1787088)
 Patch4: kodi-18-brp-mangle-shebangs.patch
+
+# FFmpeg 4.4 support (RFBZ#6000)
+Patch5: kodi-19-ffmpeg-4-4.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -324,6 +327,7 @@ This package contains FirewallD files for Kodi.
 %patch2 -p1 -b.trousers
 %patch3 -p1 -b.innobinfix
 %patch4 -p1 -b.brp-mangle-shebangs
+%patch5 -p1 -b.ffmpeg-4-4
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -456,6 +460,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Thu Jun 03 2021 Michael Cronenworth <mike@cchtml.com> - 19.1-2
+- FFmpeg 4.4 support
+
 * Mon May 10 2021 Michael Cronenworth <mike@cchtml.com> - 19.1-1
 - Kodi 19.1 Final
 
