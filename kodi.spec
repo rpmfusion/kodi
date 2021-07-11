@@ -43,7 +43,7 @@
 
 Name: kodi
 Version: 19.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -461,6 +461,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sun Jul 11 2021 Leigh Scott <leigh123linux@gmail.com> - 19.1-4
+- Rebuild for new fmt version
+
 * Tue Jun 15 2021 Leigh Scott <leigh123linux@gmail.com> - 19.1-3
 - Rebuild for python-3.10
 
