@@ -89,6 +89,9 @@ Patch4: kodi-18-brp-mangle-shebangs.patch
 # FFmpeg 4.4 support (RFBZ#6000)
 Patch5: kodi-19-ffmpeg-4-4.patch
 
+# Fix for new fmt version
+Patch6: kodi-19-fmt.patch
+
 %ifarch x86_64 i686
 %global _with_crystalhd 1
 %endif
@@ -329,6 +332,7 @@ This package contains FirewallD files for Kodi.
 %patch3 -p1 -b.innobinfix
 %patch4 -p1 -b.brp-mangle-shebangs
 %patch5 -p1 -b.ffmpeg-4-4
+%patch6 -p1 -b.new-fmt
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
