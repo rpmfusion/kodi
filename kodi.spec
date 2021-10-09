@@ -42,8 +42,8 @@
 %endif
 
 Name: kodi
-Version: 19.1
-Release: 5%{?dist}
+Version: 19.2
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -465,6 +465,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sat Oct 09 2021 Michael Cronenworth <mike@cchtml.com> - 19.2-1
+- Kodi 19.2 Final
+
 * Tue Aug 03 2021 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 19.1-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
