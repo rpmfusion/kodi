@@ -43,7 +43,7 @@ index ba9ec50a75172..6a44db8f0f4b1 100644
 @@ -1,4 +1,4 @@
  LIBNAME=ffmpeg
  BASE_URL=https://github.com/xbmc/FFmpeg
--VERSION=4.3.2-Matrix-19.1
+-VERSION=4.3.2-Matrix-19.2
 +VERSION=4.4-N-Alpha1
  ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
 
