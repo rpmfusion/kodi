@@ -42,7 +42,7 @@
 %endif
 
 Name: kodi
-Version: 19.2
+Version: 19.3
 Release: 1%{?dist}
 Summary: Media center
 
@@ -422,6 +422,7 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 %{_datadir}/xsessions/kodi.desktop
 %{_datadir}/applications/kodi.desktop
 %{_datadir}/icons/hicolor/*/*/*.png
+%{_datadir}/metainfo/org.xbmc.kodi.metainfo.xml
 %{_mandir}/man1/kodi.1.gz
 %{_mandir}/man1/kodi.bin.1.gz
 %{_mandir}/man1/kodi-standalone.1.gz
@@ -461,6 +462,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Wed Oct 27 2021 Michael Cronenworth <mike@cchtml.com> - 19.3-1
+- Kodi 19.3 Final
+
 * Sat Oct 09 2021 Michael Cronenworth <mike@cchtml.com> - 19.2-1
 - Kodi 19.2 Final
 
