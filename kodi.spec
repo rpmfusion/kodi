@@ -13,6 +13,8 @@
 %global optflags %(echo %{optflags} | sed 's/-g /-g1 /')
 %endif
 
+# Needed for F36 build issue
+%undefine _package_note_file
 
 # We support hte following options:
 # --with,
@@ -43,7 +45,7 @@
 
 Name: kodi
 Version: 19.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -116,7 +118,11 @@ BuildRequires: expat-devel
 BuildRequires: faad2-devel
 BuildRequires: firewalld-filesystem
 %if 0%{?_with_external_ffmpeg}
+%if 0%{?fedora} && 0%{?fedora} > 35
+BuildRequires: compat-ffmpeg4-devel
+%else
 BuildRequires: ffmpeg-devel
+%endif
 %else
 BuildRequires: trousers-devel
 %endif
@@ -340,13 +346,10 @@ pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
   tools/EventClients/Clients/KodiSend/kodi-send.py \
   tools/EventClients/lib/python/xbmcclient.py
 
-%if 0%{?fedora} < 32
-# Fix python binary search
-sed -i 's/  pkg_check_modules(PC_PYTHON python>=2.7 QUIET)/  pkg_check_modules(PC_PYTHON python=2.7 QUIET)/' cmake/modules/FindPython.cmake
-%endif
-
-
 %build
+%if 0%{?fedora} && 0%{?fedora} > 35
+export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
+%endif
 %cmake3 \
 %if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
@@ -462,6 +465,10 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sat Feb 19 2022 Leigh Scott <leigh123linux@gmail.com> - 19.3-2
+- Switch to compat-ffmpeg4
+- Disable package note
+
 * Wed Oct 27 2021 Michael Cronenworth <mike@cchtml.com> - 19.3-1
 - Kodi 19.3 Final
 
