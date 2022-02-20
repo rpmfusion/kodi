@@ -45,7 +45,7 @@
 
 Name: kodi
 Version: 19.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -90,6 +90,9 @@ Patch4: kodi-18-brp-mangle-shebangs.patch
 
 # FFmpeg 4.4 support (RFBZ#6000)
 Patch5: kodi-19-ffmpeg-4-4.patch
+
+# FFmpeg 4.4 fix for AC3 transcoding (RFBZ#6000)
+Patch6: kodi-19-ffmpeg-4-4-ac3.patch
 
 %ifarch x86_64 i686
 %global _with_crystalhd 1
@@ -335,6 +338,7 @@ This package contains FirewallD files for Kodi.
 %patch3 -p1 -b.innobinfix
 %patch4 -p1 -b.brp-mangle-shebangs
 %patch5 -p1 -b.ffmpeg-4-4
+%patch6 -p1 -b.ffmpeg-4-4-ac3
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -465,6 +469,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sun Feb 20 2022 Michael Cronenworth <mike@cchtml.com> - 19.3-3
+- Patch for AC3 transcoding (RHBZ#6000)
+
 * Sat Feb 19 2022 Leigh Scott <leigh123linux@gmail.com> - 19.3-2
 - Switch to compat-ffmpeg4
 - Disable package note
