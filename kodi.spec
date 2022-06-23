@@ -45,7 +45,7 @@
 
 Name: kodi
 Version: 19.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -469,6 +469,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Thu Jun 23 2022 Robert-André Mauchin <zebob.m@gmail.com> - 19.4-2
+- Rebuilt for new dav1d
+
 * Tue Mar 08 2022 Michael Cronenworth <mike@cchtml.com> - 19.4-1
 - Kodi 19.4 Final
 
