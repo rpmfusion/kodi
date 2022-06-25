@@ -130,6 +130,7 @@ BuildRequires: ffmpeg-devel
 BuildRequires: trousers-devel
 %endif
 BuildRequires: flac-devel
+BuildRequires: flatbuffers-compiler
 BuildRequires: flatbuffers-devel
 BuildRequires: flex
 BuildRequires: fmt-devel
