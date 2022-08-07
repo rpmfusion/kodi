@@ -94,6 +94,9 @@ Patch5: kodi-19-ffmpeg-4-4.patch
 # FFmpeg 4.4 fix for AC3 transcoding (RFBZ#6000)
 Patch6: kodi-19-ffmpeg-4-4-ac3.patch
 
+# https://github.com/xbmc/xbmc/pull/21674
+Patch7: kodi-19-fmt-9.patch
+
 %ifarch x86_64 i686
 %global _with_crystalhd 1
 %endif
@@ -340,6 +343,7 @@ This package contains FirewallD files for Kodi.
 %patch4 -p1 -b.brp-mangle-shebangs
 %patch5 -p1 -b.ffmpeg-4-4
 %patch6 -p1 -b.ffmpeg-4-4-ac3
+%patch7 -p1 -b.fmt-9
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
