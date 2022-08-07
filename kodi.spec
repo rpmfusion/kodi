@@ -45,7 +45,7 @@
 
 Name: kodi
 Version: 19.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -470,6 +470,10 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sun Aug 07 2022 Leigh Scott <leigh123linux@gmail.com> - 19.4-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild and ffmpeg
+  5.1
+
 * Sat Jun 25 2022 Robert-André Mauchin <zebob.m@gmail.com> - 19.4-3
 - Rebuilt for Python 3.11
 
