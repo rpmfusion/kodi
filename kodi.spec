@@ -1,5 +1,3 @@
-# Use old cmake macro
-%global __cmake_in_source_build 1
 #global PRERELEASE RC1
 %global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
@@ -27,11 +25,7 @@
 %if 0%{?fedora}
 # (libbluray in EPEL 6 is too old.)
 %global _with_libbluray 1
-%if 0%{?fedora} < 31
-%global _with_cwiid 1
-%else
 %global _with_cwiid 0
-%endif
 %global _with_libssh 1
 %global _with_libcec 1
 %global _with_external_ffmpeg 1
@@ -44,15 +38,15 @@
 %endif
 
 Name: kodi
-Version: 19.4
-Release: 4%{?dist}
+Version: 19.5
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
 # Main binary and all supporting files are GPLv2+/GPLv3+
 # Some supporting libraries use the LGPL / BSD / MIT license
 Group: Applications/Multimedia
-URL: http://www.kodi.tv/
+URL: https://www.kodi.tv/
 Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 # kodi contains code that we cannot ship, as well as redundant private
 # copies of upstream libraries that we already distribute.  Therefore
@@ -94,10 +88,11 @@ Patch5: kodi-19-ffmpeg-4-4.patch
 # FFmpeg 4.4 fix for AC3 transcoding (RFBZ#6000)
 Patch6: kodi-19-ffmpeg-4-4-ac3.patch
 
-# https://github.com/xbmc/xbmc/pull/21674
-Patch7: kodi-19-fmt-9.patch
+# Fix build with mesa-22.3
+# https://gitweb.gentoo.org/repo/gentoo.git/plain/media-tv/kodi/files/kodi-19.4-fix-mesa-22.3.0-build.patch
+Patch7: kodi-19.4-fix-mesa-22.3.0-build.patch
 
-%ifarch x86_64 i686
+%ifarch x86_64
 %global _with_crystalhd 1
 %endif
 
@@ -111,7 +106,7 @@ BuildRequires: avahi-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: boost-devel
 BuildRequires: bzip2-devel
-BuildRequires: cmake3
+BuildRequires: cmake
 BuildRequires: crossguid-devel
 %if 0%{?_with_cwiid}
 BuildRequires: cwiid-devel
@@ -124,11 +119,7 @@ BuildRequires: expat-devel
 BuildRequires: faad2-devel
 BuildRequires: firewalld-filesystem
 %if 0%{?_with_external_ffmpeg}
-%if 0%{?fedora} && 0%{?fedora} > 35
 BuildRequires: compat-ffmpeg4-devel
-%else
-BuildRequires: ffmpeg-devel
-%endif
 %else
 BuildRequires: trousers-devel
 %endif
@@ -142,11 +133,7 @@ BuildRequires: fontpackages-devel
 BuildRequires: freetype-devel
 BuildRequires: fribidi-devel
 BuildRequires: fstrcmp-devel
-%if 0%{?el6}
-BuildRequires: gettext-devel
-%else
 BuildRequires: gettext-autopoint
-%endif
 BuildRequires: gcc
 BuildRequires: gcc-c++
 BuildRequires: giflib-devel
@@ -169,11 +156,7 @@ BuildRequires: libbluray-devel
 BuildRequires: libcap-devel
 BuildRequires: libcdio-devel
 %if 0%{?_with_libcec}
-%if 0%{?fedora} > 24
 BuildRequires: libcec-devel >= 4.0.0
-%else
-BuildRequires: libcec-devel < 4.0.0
-%endif
 %endif
 %if 0%{?_with_crystalhd}
 BuildRequires: libcrystalhd-devel
@@ -184,11 +167,7 @@ BuildRequires: libdca-devel
 BuildRequires: libdrm-devel
 BuildRequires: libidn2-devel
 BuildRequires: libinput-devel
-%if 0%{?el6}
-BuildRequires: libjpeg-devel
-%else
 BuildRequires: libjpeg-turbo-devel
-%endif
 BuildRequires: libmad-devel
 BuildRequires: libmicrohttpd-devel
 BuildRequires: libmms-devel
@@ -258,11 +237,7 @@ Requires: dejavu-sans-fonts
 Requires: libbluray%{?_isa}
 %endif
 %if 0%{?_with_libcec}
-%if 0%{?fedora} > 24
 Requires: libcec%{?_isa} >= 4.0.0
-%else
-Requires: libcec%{?_isa} < 4.0.0
-%endif
 %endif
 %if 0%{?_with_crystalhd}
 Requires: libcrystalhd%{?_isa}
@@ -343,7 +318,9 @@ This package contains FirewallD files for Kodi.
 %patch4 -p1 -b.brp-mangle-shebangs
 %patch5 -p1 -b.ffmpeg-4-4
 %patch6 -p1 -b.ffmpeg-4-4-ac3
-%patch7 -p1 -b.fmt-9
+%if 0%{?fedora} && 0%{?fedora} >= 37
+%patch7 -p1 -b.mesa-22.3.0-build
+%endif
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -356,10 +333,8 @@ pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
   tools/EventClients/lib/python/xbmcclient.py
 
 %build
-%if 0%{?fedora} && 0%{?fedora} > 35
 export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
-%endif
-%cmake3 \
+%cmake \
 %if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
 %else
@@ -381,13 +356,13 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME="%{kodi_backends}" \
-  -DAPP_RENDER_SYSTEM=gl \
-  .
-%ninja_build
+  -DAPP_RENDER_SYSTEM=gl
+
+%cmake_build
 
 
 %install
-%ninja_install
+%cmake_install
 
 # remove the doc files from unversioned /usr/share/doc/xbmc, they should be in versioned docdir
 rm -r $RPM_BUILD_ROOT/%{_datadir}/doc/
@@ -474,6 +449,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sat Dec 24 2022 Leigh Scott <leigh123linux@gmail.com> - 19.5-1
+- Kodi 19.5 Final
+
 * Sun Aug 07 2022 Leigh Scott <leigh123linux@gmail.com> - 19.4-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild and ffmpeg
   5.1
