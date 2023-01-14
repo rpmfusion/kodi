@@ -1,9 +1,9 @@
-#global PRERELEASE RC1
-%global DIRVERSION %{version}
+%global PRERELEASE rc2
+#global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
 #global DIRVERSION %{version}-%{GITCOMMIT}
-#global DIRVERSION %{version}%{PRERELEASE}
+%global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 %ifarch %{arm} %{arm64}
 # Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
@@ -38,8 +38,8 @@
 %endif
 
 Name: kodi
-Version: 19.5
-Release: 1%{?dist}
+Version: 20.0
+Release: 0.rc2.0%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -56,41 +56,26 @@ Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 Source1: kodi-generate-tarball-xz.sh
 
 # kodi uses modified libdvd{css,nav,read} source and downloads at build time
-# wget -O kodi-libdvdnav-6.0.0-Leia-Alpha-3.tar.gz https://github.com/xbmc/libdvdnav/archive/6.0.0-Leia-Alpha-3.tar.gz
-Source2: kodi-libdvdnav-6.0.0-Leia-Alpha-3.tar.gz
-# wget -O kodi-libdvdread-6.0.0-Leia-Alpha-3.tar.gz https://github.com/xbmc/libdvdread/archive/6.0.0-Leia-Alpha-3.tar.gz
-Source3: kodi-libdvdread-6.0.0-Leia-Alpha-3.tar.gz
+# wget -O kodi-libdvdnav-6.1.1-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdnav/archive/6.1.1-Next-Nexus-Alpha2-2.tar.gz
+Source2: kodi-libdvdnav-6.1.1-Next-Nexus-Alpha2-2.tar.gz
+# wget -O kodi-libdvdread-6.1.3-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdread/archive/6.1.3-Next-Nexus-Alpha2-2.tar.gz
+Source3: kodi-libdvdread-6.1.3-Next-Nexus-Alpha2-2.tar.gz
 %if %{with dvdcss}
-# wget -O kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.2-Leia-Beta-5.tar.gz
-Source4: kodi-libdvdcss-1.4.2-Leia-Beta-5.tar.gz
+# wget -O kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.3-Next-Nexus-Alpha2-2.tar.gz
+Source4: kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
-# wget -O ffmpeg-4.4-N-Alpha1.tar.gz https://github.com/xbmc/FFmpeg/archive/4.4-N-Alpha1.tar.gz
-Source5: ffmpeg-4.4-N-Alpha1.tar.gz
+# wget -O ffmpeg-5.1.2-Nexus-Alpha3.tar.gz https://github.com/xbmc/FFmpeg/archive/5.1.2-Nexus-Alpha3.tar.gz
+Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 %endif
 
 # Set program version parameters
-Patch1: kodi-19-versioning.patch
-
-# Prevent trousers from being linked, which breaks Samba
-Patch2: kodi-18-trousers.patch
-
-# Fix an annobin issue
-Patch3: kodi-18-annobin-workaround.patch
-
-# Workaround for brp-mangle-shebangs behavior (RHBZ#1787088)
-Patch4: kodi-18-brp-mangle-shebangs.patch
-
-# FFmpeg 4.4 support (RFBZ#6000)
-Patch5: kodi-19-ffmpeg-4-4.patch
-
-# FFmpeg 4.4 fix for AC3 transcoding (RFBZ#6000)
-Patch6: kodi-19-ffmpeg-4-4-ac3.patch
+Patch1: kodi-20-versioning.patch
 
 # Fix build with mesa-22.3
 # https://gitweb.gentoo.org/repo/gentoo.git/plain/media-tv/kodi/files/kodi-19.4-fix-mesa-22.3.0-build.patch
-Patch7: kodi-19.4-fix-mesa-22.3.0-build.patch
+Patch2: kodi-19.4-fix-mesa-22.3.0-build.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -208,6 +193,7 @@ BuildRequires: nasm
 BuildRequires: ninja-build
 BuildRequires: pcre-devel
 BuildRequires: pixman-devel
+BuildRequires: pipewire-devel
 BuildRequires: pulseaudio-libs-devel
 BuildRequires: python3-devel
 BuildRequires: python3-pillow
@@ -313,13 +299,8 @@ This package contains FirewallD files for Kodi.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-%patch2 -p1 -b.trousers
-%patch3 -p1 -b.innobinfix
-%patch4 -p1 -b.brp-mangle-shebangs
-%patch5 -p1 -b.ffmpeg-4-4
-%patch6 -p1 -b.ffmpeg-4-4-ac3
 %if 0%{?fedora} && 0%{?fedora} >= 37
-%patch7 -p1 -b.mesa-22.3.0-build
+%patch2 -p1 -b.mesa-22.3.0-build
 %endif
 
 # Fix up Python shebangs
@@ -356,7 +337,8 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME="%{kodi_backends}" \
-  -DAPP_RENDER_SYSTEM=gl
+  -DAPP_RENDER_SYSTEM=gl \
+  -DENABLE_INTERNAL_RapidJSON=OFF
 
 %cmake_build
 
@@ -403,7 +385,7 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 %{_bindir}/kodi
 %{_bindir}/kodi-standalone
 %{_bindir}/JsonSchemaBuilder
-%{_bindir}/TexturePacker
+%{_bindir}/kodi-TexturePacker
 %{_libdir}/kodi/
 %{_datadir}/kodi/
 %{_datadir}/xsessions/kodi.desktop
@@ -413,7 +395,7 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 %{_mandir}/man1/kodi.1.gz
 %{_mandir}/man1/kodi.bin.1.gz
 %{_mandir}/man1/kodi-standalone.1.gz
-%{_mandir}/man1/TexturePacker.1.gz
+%{_mandir}/man1/kodi-TexturePacker.1.gz
 
 
 %files devel
@@ -449,6 +431,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Fri Jan 13 2023 Michael Cronenworth <mike@cchtml.com> - 20.0-0.rc2.0
+- Kodi 20.0 RC2
+
 * Sat Dec 24 2022 Leigh Scott <leigh123linux@gmail.com> - 19.5-1
 - Kodi 19.5 Final
 

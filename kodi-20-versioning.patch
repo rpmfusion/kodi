@@ -1,0 +1,11 @@
+--- kodi-20.0rc2/xbmc/application/Application.cpp.orig	2022-12-19 00:41:40.000000000 -0600
++++ kodi-20.0rc2/xbmc/application/Application.cpp	2023-01-13 22:13:48.253716890 -0600
+@@ -3580,7 +3580,7 @@
+ void CApplication::PrintStartupLog()
+ {
+   CLog::Log(LOGINFO, "-----------------------------------------------------------------------");
+-  CLog::Log(LOGINFO, "Starting {} ({}). Platform: {} {} {}-bit", CSysInfo::GetAppName(),
++  CLog::Log(LOGINFO, "Starting {} from RPM Fusion ({}). Platform: {} {} {}-bit", CSysInfo::GetAppName(),
+             CSysInfo::GetVersion(), g_sysinfo.GetBuildTargetPlatformName(),
+             g_sysinfo.GetBuildTargetCpuFamily(), g_sysinfo.GetXbmcBitness());
+ 
