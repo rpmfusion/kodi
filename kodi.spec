@@ -1,9 +1,9 @@
-%global PRERELEASE rc2
-#global DIRVERSION %{version}
+#global PRERELEASE rc2
+%global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
 #global DIRVERSION %{version}-%{GITCOMMIT}
-%global DIRVERSION %{version}%{PRERELEASE}
+#global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 %ifarch %{arm} %{arm64}
 # Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 20.0
-Release: 0.rc2.0%{?dist}
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -72,10 +72,6 @@ Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 
 # Set program version parameters
 Patch1: kodi-20-versioning.patch
-
-# Fix build with mesa-22.3
-# https://gitweb.gentoo.org/repo/gentoo.git/plain/media-tv/kodi/files/kodi-19.4-fix-mesa-22.3.0-build.patch
-Patch2: kodi-19.4-fix-mesa-22.3.0-build.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -299,9 +295,6 @@ This package contains FirewallD files for Kodi.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
-%if 0%{?fedora} && 0%{?fedora} >= 37
-%patch2 -p1 -b.mesa-22.3.0-build
-%endif
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -431,6 +424,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Mon Jan 16 2023 Michael Cronenworth <mike@cchtml.com> - 20.0-1
+- Kodi 20.0 Final
+
 * Fri Jan 13 2023 Michael Cronenworth <mike@cchtml.com> - 20.0-0.rc2.0
 - Kodi 20.0 RC2
 
