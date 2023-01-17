@@ -73,6 +73,9 @@ Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 # Set program version parameters
 Patch1: kodi-20-versioning.patch
 
+# GCC 13 requires explicit definition of cstdint header
+Patch2: kodi-20-cstdint.patch
+
 %ifarch x86_64
 %global _with_crystalhd 1
 %endif
@@ -295,6 +298,7 @@ This package contains FirewallD files for Kodi.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
+%patch2 -p1 -b.cstdint
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
