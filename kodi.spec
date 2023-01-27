@@ -76,6 +76,9 @@ Patch1: kodi-20-versioning.patch
 # GCC 13 requires explicit definition of cstdint header
 Patch2: kodi-20-cstdint.patch
 
+# Fix an annobin issue
+Patch3: kodi-20-annobin-workaround.patch
+
 %ifarch x86_64
 %global _with_crystalhd 1
 %endif
@@ -299,6 +302,7 @@ This package contains FirewallD files for Kodi.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch1 -p1 -b.versioning
 %patch2 -p1 -b.cstdint
+%patch3 -p1 -b.innobinfix
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
