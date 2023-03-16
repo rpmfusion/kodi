@@ -38,7 +38,7 @@
 %endif
 
 Name: kodi
-Version: 20.0
+Version: 20.1
 Release: 1%{?dist}
 Summary: Media center
 
@@ -432,6 +432,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Wed Mar 15 2023 Michael Cronenworth <mike@cchtml.com> - 20.1-1
+- Kodi 20.1 Final
+
 * Mon Jan 16 2023 Michael Cronenworth <mike@cchtml.com> - 20.0-1
 - Kodi 20.0 Final
 
