@@ -38,7 +38,7 @@
 %endif
 
 Name: kodi
-Version: 20.1
+Version: 20.2
 Release: 1%{?dist}
 Summary: Media center
 
@@ -73,11 +73,8 @@ Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 # Set program version parameters
 Patch1: kodi-20-versioning.patch
 
-# GCC 13 requires explicit definition of cstdint header
-Patch2: kodi-20-cstdint.patch
-
 # Fix an annobin issue, required for ARM arch
-Patch3: kodi-20-annobin-workaround.patch
+Patch2: kodi-20-annobin-workaround.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -300,9 +297,8 @@ This package contains FirewallD files for Kodi.
 
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
-%patch1 -p1 -b.versioning
-%patch2 -p1 -b.cstdint
-%patch3 -p1 -b.innobinfix
+%patch -P 1 -p1 -b.versioning
+%patch -P 2 -p1 -b.innobinfix
 
 # Fix up Python shebangs
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
@@ -432,6 +428,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Thu Jun 29 2023 Michael Cronenworth <mike@cchtml.com> - 20.2-1
+- Kodi 20.2 Final
+
 * Wed Mar 15 2023 Michael Cronenworth <mike@cchtml.com> - 20.1-1
 - Kodi 20.1 Final
 
