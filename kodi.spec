@@ -78,6 +78,9 @@ Patch2: kodi-20-annobin-workaround.patch
 
 Patch3: https://github.com/xbmc/xbmc/pull/23453.patch#/fmt10_buildfix.patch
 
+# Add initializer for tp_watched
+Patch4: tp_watched_initializer.patch
+
 %ifarch x86_64
 %global _with_crystalhd 1
 %endif
@@ -302,6 +305,7 @@ This package contains FirewallD files for Kodi.
 %patch -P 2 -p1 -b.innobinfix
 %if 0%{?fedora} && 0%{?fedora} > 38
 %patch -P 3 -p1 -b.fmt
+%patch -P 4 -p1 -b.initializer
 %endif
 
 # Fix up Python shebangs

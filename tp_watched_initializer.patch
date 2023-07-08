@@ -1,0 +1,10 @@
+--- a/xbmc/interfaces/python/swig.cpp
++++ b/xbmc/interfaces/python/swig.cpp
+@@ -72,6 +72,7 @@ namespace PythonBindings
+ #if PY_VERSION_HEX < 0x03090000
+       0,
+ #endif
++      0
+     };
+ 
+     static int size = (long*)&(py_type_object_header.tp_name) - (long*)&py_type_object_header;
