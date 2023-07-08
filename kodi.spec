@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 20.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -428,6 +428,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Sat Jul 08 2023 Leigh Scott <leigh123linux@gmail.com> - 20.2-2
+- Rebuilt for Python 3.12
+
 * Thu Jun 29 2023 Michael Cronenworth <mike@cchtml.com> - 20.2-1
 - Kodi 20.2 Final
 
