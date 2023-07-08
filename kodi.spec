@@ -76,6 +76,8 @@ Patch1: kodi-20-versioning.patch
 # Fix an annobin issue, required for ARM arch
 Patch2: kodi-20-annobin-workaround.patch
 
+Patch3: https://github.com/xbmc/xbmc/pull/23453.patch#/fmt10_buildfix.patch
+
 %ifarch x86_64
 %global _with_crystalhd 1
 %endif
@@ -298,6 +300,9 @@ This package contains FirewallD files for Kodi.
 %setup -q -n %{name}-%{DIRVERSION}
 %patch -P 1 -p1 -b.versioning
 %patch -P 2 -p1 -b.innobinfix
+%if 0%{?fedora} && 0%{?fedora} > 38
+%patch -P 3 -p1 -b.fmt
+%endif
 
 # Fix up Python shebangs
 %py3_shebang_fix \
