@@ -196,7 +196,6 @@ BuildRequires: pipewire-devel
 BuildRequires: pulseaudio-libs-devel
 BuildRequires: python3-devel
 BuildRequires: python3-pillow
-BuildRequires: /usr/bin/pathfix.py
 BuildRequires: rapidjson-devel
 BuildRequires: spdlog-devel
 BuildRequires: sqlite-devel
@@ -301,7 +300,7 @@ This package contains FirewallD files for Kodi.
 %patch -P 2 -p1 -b.innobinfix
 
 # Fix up Python shebangs
-pathfix.py -pni "%{__python3} %{py3_shbang_opts}" \
+%py3_shebang_fix \
   tools/EventClients/lib/python/zeroconf.py \
   tools/EventClients/Clients/PS3BDRemote/ps3_remote.py \
   tools/EventClients/lib/python/ps3/sixaxis.py \
