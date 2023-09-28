@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 20.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -189,7 +189,7 @@ BuildRequires: libxml2-devel
 BuildRequires: libxslt-devel
 BuildRequires: lirc-devel
 BuildRequires: lzo-devel
-BuildRequires: mariadb-devel
+BuildRequires: mariadb-connector-c-devel
 BuildRequires: mesa-libEGL-devel
 BuildRequires: mesa-libGLES-devel
 BuildRequires: mesa-libgbm-devel
@@ -436,6 +436,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Thu Sep 28 2023 Michael Cronenworth <mike@cchtml.com> - 20.2-5
+- Update mariadb BR (RFBZ#6771)
+
 * Fri Aug 11 2023 Leigh Scott <leigh123linux@gmail.com> - 20.2-4
 - Rebuild for new libplist
 
