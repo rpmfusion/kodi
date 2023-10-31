@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 20.2
-Release: 5%{?dist}
+Release: 6%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -79,7 +79,7 @@ Patch2: kodi-20-annobin-workaround.patch
 Patch3: https://github.com/xbmc/xbmc/pull/23453.patch#/fmt10_buildfix.patch
 
 # Add initializer for tp_watched
-Patch4: tp_watched_initializer.patch
+Patch4: https://github.com/xbmc/xbmc/commit/2c84ee54a75770e291f38d4ebb2c31c8f2c3b8c5.patch#/tp_watched_initializer.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -436,6 +436,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Tue Oct 31 2023 Leigh Scott <leigh123linux@gmail.com> - 20.2-6
+- Use upstream python-3.12 fix
+
 * Thu Sep 28 2023 Michael Cronenworth <mike@cchtml.com> - 20.2-5
 - Update mariadb BR (RFBZ#6771)
 
