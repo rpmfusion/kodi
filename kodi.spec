@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 20.2
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -57,17 +57,17 @@ Source1: kodi-generate-tarball-xz.sh
 
 # kodi uses modified libdvd{css,nav,read} source and downloads at build time
 # wget -O kodi-libdvdnav-6.1.1-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdnav/archive/6.1.1-Next-Nexus-Alpha2-2.tar.gz
-Source2: kodi-libdvdnav-6.1.1-Next-Nexus-Alpha2-2.tar.gz
+Source2: https://github.com/xbmc/libdvdnav/archive/6.1.1-Next-Nexus-Alpha2-2.tar.gz
 # wget -O kodi-libdvdread-6.1.3-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdread/archive/6.1.3-Next-Nexus-Alpha2-2.tar.gz
-Source3: kodi-libdvdread-6.1.3-Next-Nexus-Alpha2-2.tar.gz
+Source3: https://github.com/xbmc/libdvdread/archive/6.1.3-Next-Nexus-Alpha2-2.tar.gz
 %if %{with dvdcss}
 # wget -O kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.3-Next-Nexus-Alpha2-2.tar.gz
-Source4: kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz
+Source4: https://github.com/xbmc/libdvdcss/archive/1.4.3-Next-Nexus-Alpha2-2.tar.gz
 %endif
 
 %if ! 0%{?_with_external_ffmpeg}
 # wget -O ffmpeg-5.1.2-Nexus-Alpha3.tar.gz https://github.com/xbmc/FFmpeg/archive/5.1.2-Nexus-Alpha3.tar.gz
-Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
+Source5: https://github.com/xbmc/FFmpeg/archive/5.1.2-Nexus-Alpha3.tar.gz
 %endif
 
 # Set program version parameters
@@ -82,7 +82,7 @@ Patch3: https://github.com/xbmc/xbmc/pull/23453.patch#/fmt10_buildfix.patch
 Patch4: https://github.com/xbmc/xbmc/commit/2c84ee54a75770e291f38d4ebb2c31c8f2c3b8c5.patch#/tp_watched_initializer.patch
 
 # Add Python 3.12 fix
-Patch4: python_fix.patch
+Patch5: python_fix.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -309,6 +309,7 @@ This package contains FirewallD files for Kodi.
 %if 0%{?fedora} && 0%{?fedora} > 38
 %patch -P 3 -p1 -b.fmt
 %patch -P 4 -p1 -b.initializer
+%patch -P 5 -p1 -b.fix
 %endif
 
 # Fix up Python shebangs
