@@ -82,7 +82,7 @@ Patch3: https://github.com/xbmc/xbmc/pull/23453.patch#/fmt10_buildfix.patch
 Patch4: https://github.com/xbmc/xbmc/commit/2c84ee54a75770e291f38d4ebb2c31c8f2c3b8c5.patch#/tp_watched_initializer.patch
 
 # Add Python 3.12 fix
-Patch5: python_fix.patch
+Patch5: https://github.com/xbmc/xbmc/commit/4bf9de87e700f0de56ef698a8d8d6eb7d4ff9050.patch#/python_3.12_fix.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
