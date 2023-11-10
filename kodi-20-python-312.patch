@@ -1,0 +1,370 @@
+From 4bf9de87e700f0de56ef698a8d8d6eb7d4ff9050 Mon Sep 17 00:00:00 2001
+From: repojohnray <8113421+repojohnray@users.noreply.github.com>
+Date: Wed, 11 Jan 2023 00:10:48 +0100
+Subject: [PATCH] CPythonInvoker: code cleanup
+
+---
+ xbmc/interfaces/python/AddonPythonInvoker.cpp | 32 ++++---------
+ xbmc/interfaces/python/AddonPythonInvoker.h   |  3 +-
+ xbmc/interfaces/python/PythonInvoker.cpp      | 48 ++++++-------------
+ xbmc/interfaces/python/PythonInvoker.h        | 14 ++++--
+ xbmc/interfaces/python/XBPython.cpp           | 20 ++++++++
+ .../python/HTTPPythonWsgiInvoker.cpp          | 35 +++++---------
+ .../python/HTTPPythonWsgiInvoker.h            |  3 +-
+ 7 files changed, 71 insertions(+), 84 deletions(-)
+
+diff --git a/xbmc/interfaces/python/AddonPythonInvoker.cpp b/xbmc/interfaces/python/AddonPythonInvoker.cpp
+index b6158a8db612b..30b82a2df40e3 100644
+--- a/xbmc/interfaces/python/AddonPythonInvoker.cpp
++++ b/xbmc/interfaces/python/AddonPythonInvoker.cpp
+@@ -84,45 +84,33 @@ PyObject* PyInit_Module_xbmcvfs(void);
+ 
+ using namespace PythonBindings;
+ 
+-typedef struct
++namespace
+ {
+-  const char *name;
+-  CPythonInvoker::PythonModuleInitialization initialization;
+-} PythonModule;
+-
+-static PythonModule PythonModules[] =
++// clang-format off
++const _inittab PythonModules[] =
+   {
+     { "xbmcdrm",    PyInit_Module_xbmcdrm    },
+     { "xbmcgui",    PyInit_Module_xbmcgui    },
+     { "xbmc",       PyInit_Module_xbmc       },
+     { "xbmcplugin", PyInit_Module_xbmcplugin },
+     { "xbmcaddon",  PyInit_Module_xbmcaddon  },
+-    { "xbmcvfs",    PyInit_Module_xbmcvfs    }
++    { "xbmcvfs",    PyInit_Module_xbmcvfs    },
++    { nullptr,      nullptr }
+   };
++// clang-format on
++} // namespace
+ 
+ CAddonPythonInvoker::CAddonPythonInvoker(ILanguageInvocationHandler *invocationHandler)
+   : CPythonInvoker(invocationHandler)
+ {
+-  PyImport_AppendInittab("xbmcdrm", PyInit_Module_xbmcdrm);
+-  PyImport_AppendInittab("xbmcgui", PyInit_Module_xbmcgui);
+-  PyImport_AppendInittab("xbmc", PyInit_Module_xbmc);
+-  PyImport_AppendInittab("xbmcplugin", PyInit_Module_xbmcplugin);
+-  PyImport_AppendInittab("xbmcaddon", PyInit_Module_xbmcaddon);
+-  PyImport_AppendInittab("xbmcvfs", PyInit_Module_xbmcvfs);
+ }
+ 
+ CAddonPythonInvoker::~CAddonPythonInvoker() = default;
+ 
+-std::map<std::string, CPythonInvoker::PythonModuleInitialization> CAddonPythonInvoker::getModules() const
++void CAddonPythonInvoker::GlobalInitializeModules(void)
+ {
+-  static std::map<std::string, PythonModuleInitialization> modules;
+-  if (modules.empty())
+-  {
+-    for (const PythonModule& pythonModule : PythonModules)
+-      modules.insert(std::make_pair(pythonModule.name, pythonModule.initialization));
+-  }
+-
+-  return modules;
++  if (PyImport_ExtendInittab(const_cast<_inittab*>(PythonModules)))
++    CLog::Log(LOGWARNING, "CAddonPythonInvoker(): unable to extend inittab");
+ }
+ 
+ const char* CAddonPythonInvoker::getInitializationScript() const
+diff --git a/xbmc/interfaces/python/AddonPythonInvoker.h b/xbmc/interfaces/python/AddonPythonInvoker.h
+index a8460712ea09d..dfc6c9b25e955 100644
+--- a/xbmc/interfaces/python/AddonPythonInvoker.h
++++ b/xbmc/interfaces/python/AddonPythonInvoker.h
+@@ -16,8 +16,9 @@ class CAddonPythonInvoker : public CPythonInvoker
+   explicit CAddonPythonInvoker(ILanguageInvocationHandler *invocationHandler);
+   ~CAddonPythonInvoker() override;
+ 
++  static void GlobalInitializeModules(void);
++
+ protected:
+   // overrides of CPythonInvoker
+-  std::map<std::string, PythonModuleInitialization> getModules() const override;
+   const char* getInitializationScript() const override;
+ };
+diff --git a/xbmc/interfaces/python/PythonInvoker.cpp b/xbmc/interfaces/python/PythonInvoker.cpp
+index 55c5181403bde..8da7becdcf059 100644
+--- a/xbmc/interfaces/python/PythonInvoker.cpp
++++ b/xbmc/interfaces/python/PythonInvoker.cpp
+@@ -64,10 +64,6 @@ extern "C" FILE* fopen_utf8(const char* _Filename, const char* _Mode);
+ using namespace XFILE;
+ using namespace std::chrono_literals;
+ 
+-#define PythonModulesSize sizeof(PythonModules) / sizeof(PythonModule)
+-
+-CCriticalSection CPythonInvoker::s_critical;
+-
+ static const std::string getListOfAddonClassesAsString(
+     XBMCAddon::AddonClass::Ref<XBMCAddon::Python::PythonLanguageHook>& languageHook)
+ {
+@@ -277,6 +273,7 @@ bool CPythonInvoker::execute(const std::string& script, std::vector<std::wstring
+   }
+ 
+   PySys_SetObject("argv", sysArgv);
++  Py_DECREF(sysArgv);
+ 
+   CLog::Log(LOGDEBUG, "CPythonInvoker({}, {}): entering source directory {}", GetId(), m_sourceFile,
+             scriptDir);
+@@ -570,6 +567,9 @@ void CPythonInvoker::onExecutionDone()
+                 "shutting down the Interpreter",
+                 GetId(), m_sourceFile);
+ 
++    // PyErr_Clear() is required to prevent the debug python library to trigger an assert() at the Py_EndInterpreter() level
++    PyErr_Clear();
++
+     Py_EndInterpreter(m_threadState);
+ 
+     // If we still have objects left around, produce an error message detailing what's been left behind
+@@ -619,10 +619,6 @@ void CPythonInvoker::onExecutionFailed()
+ void CPythonInvoker::onInitialization()
+ {
+   XBMC_TRACE;
+-  {
+-    GilSafeSingleLock lock(s_critical);
+-    initializeModules(getModules());
+-  }
+ 
+   // get a possible initialization script
+   const char* runscript = getInitializationScript();
+@@ -641,15 +637,14 @@ void CPythonInvoker::onPythonModuleInitialization(void* moduleDict)
+ 
+   PyObject* moduleDictionary = (PyObject*)moduleDict;
+ 
+-  PyObject* pyaddonid = PyUnicode_FromString(m_addon->ID().c_str());
+-  PyDict_SetItemString(moduleDictionary, "__xbmcaddonid__", pyaddonid);
++  PyDict_SetItemString(moduleDictionary, "__xbmcaddonid__",
++                       PyObjectPtr(PyUnicode_FromString(m_addon->ID().c_str())).get());
+ 
+   ADDON::CAddonVersion version = m_addon->GetDependencyVersion("xbmc.python");
+-  PyObject* pyxbmcapiversion = PyUnicode_FromString(version.asString().c_str());
+-  PyDict_SetItemString(moduleDictionary, "__xbmcapiversion__", pyxbmcapiversion);
++  PyDict_SetItemString(moduleDictionary, "__xbmcapiversion__",
++                       PyObjectPtr(PyUnicode_FromString(version.asString().c_str())).get());
+ 
+-  PyObject* pyinvokerid = PyLong_FromLong(GetId());
+-  PyDict_SetItemString(moduleDictionary, "__xbmcinvokerid__", pyinvokerid);
++  PyDict_SetItemString(moduleDictionary, "__xbmcinvokerid__", PyLong_FromLong(GetId()));
+ 
+   CLog::Log(LOGDEBUG,
+             "CPythonInvoker({}, {}): instantiating addon using automatically obtained id of \"{}\" "
+@@ -683,25 +678,6 @@ void CPythonInvoker::onError(const std::string& exceptionType /* = "" */,
+   }
+ }
+ 
+-void CPythonInvoker::initializeModules(
+-    const std::map<std::string, PythonModuleInitialization>& modules)
+-{
+-  for (const auto& module : modules)
+-  {
+-    if (!initializeModule(module.second))
+-      CLog::Log(LOGWARNING, "CPythonInvoker({}, {}): unable to initialize python module \"{}\"",
+-                GetId(), m_sourceFile, module.first);
+-  }
+-}
+-
+-bool CPythonInvoker::initializeModule(PythonModuleInitialization module)
+-{
+-  if (module == NULL)
+-    return false;
+-
+-  return module() != nullptr;
+-}
+-
+ void CPythonInvoker::getAddonModuleDeps(const ADDON::AddonPtr& addon, std::set<std::string>& paths)
+ {
+   for (const auto& it : addon->GetDependencies())
+@@ -721,3 +697,9 @@ void CPythonInvoker::getAddonModuleDeps(const ADDON::AddonPtr& addon, std::set<s
+     }
+   }
+ }
++
++void CPythonInvoker::PyObjectDeleter::operator()(PyObject* p) const
++{
++  assert(Py_REFCNT(p) == 2);
++  Py_DECREF(p);
++}
+diff --git a/xbmc/interfaces/python/PythonInvoker.h b/xbmc/interfaces/python/PythonInvoker.h
+index dd093ed73acd6..e4ad95e8b44e6 100644
+--- a/xbmc/interfaces/python/PythonInvoker.h
++++ b/xbmc/interfaces/python/PythonInvoker.h
+@@ -31,8 +31,6 @@ class CPythonInvoker : public ILanguageInvoker
+ 
+   bool IsStopping() const override { return m_stop || ILanguageInvoker::IsStopping(); }
+ 
+-  typedef PyObject* (*PythonModuleInitialization)();
+-
+ protected:
+   // implementation of ILanguageInvoker
+   bool execute(const std::string& script, const std::vector<std::string>& arguments) override;
+@@ -42,7 +40,6 @@ class CPythonInvoker : public ILanguageInvoker
+   void onExecutionFailed() override;
+ 
+   // custom virtual methods
+-  virtual std::map<std::string, PythonModuleInitialization> getModules() const = 0;
+   virtual const char* getInitializationScript() const = 0;
+   virtual void onInitialization();
+   // actually a PyObject* but don't wanna draw Python.h include into the header
+@@ -59,8 +56,6 @@ class CPythonInvoker : public ILanguageInvoker
+   CCriticalSection m_critical;
+ 
+ private:
+-  void initializeModules(const std::map<std::string, PythonModuleInitialization>& modules);
+-  bool initializeModule(PythonModuleInitialization module);
+   void getAddonModuleDeps(const ADDON::AddonPtr& addon, std::set<std::string>& paths);
+   bool execute(const std::string& script, std::vector<std::wstring>& arguments);
+   FILE* PyFile_AsFileWithMode(PyObject* py_file, const char* mode);
+@@ -73,4 +68,13 @@ class CPythonInvoker : public ILanguageInvoker
+   bool m_systemExitThrown = false;
+ 
+   static CCriticalSection s_critical;
++
++private:
++  struct PyObjectDeleter
++  {
++    void operator()(PyObject* p) const;
++  };
++
++public:
++  typedef std::unique_ptr<PyObject, PyObjectDeleter> PyObjectPtr;
+ };
+diff --git a/xbmc/interfaces/python/XBPython.cpp b/xbmc/interfaces/python/XBPython.cpp
+index ee8ed93ff56ed..96b04200adea2 100644
+--- a/xbmc/interfaces/python/XBPython.cpp
++++ b/xbmc/interfaces/python/XBPython.cpp
+@@ -34,6 +34,10 @@
+ #include "platform/Environment.h"
+ #endif
+ 
++#ifdef HAS_WEB_INTERFACE
++#include "network/httprequesthandler/python/HTTPPythonWsgiInvoker.h"
++#endif
++
+ #include <algorithm>
+ 
+ // Only required for Py3 < 3.7
+@@ -50,6 +54,14 @@ XBPython::~XBPython()
+ {
+   XBMC_TRACE;
+   CServiceBroker::GetAnnouncementManager()->RemoveAnnouncer(this);
++
++#if PY_VERSION_HEX >= 0x03070000
++  if (Py_IsInitialized())
++  {
++    PyThreadState_Swap(PyInterpreterState_ThreadHead(PyInterpreterState_Main()));
++    Py_Finalize();
++  }
++#endif
+ }
+ 
+ #define LOCK_AND_COPY(type, dest, src) \
+@@ -518,6 +530,14 @@ bool XBPython::OnScriptInitialized(ILanguageInvoker* invoker)
+     Py_OptimizeFlag = 1;
+ #endif
+ 
++    // *::GlobalInitializeModules() functions call PyImport_ExtendInittab(). PyImport_ExtendInittab() should
++    // be called before Py_Initialize() as required by the Python documentation.
++    CAddonPythonInvoker::GlobalInitializeModules();
++
++#ifdef HAS_WEB_INTERFACE
++    CHTTPPythonWsgiInvoker::GlobalInitializeModules();
++#endif
++
+     Py_Initialize();
+ 
+ #if PY_VERSION_HEX < 0x03070000
+diff --git a/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp b/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp
+index ac047a7530057..a28fb80115ce8 100644
+--- a/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp
++++ b/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp
+@@ -75,26 +75,23 @@ PyObject* PyInit_Module_xbmcwsgi(void);
+ 
+ using namespace PythonBindings;
+ 
+-typedef struct
++namespace
+ {
+-  const char *name;
+-  CPythonInvoker::PythonModuleInitialization initialization;
+-} PythonModule;
+-
+-static PythonModule PythonModules[] =
++// clang-format off
++const _inittab PythonModules[] =
+ {
+   { "xbmc",           PyInit_Module_xbmc },
+   { "xbmcaddon",      PyInit_Module_xbmcaddon },
+-  { "xbmcwsgi",       PyInit_Module_xbmcwsgi }
++  { "xbmcwsgi",       PyInit_Module_xbmcwsgi },
++  { nullptr,          nullptr }
+ };
++// clang-format on
++} // namespace
+ 
+ CHTTPPythonWsgiInvoker::CHTTPPythonWsgiInvoker(ILanguageInvocationHandler* invocationHandler, HTTPPythonRequest* request)
+   : CHTTPPythonInvoker(invocationHandler, request),
+     m_wsgiResponse(NULL)
+ {
+-  PyImport_AppendInittab("xbmc", PyInit_Module_xbmc);
+-  PyImport_AppendInittab("xbmcaddon", PyInit_Module_xbmcaddon);
+-  PyImport_AppendInittab("xbmcwsgi", PyInit_Module_xbmcwsgi);
+ }
+ 
+ CHTTPPythonWsgiInvoker::~CHTTPPythonWsgiInvoker()
+@@ -103,6 +100,12 @@ CHTTPPythonWsgiInvoker::~CHTTPPythonWsgiInvoker()
+   m_wsgiResponse = NULL;
+ }
+ 
++void CHTTPPythonWsgiInvoker::GlobalInitializeModules(void)
++{
++  if (PyImport_ExtendInittab(const_cast<_inittab*>(PythonModules)))
++    CLog::Log(LOGWARNING, "CHTTPPythonWsgiInvoker(): unable to extend inittab");
++}
++
+ HTTPPythonRequest* CHTTPPythonWsgiInvoker::GetRequest()
+ {
+   if (m_request == NULL || m_wsgiResponse == NULL)
+@@ -303,18 +306,6 @@ void CHTTPPythonWsgiInvoker::executeScript(FILE* fp, const std::string& script,
+   }
+ }
+ 
+-std::map<std::string, CPythonInvoker::PythonModuleInitialization> CHTTPPythonWsgiInvoker::getModules() const
+-{
+-  static std::map<std::string, PythonModuleInitialization> modules;
+-  if (modules.empty())
+-  {
+-    for (const PythonModule& pythonModule : PythonModules)
+-      modules.insert(std::make_pair(pythonModule.name, pythonModule.initialization));
+-  }
+-
+-  return modules;
+-}
+-
+ const char* CHTTPPythonWsgiInvoker::getInitializationScript() const
+ {
+   return RUNSCRIPT;
+diff --git a/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.h b/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.h
+index 3ec34c0eba93b..64a3c53fee4ab 100644
+--- a/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.h
++++ b/xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.h
+@@ -29,13 +29,14 @@ class CHTTPPythonWsgiInvoker : public CHTTPPythonInvoker
+   CHTTPPythonWsgiInvoker(ILanguageInvocationHandler* invocationHandler, HTTPPythonRequest* request);
+   ~CHTTPPythonWsgiInvoker() override;
+ 
++  static void GlobalInitializeModules(void);
++
+   // implementations of CHTTPPythonInvoker
+   HTTPPythonRequest* GetRequest() override;
+ 
+ protected:
+   // overrides of CPythonInvoker
+   void executeScript(FILE* fp, const std::string& script, PyObject* moduleDict) override;
+-  std::map<std::string, PythonModuleInitialization> getModules() const override;
+   const char* getInitializationScript() const override;
+ 
+ private:

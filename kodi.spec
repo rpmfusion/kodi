@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 20.2
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -80,6 +80,8 @@ Patch3: https://github.com/xbmc/xbmc/pull/23453.patch#/fmt10_buildfix.patch
 
 # Add initializer for tp_watched
 Patch4: https://github.com/xbmc/xbmc/commit/2c84ee54a75770e291f38d4ebb2c31c8f2c3b8c5.patch#/tp_watched_initializer.patch
+# Python 3.12 support
+Patch5: https://github.com/xbmc/xbmc/commit/4bf9de87e700f0de56ef698a8d8d6eb7d4ff9050.patch#/kodi-20-python-312.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -306,6 +308,7 @@ This package contains FirewallD files for Kodi.
 %if 0%{?fedora} && 0%{?fedora} > 38
 %patch -P 3 -p1 -b.fmt
 %patch -P 4 -p1 -b.initializer
+%patch -P 5 -p1 -b.python-312
 %endif
 
 # Fix up Python shebangs
@@ -436,6 +439,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Fri Nov 10 2023 Michael Cronenworth <mike@cchtml.com> - 20.2-7
+- Another upstream python-3.12 fix (RFBZ#6783)
+
 * Tue Oct 31 2023 Leigh Scott <leigh123linux@gmail.com> - 20.2-6
 - Use upstream python-3.12 fix
 
