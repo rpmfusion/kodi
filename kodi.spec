@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 20.2
-Release: 8%{?dist}
+Release: 7%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -110,7 +110,7 @@ BuildRequires: expat-devel
 BuildRequires: faad2-devel
 BuildRequires: firewalld-filesystem
 %if 0%{?_with_external_ffmpeg}
-BuildRequires: compat-ffmpeg5-devel
+BuildRequires: compat-ffmpeg4-devel
 %else
 BuildRequires: trousers-devel
 %endif
@@ -322,7 +322,7 @@ This package contains FirewallD files for Kodi.
   tools/EventClients/lib/python/xbmcclient.py
 
 %build
-export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg5/pkgconfig"
+export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
 %cmake \
 %if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
@@ -439,9 +439,6 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
-* Tue Jan 09 2024 Leigh Scott <leigh123linux@gmail.com> - 20.2-8
-- Use compat-ffmpeg5
-
 * Fri Nov 10 2023 Michael Cronenworth <mike@cchtml.com> - 20.2-7
 - Another upstream python-3.12 fix (RFBZ#6783)
 
