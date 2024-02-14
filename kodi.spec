@@ -80,6 +80,9 @@ Patch2: kodi-20-annobin-workaround.patch
 Patch3: https://github.com/xbmc/xbmc/commit/4bf9de87e700f0de56ef698a8d8d6eb7d4ff9050.patch#/kodi-20-python-312.patch
 # Add missing includes
 Patch4: https://github.com/xbmc/xbmc/commit/3dcea03c915f2062d4f8740d66abdf033fba9d6c.patch#/kodi-20-add-missing-includes.patch
+Patch5: kodi-20-add-more-missing-includes.patch
+# swig buildfix
+Patch6: kodi-20-swig-fix.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -201,6 +204,7 @@ BuildRequires: pipewire-devel
 BuildRequires: pulseaudio-libs-devel
 BuildRequires: python3-devel
 BuildRequires: python3-pillow
+BuildRequires: python3-setuptools
 BuildRequires: rapidjson-devel
 BuildRequires: spdlog-devel
 BuildRequires: sqlite-devel
@@ -307,6 +311,8 @@ This package contains FirewallD files for Kodi.
 %patch -P 3 -p1 -b.python-312
 %endif
 %patch -P 4 -p1 -b.missing-includes
+%patch -P 5 -p1 -b.more-missing-includes
+%patch -P 6 -p1 -b.swig-fix
 
 # Fix up Python shebangs
 %py3_shebang_fix \
