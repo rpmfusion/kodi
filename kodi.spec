@@ -38,7 +38,7 @@
 %endif
 
 Name: kodi
-Version: 20.3
+Version: 20.4
 Release: 1%{?dist}
 Summary: Media center
 
@@ -78,6 +78,8 @@ Patch2: kodi-20-annobin-workaround.patch
 
 # Python 3.12 support
 Patch3: https://github.com/xbmc/xbmc/commit/4bf9de87e700f0de56ef698a8d8d6eb7d4ff9050.patch#/kodi-20-python-312.patch
+# Add missing includes
+Patch4: https://github.com/xbmc/xbmc/commit/3dcea03c915f2062d4f8740d66abdf033fba9d6c.patch#/kodi-20-add-missing-includes.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -304,6 +306,7 @@ This package contains FirewallD files for Kodi.
 %if 0%{?fedora} && 0%{?fedora} > 38
 %patch -P 3 -p1 -b.python-312
 %endif
+%patch -P 4 -p1 -b.missing-includes
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -433,6 +436,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Wed Feb 14 2024 Leigh Scott <leigh123linux@gmail.com> - 20.4-1
+- Kodi 20.4 Final
+
 * Wed Jan 10 2024 Michael Cronenworth <mike@cchtml.com> - 20.3-1
 - Kodi 20.3 Final
 
