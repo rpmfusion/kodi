@@ -136,7 +136,7 @@ BuildRequires: gtest-devel
 BuildRequires: jasper-devel
 # F41 java is to new for kodi-20
 %if 0%{?fedora} && 0%{?fedora} > 40
-BuildRequires: java-1.8.0-devel
+BuildRequires: java-17-devel
 %else
 BuildRequires: java-devel
 %endif
