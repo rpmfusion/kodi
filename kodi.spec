@@ -38,7 +38,7 @@
 %endif
 
 Name: kodi
-Version: 20.4
+Version: 20.5
 Release: 1%{?dist}
 Summary: Media center
 
@@ -442,6 +442,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Mon Mar 04 2024 Leigh Scott <leigh123linux@gmail.com> - 20.5-1
+- Kodi 20.5 Final
+
 * Wed Feb 14 2024 Leigh Scott <leigh123linux@gmail.com> - 20.4-1
 - Kodi 20.4 Final
 
