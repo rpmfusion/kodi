@@ -134,7 +134,12 @@ BuildRequires: glib2-devel
 BuildRequires: gperf
 BuildRequires: gtest-devel
 BuildRequires: jasper-devel
+# F41 java is to new for kodi-20
+%if 0%{?fedora} && 0%{?fedora} > 40
+BuildRequires: java-1.8.0-devel
+%else
 BuildRequires: java-devel
+%endif
 BuildRequires: lame-devel
 BuildRequires: lcms2-devel
 BuildRequires: libXinerama-devel
