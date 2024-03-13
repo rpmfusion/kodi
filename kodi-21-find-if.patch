@@ -1,0 +1,10 @@
+--- a/xbmc/platform/posix/filesystem/SMBWSDiscoveryListener.cpp	2024-03-06 18:36:29.000000000 -0600
++++ b/xbmc/platform/posix/filesystem/SMBWSDiscoveryListener.cpp	2024-03-12 17:05:37.140044777 -0500
+@@ -17,6 +17,7 @@
+ 
+ #include "platform/posix/filesystem/SMBWSDiscovery.h"
+ 
++#include <algorithm>
+ #include <array>
+ #include <chrono>
+ #include <mutex>

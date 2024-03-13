@@ -38,8 +38,8 @@
 %endif
 
 Name: kodi
-Version: 20.5
-Release: 1%{?dist}
+Version: 21.0
+Release: 0.0rc1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -47,7 +47,7 @@ License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
 # Some supporting libraries use the LGPL / BSD / MIT license
 Group: Applications/Multimedia
 URL: https://www.kodi.tv/
-Source0: %{name}-%{DIRVERSION}-patched.tar.xz
+Source0: %{name}-%{DIRVERSION}rc1-patched.tar.xz
 # kodi contains code that we cannot ship, as well as redundant private
 # copies of upstream libraries that we already distribute.  Therefore
 # we use this script to remove the code before shipping it.
@@ -70,19 +70,15 @@ Source4: kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz
 Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 %endif
 
+# Build dependency ONLY
+# wget -O apache-groovy-binary-4.0.16.zip http://mirrors.kodi.tv/build-deps/sources/apache-groovy-binary-4.0.16.zip
+Source6: apache-groovy-binary-4.0.16.zip
+
 # Set program version parameters
 Patch1: kodi-20-versioning.patch
 
-# Fix an annobin issue, required for ARM arch
-Patch2: kodi-20-annobin-workaround.patch
-
-# Python 3.12 support
-Patch3: https://github.com/xbmc/xbmc/commit/4bf9de87e700f0de56ef698a8d8d6eb7d4ff9050.patch#/kodi-20-python-312.patch
-# Add missing includes
-Patch4: https://github.com/xbmc/xbmc/commit/3dcea03c915f2062d4f8740d66abdf033fba9d6c.patch#/kodi-20-add-missing-includes.patch
-Patch5: kodi-20-add-more-missing-includes.patch
-# swig buildfix
-Patch6: kodi-20-swig-fix.patch
+# Compiler error
+Patch2: kodi-21-find-if.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -94,6 +90,8 @@ ExcludeArch: %{power64}
 BuildRequires: a52dec-devel
 BuildRequires: afpfs-ng-devel
 BuildRequires: alsa-lib-devel
+BuildRequires: apache-commons-lang3
+BuildRequires: apache-commons-text
 BuildRequires: avahi-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: boost-devel
@@ -111,7 +109,7 @@ BuildRequires: expat-devel
 BuildRequires: faad2-devel
 BuildRequires: firewalld-filesystem
 %if 0%{?_with_external_ffmpeg}
-BuildRequires: compat-ffmpeg4-devel
+BuildRequires: ffmpeg-devel
 %else
 BuildRequires: trousers-devel
 %endif
@@ -161,6 +159,7 @@ BuildRequires: libcrystalhd-devel
 BuildRequires: libcurl-devel
 BuildRequires: libdav1d-devel
 BuildRequires: libdca-devel
+BuildRequires: libdisplay-info-devel
 BuildRequires: libdrm-devel
 BuildRequires: libidn2-devel
 BuildRequires: libinput-devel
@@ -217,6 +216,7 @@ BuildRequires: swig
 BuildRequires: systemd-devel
 BuildRequires: taglib-devel >= 1.10
 BuildRequires: tinyxml-devel
+BuildRequires: tinyxml2-devel
 BuildRequires: tre-devel
 BuildRequires: wavpack-devel
 %if 0%{?_with_wayland}
@@ -227,7 +227,6 @@ BuildRequires: yajl-devel
 BuildRequires: zlib-devel
 
 Requires: (%{name}-firewalld = %{version}-%{release} if firewalld)
-Requires: dejavu-sans-fonts
 # need explicit requires for these packages
 # as they are dynamically loaded via XBMC's arcane
 # pseudo-DLL loading scheme (sigh)
@@ -309,15 +308,12 @@ This package contains FirewallD files for Kodi.
 
 
 %prep
-%setup -q -n %{name}-%{DIRVERSION}
+%setup -q -n %{name}-%{DIRVERSION}rc1
+pushd ..
+unzip %{SOURCE6}
+popd
 %patch -P 1 -p1 -b.versioning
-%patch -P 2 -p1 -b.innobinfix
-%if 0%{?fedora} && 0%{?fedora} > 38
-%patch -P 3 -p1 -b.python-312
-%endif
-%patch -P 4 -p1 -b.missing-includes
-%patch -P 5 -p1 -b.more-missing-includes
-%patch -P 6 -p1 -b.swig-fix
+%patch -P 2 -p1 -b.find-if
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -340,6 +336,9 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
 %if ! 0%{?_with_external_ffmpeg}
   -DFFMPEG_URL=%{SOURCE5} \
 %endif
+  -Dgroovy_SOURCE_DIR=%{_builddir}/groovy-4.0.16 \
+  -Dapache-commons-lang_SOURCE_DIR=/usr/share/java \
+  -Dapache-commons-text_SOURCE_DIR=/usr/share/java/apache-commons-text \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DCMAKE_C_FLAGS_RELWITHDEBINFO:STRING="-DNDEBUG" \
   -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-DNDEBUG" \
@@ -378,9 +377,6 @@ install -d $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib
 ln -s %{python3_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib/PIL
 #install -d $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib
 
-# Use external font files instead of bundled ones
-ln -sf %{_fontbasedir}/dejavu/DejaVuSans-Bold.ttf ${RPM_BUILD_ROOT}%{_datadir}/kodi/addons/skin.estouchy/fonts/
-
 # Move man-pages into system dir
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
 mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
@@ -389,6 +385,9 @@ mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
 %if ! 0%{?_with_cwiid}
 rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 %endif
+
+# Remove duplicate binary
+rm -f ${RPM_BUILD_ROOT}%{_bindir}/TexturePacker
 
 
 %post firewalld
@@ -400,10 +399,10 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 %doc README.md docs
 %{_bindir}/kodi
 %{_bindir}/kodi-standalone
-%{_bindir}/JsonSchemaBuilder
 %{_bindir}/kodi-TexturePacker
 %{_libdir}/kodi/
 %{_datadir}/kodi/
+%{_datadir}/wayland-sessions/kodi-gbm.desktop
 %{_datadir}/xsessions/kodi.desktop
 %{_datadir}/applications/kodi.desktop
 %{_datadir}/icons/hicolor/*/*/*.png
@@ -447,6 +446,9 @@ rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
 
 
 %changelog
+* Mon Mar 11 2024 Michael Cronenworth <mike@cchtml.com> - 21.0-0.0rc1
+- Kodi 21.0 RC1
+
 * Mon Mar 04 2024 Leigh Scott <leigh123linux@gmail.com> - 20.5-1
 - Kodi 20.5 Final
 
