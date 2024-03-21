@@ -1,9 +1,9 @@
 #global PRERELEASE rc2
-%global DIRVERSION %{version}%{PRERELEASE}
+#global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
 #global DIRVERSION %{version}-%{GITCOMMIT}
-#global DIRVERSION %{version}%{PRERELEASE}
+%global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 %ifarch %{arm} %{arm64}
 # Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
@@ -308,7 +308,7 @@ This package contains FirewallD files for Kodi.
 
 
 %prep
-%setup -q -n %{name}-%{DIRVERSION}rc1
+%setup -q -n %{name}-%{DIRVERSION}
 pushd ..
 unzip %{SOURCE6}
 popd
