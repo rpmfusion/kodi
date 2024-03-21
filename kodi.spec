@@ -1,4 +1,4 @@
-#global PRERELEASE rc2
+%global PRERELEASE rc2
 #global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
