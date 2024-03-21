@@ -1,5 +1,5 @@
 #global PRERELEASE rc2
-%global DIRVERSION %{version}
+%global DIRVERSION %{version}%{PRERELEASE}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
 #global DIRVERSION %{version}-%{GITCOMMIT}
@@ -47,7 +47,7 @@ License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
 # Some supporting libraries use the LGPL / BSD / MIT license
 Group: Applications/Multimedia
 URL: https://www.kodi.tv/
-Source0: %{name}-%{DIRVERSION}rc1-patched.tar.xz
+Source0: %{name}-%{DIRVERSION}-patched.tar.xz
 # kodi contains code that we cannot ship, as well as redundant private
 # copies of upstream libraries that we already distribute.  Therefore
 # we use this script to remove the code before shipping it.
