@@ -1,9 +1,9 @@
-%global PRERELEASE rc2
-#global DIRVERSION %{version}
+#global PRERELEASE rc2
+%global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
 #global DIRVERSION %{version}-%{GITCOMMIT}
-%global DIRVERSION %{version}%{PRERELEASE}
+#global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 %ifarch %{arm} %{arm64}
 # Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.0
-Release: 0.0rc2%{?dist}
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -375,7 +375,6 @@ rm -f $RPM_BUILD_ROOT/%{_datadir}/xsessions/xbmc.desktop
 # the system Python interpreter, we also want to use the system libraries
 install -d $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib
 ln -s %{python3_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib/PIL
-#install -d $RPM_BUILD_ROOT%{_libdir}/xbmc/addons/script.module.pysqlite/lib
 
 # Move man-pages into system dir
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
@@ -446,6 +445,9 @@ rm -f ${RPM_BUILD_ROOT}%{_bindir}/TexturePacker
 
 
 %changelog
+* Sun Apr 07 2024 Michael Cronenworth <mike@cchtml.com> - 21.0-1
+- Kodi 21.0 Final
+
 * Thu Mar 21 2024 Michael Cronenworth <mike@cchtml.com> - 21.0-0.0rc2
 - Kodi 21.0 RC2
 
