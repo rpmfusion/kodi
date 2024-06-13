@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -445,6 +445,9 @@ rm -f ${RPM_BUILD_ROOT}%{_bindir}/TexturePacker
 
 
 %changelog
+* Thu Jun 13 2024 Leigh Scott <leigh123linux@gmail.com> - 21.0-2
+- Rebuilt for Python 3.13
+
 * Sun Apr 07 2024 Michael Cronenworth <mike@cchtml.com> - 21.0-1
 - Kodi 21.0 Final
 
