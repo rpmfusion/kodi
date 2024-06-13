@@ -80,6 +80,9 @@ Patch1: kodi-20-versioning.patch
 # Compiler error
 Patch2: kodi-21-find-if.patch
 
+# Python-3.13 fix
+Patch3: fix_py313.patch
+
 %ifarch x86_64
 %global _with_crystalhd 1
 %endif
@@ -314,6 +317,7 @@ unzip %{SOURCE6}
 popd
 %patch -P 1 -p1 -b.versioning
 %patch -P 2 -p1 -b.find-if
+%patch -P 3 -p1 -b.py313
 
 # Fix up Python shebangs
 %py3_shebang_fix \
