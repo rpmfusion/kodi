@@ -38,8 +38,8 @@
 %endif
 
 Name: kodi
-Version: 21.0
-Release: 3%{?dist}
+Version: 21.1
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -75,13 +75,10 @@ Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 Source6: apache-groovy-binary-4.0.16.zip
 
 # Set program version parameters
-Patch1: kodi-20-versioning.patch
-
-# Compiler error
-Patch2: kodi-21-find-if.patch
+Patch0: kodi-20-versioning.patch
 
 # Python-3.13 fix
-Patch3: fix_py313.patch
+Patch1: fix_py313.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -147,6 +144,7 @@ BuildRequires: libXinerama-devel
 BuildRequires: libXmu-devel
 BuildRequires: libXrandr-devel
 BuildRequires: libXtst-devel
+BuildRequires: libappstream-glib
 BuildRequires: libass-devel >= 0.9.7
 %if 0%{?_with_libbluray}
 BuildRequires: libbluray-devel
@@ -315,9 +313,8 @@ This package contains FirewallD files for Kodi.
 pushd ..
 unzip %{SOURCE6}
 popd
-%patch -P 1 -p1 -b.versioning
-%patch -P 2 -p1 -b.find-if
-%patch -P 3 -p1 -b.py313
+%patch -P 0 -p1 -b.versioning
+%patch -P 1 -p1 -b.py313
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -369,8 +366,10 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
 rm -r $RPM_BUILD_ROOT/%{_datadir}/doc/
 
 desktop-file-install \
- --dir=${RPM_BUILD_ROOT}%{_datadir}/applications \
+ --dir=%{buildroot}%{_datadir}/applications \
  $RPM_BUILD_ROOT%{_datadir}/applications/kodi.desktop
+
+appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/org.xbmc.kodi.metainfo.xml
 
 # Stop shipping the duplicate xsession file
 rm -f $RPM_BUILD_ROOT/%{_datadir}/xsessions/xbmc.desktop
@@ -381,16 +380,16 @@ install -d $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib
 ln -s %{python3_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib/PIL
 
 # Move man-pages into system dir
-mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/
-mv docs/manpages ${RPM_BUILD_ROOT}%{_mandir}/man1/
+mkdir -p %{buildroot}%{_mandir}/
+mv docs/manpages %{buildroot}%{_mandir}/man1/
 
 # Remove wiiremote man page if support was disabled
 %if ! 0%{?_with_cwiid}
-rm -f ${RPM_BUILD_ROOT}%{_mandir}/man1/kodi-wiiremote.1
+rm -f %{buildroot}%{_mandir}/man1/kodi-wiiremote.1
 %endif
 
 # Remove duplicate binary
-rm -f ${RPM_BUILD_ROOT}%{_bindir}/TexturePacker
+rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %post firewalld
@@ -409,11 +408,12 @@ rm -f ${RPM_BUILD_ROOT}%{_bindir}/TexturePacker
 %{_datadir}/xsessions/kodi.desktop
 %{_datadir}/applications/kodi.desktop
 %{_datadir}/icons/hicolor/*/*/*.png
-%{_datadir}/metainfo/org.xbmc.kodi.metainfo.xml
-%{_mandir}/man1/kodi.1.gz
-%{_mandir}/man1/kodi.bin.1.gz
-%{_mandir}/man1/kodi-standalone.1.gz
-%{_mandir}/man1/kodi-TexturePacker.1.gz
+%{_datadir}/icons/hicolor/scalable/apps/kodi.svg
+%{_metainfodir}/org.xbmc.kodi.metainfo.xml
+%{_mandir}/man1/kodi.1.*
+%{_mandir}/man1/kodi.bin.1.*
+%{_mandir}/man1/kodi-standalone.1.*
+%{_mandir}/man1/kodi-TexturePacker.1.*
 
 
 %files devel
@@ -430,10 +430,10 @@ rm -f ${RPM_BUILD_ROOT}%{_bindir}/TexturePacker
 %if 0%{?_with_cwiid}
 %{_bindir}/kodi-wiiremote
 %endif
-%{_mandir}/man1/kodi-ps3remote.1.gz
-%{_mandir}/man1/kodi-send.1.gz
+%{_mandir}/man1/kodi-ps3remote.1.*
+%{_mandir}/man1/kodi-send.1.*
 %if 0%{?_with_cwiid}
-%{_mandir}/man1/kodi-wiiremote.1.gz
+%{_mandir}/man1/kodi-wiiremote.1.*
 %endif
 
 
@@ -449,6 +449,9 @@ rm -f ${RPM_BUILD_ROOT}%{_bindir}/TexturePacker
 
 
 %changelog
+* Tue Aug 20 2024 Leigh Scott <leigh123linux@gmail.com> - 21.1-1
+- Update to 21.1
+
 * Sat Jul 27 2024 Leigh Scott <leigh123linux@gmail.com> - 21.0-3
 - Rebuild for new fmt
 
