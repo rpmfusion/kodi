@@ -363,21 +363,21 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
 %cmake_install
 
 # remove the doc files from unversioned /usr/share/doc/xbmc, they should be in versioned docdir
-rm -r $RPM_BUILD_ROOT/%{_datadir}/doc/
+rm -r %{buildroot}/%{_datadir}/doc/
 
 desktop-file-install \
  --dir=%{buildroot}%{_datadir}/applications \
- $RPM_BUILD_ROOT%{_datadir}/applications/kodi.desktop
+ %{buildroot}%{_datadir}/applications/kodi.desktop
 
 appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/org.xbmc.kodi.metainfo.xml
 
 # Stop shipping the duplicate xsession file
-rm -f $RPM_BUILD_ROOT/%{_datadir}/xsessions/xbmc.desktop
+rm -f %{buildroot}/%{_datadir}/xsessions/xbmc.desktop
 
 # Normally we are expected to build these manually. But since we are using
 # the system Python interpreter, we also want to use the system libraries
-install -d $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib
-ln -s %{python3_sitearch}/PIL $RPM_BUILD_ROOT%{_libdir}/kodi/addons/script.module.pil/lib/PIL
+install -d %{buildroot}%{_libdir}/kodi/addons/script.module.pil/lib
+ln -s %{python3_sitearch}/PIL %{buildroot}%{_libdir}/kodi/addons/script.module.pil/lib/PIL
 
 # Move man-pages into system dir
 mkdir -p %{buildroot}%{_mandir}/
