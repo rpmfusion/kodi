@@ -82,7 +82,7 @@ Patch1: fix_py313.patch
 
 # ffmpeg-7 fix
 # https://github.com/xbmc/xbmc/pull/24972
-Patch2: 24972.patch
+Patch2: ffmpeg7.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
