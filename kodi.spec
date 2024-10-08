@@ -80,6 +80,10 @@ Patch0: kodi-20-versioning.patch
 # Python-3.13 fix
 Patch1: fix_py313.patch
 
+# ffmpeg-7 fix
+# https://github.com/xbmc/xbmc/pull/24972
+Patch2: 24972.patch
+
 %ifarch x86_64
 %global _with_crystalhd 1
 %endif
@@ -315,6 +319,7 @@ unzip %{SOURCE6}
 popd
 %patch -P 0 -p1 -b.versioning
 %patch -P 1 -p1 -b.py313
+%patch -P 2 -p1 -b.ffmpeg7
 
 # Fix up Python shebangs
 %py3_shebang_fix \
