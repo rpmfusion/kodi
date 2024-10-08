@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -449,6 +449,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Tue Oct 08 2024 Nicolas Chauvet <kwizart@gmail.com> - 21.1-2
+- Rebuilt
+
 * Tue Aug 20 2024 Leigh Scott <leigh123linux@gmail.com> - 21.1-1
 - Update to 21.1
 
