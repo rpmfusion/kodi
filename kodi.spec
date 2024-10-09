@@ -82,7 +82,8 @@ Patch1: fix_py313.patch
 
 # ffmpeg-7 fix
 # https://github.com/xbmc/xbmc/pull/24972
-Patch2: ffmpeg7.patch
+# https://salsa.debian.org/multimedia-team/kodi-media-center/kodi/-/blob/debian/sid/debian/patches/workarounds/0004-ffmpeg7.patch
+Patch2: 0004-ffmpeg7.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
