@@ -1,0 +1,11 @@
+--- a/cmake/scripts/linux/Install.cmake	2025-01-15 22:14:15.000000000 +0000
++++ b/cmake/scripts/linux/Install.cmake	2025-01-16 15:19:02.000000000 +0000
+@@ -199,7 +199,7 @@ install(FILES ${CMAKE_BINARY_DIR}/${CORE
+ 
+ if(ENABLE_EVENTCLIENTS)
+   find_package(PythonInterpreter REQUIRED)
+-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from sysconfig import get_path; print(get_path('platlib', scheme='posix_prefix', vars={'platbase':'${CMAKE_INSTALL_PREFIX}'}))"
++  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix=''))"
+                   OUTPUT_VARIABLE PYTHON_LIB_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+   # Install kodi-eventclients-common BT python files
+   install(PROGRAMS ${CMAKE_SOURCE_DIR}/tools/EventClients/lib/python/bt/__init__.py

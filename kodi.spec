@@ -38,8 +38,8 @@
 %endif
 
 Name: kodi
-Version: 21.1
-Release: 2%{?dist}
+Version: 21.2
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -77,8 +77,10 @@ Source6: apache-groovy-binary-4.0.16.zip
 # Set program version parameters
 Patch0: kodi-20-versioning.patch
 
-# Python-3.13 fix
-Patch1: fix_py313.patch
+# Revert bad upstream commit to fix sitelib directory
+# https://github.com/xbmc/xbmc/commit/2208a3bc7d40c75f73fef8b94823b150ccff38dd
+# https://github.com/xbmc/xbmc/commit/2b55d858fa39b144ecbaff6bfc7c2ccbb534e03d
+Patch1: fix_python_install_directory.patch
 
 # ffmpeg-7 fix
 # https://github.com/xbmc/xbmc/pull/24972
@@ -319,7 +321,7 @@ pushd ..
 unzip %{SOURCE6}
 popd
 %patch -P 0 -p1 -b.versioning
-%patch -P 1 -p1 -b.py313
+%patch -P 1 -p1 -b.sitelib
 %patch -P 2 -p1 -b.ffmpeg7
 
 # Fix up Python shebangs
@@ -455,6 +457,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Thu Jan 16 2025 Leigh Scott <leigh123linux@gmail.com> - 21.2-1
+- Update to 21.2
+
 * Tue Oct 08 2024 Nicolas Chauvet <kwizart@gmail.com> - 21.1-2
 - Rebuilt
 
