@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -139,12 +139,7 @@ BuildRequires: glib2-devel
 BuildRequires: gperf
 BuildRequires: gtest-devel
 BuildRequires: jasper-devel
-# F41 java is to new for kodi-20
-%if 0%{?fedora} && 0%{?fedora} > 40
-BuildRequires: java-17-devel
-%else
-BuildRequires: java-devel
-%endif
+BuildRequires: java-21-devel
 BuildRequires: lame-devel
 BuildRequires: lcms2-devel
 BuildRequires: libXinerama-devel
@@ -457,6 +452,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Thu Jan 16 2025 Leigh Scott <leigh123linux@gmail.com> - 21.2-2
+- Switch build requires to java-21-devel
+
 * Thu Jan 16 2025 Leigh Scott <leigh123linux@gmail.com> - 21.2-1
 - Update to 21.2
 
