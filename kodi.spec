@@ -317,7 +317,9 @@ unzip %{SOURCE6}
 popd
 %patch -P 0 -p1 -b.versioning
 %patch -P 1 -p1 -b.sitelib
+%if 0%{?fedora} && 0%{?fedora} > 40
 %patch -P 2 -p1 -b.ffmpeg7
+%endif
 
 # Fix up Python shebangs
 %py3_shebang_fix \
