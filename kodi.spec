@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -86,6 +86,9 @@ Patch1: fix_python_install_directory.patch
 # https://github.com/xbmc/xbmc/pull/24972
 # https://salsa.debian.org/multimedia-team/kodi-media-center/kodi/-/blob/debian/sid/debian/patches/workarounds/0004-ffmpeg7.patch
 Patch2: 0004-ffmpeg7.patch
+
+# https://github.com/xbmc/xbmc/pull/26125
+Patch3: kodi-20-pipewire.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -320,6 +323,7 @@ popd
 %if 0%{?fedora} && 0%{?fedora} > 40
 %patch -P 2 -p1 -b.ffmpeg7
 %endif
+%patch -P 3 -p1 -b.pipewire
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -454,6 +458,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Sat Feb 22 2025 Michael Cronenworth <mike@cchtml.com> - 21.2-4
+- Add patch for pipewire log spam
+
 * Thu Feb 13 2025 Michael Cronenworth <mike@cchtml.com> - 21.2-3
 - Rebuild for libdisplay-info (RFBZ#7172)
 
