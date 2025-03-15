@@ -94,7 +94,7 @@ Patch3: kodi-20-pipewire.patch
 Patch4: kodi-20-libnfs.patch
 
 # https://github.com/xbmc/xbmc/commit/1a513cca5d095420b6aa18a3ad3aeffc4fcee8cc
-Patch5: https://github.com/xbmc/xbmc/commit/1a513cca5d095420b6aa18a3ad3aeffc4fcee8cc.patch#/kodi-20-pipewire14.patch
+Patch5: kodi-20-pipewire14.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
