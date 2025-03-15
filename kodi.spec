@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -89,6 +89,9 @@ Patch2: 0004-ffmpeg7.patch
 
 # https://github.com/xbmc/xbmc/pull/26125
 Patch3: kodi-20-pipewire.patch
+
+# https://github.com/xbmc/xbmc/commit/f6ba404babe8b9d090dd5360949c410ba40c97df
+Patch4: kodi-20-libnfs.patch
 
 %ifarch x86_64
 %global _with_crystalhd 1
@@ -458,6 +461,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Sat Mar 15 2025 Leigh Scott <leigh123linux@gmail.com> - 21.2-5
+- Rebuild for new libnfs
+
 * Sat Feb 22 2025 Michael Cronenworth <mike@cchtml.com> - 21.2-4
 - Add patch for pipewire log spam
 

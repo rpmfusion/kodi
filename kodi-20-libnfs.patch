@@ -1,0 +1,135 @@
+From 28a63baec8552b7a7ca0999be15b556012270b5a Mon Sep 17 00:00:00 2001
+From: Stephan Sundermann <stephansundermann@gmail.com>
+Date: Sun, 15 Dec 2024 17:08:34 +0100
+Subject: [PATCH 1/2] [nfs] Fix API breakage in libnfs 6.0
+
+---
+ cmake/modules/FindNFS.cmake                      |  3 ---
+ .../depends/target/libnfs/01-MSUWP-compat.patch  | 11 -----------
+ tools/depends/target/libnfs/Makefile             |  4 +---
+ xbmc/filesystem/NFSFile.cpp                      | 16 ++++++++++++++--
+ 4 files changed, 15 insertions(+), 19 deletions(-)
+ delete mode 100644 tools/depends/target/libnfs/01-MSUWP-compat.patch
+
+diff --git a/cmake/modules/FindNFS.cmake b/cmake/modules/FindNFS.cmake
+index 76a1090652c8a..37b1d09355016 100644
+--- a/cmake/modules/FindNFS.cmake
++++ b/cmake/modules/FindNFS.cmake
+@@ -19,9 +19,6 @@ if(NOT TARGET ${APP_NAME_LC}::${CMAKE_FIND_PACKAGE_NAME})
+     if(WIN32 OR WINDOWS_STORE)
+       set(${MODULE}_C_FLAGS "/sdl-")
+       set(${MODULE}_CXX_FLAGS "/sdl-")
+-
+-      set(patches "${CORE_SOURCE_DIR}/tools/depends/target/${MODULE_LC}/01-MSUWP-compat.patch")
+-      generate_patchcommand("${patches}")
+     endif()
+ 
+     BUILD_DEP_TARGET()
+diff --git a/tools/depends/target/libnfs/01-MSUWP-compat.patch b/tools/depends/target/libnfs/01-MSUWP-compat.patch
+deleted file mode 100644
+index 70cac0b767ade..0000000000000
+--- a/tools/depends/target/libnfs/01-MSUWP-compat.patch
++++ /dev/null
+@@ -1,11 +0,0 @@
+---- a/CMakeLists.txt
+-+++ b/CMakeLists.txt
+-@@ -39,7 +39,7 @@
+-   add_definitions(-Dlibnfs_EXPORTS)
+- endif()
+- 
+--if(CMAKE_SYSTEM_NAME STREQUAL Windows)
+-+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+-   add_definitions("-D_U_=" -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
+-   list(APPEND SYSTEM_LIBRARIES ws2_32)
+-   add_subdirectory(win32)
+diff --git a/tools/depends/target/libnfs/Makefile b/tools/depends/target/libnfs/Makefile
+index e069bbf79070a..f4cfd33a3716e 100644
+--- a/tools/depends/target/libnfs/Makefile
++++ b/tools/depends/target/libnfs/Makefile
+@@ -1,6 +1,5 @@
+ include ../../Makefile.include LIBNFS-VERSION ../../download-files.include
+-DEPS= ../../Makefile.include Makefile LIBNFS-VERSION ../../download-files.include \
+-                  01-MSUWP-compat.patch
++DEPS= ../../Makefile.include Makefile LIBNFS-VERSION ../../download-files.include
+ 
+ # configuration settings
+ CMAKE_OPTIONS=-DBUILD_SHARED_LIBS=OFF \
+@@ -17,7 +16,6 @@ $(PLATFORM): $(DEPS) | $(TARBALLS_LOCATION)/$(ARCHIVE).$(HASH_TYPE)
+ 	-rm -rf $(PLATFORM); mkdir -p $(PLATFORM)
+ 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
+ 	cd $(PLATFORM); mkdir -p build
+-	cd $(PLATFORM); patch -p1 -i ../01-MSUWP-compat.patch
+ 	cd $(PLATFORM)/build; $(CMAKE) $(CMAKE_OPTIONS) ..
+ 
+ $(LIBDYLIB): $(PLATFORM)
+diff --git a/xbmc/filesystem/NFSFile.cpp b/xbmc/filesystem/NFSFile.cpp
+index b96b2bc4fad4b..2f9891529b114 100644
+--- a/xbmc/filesystem/NFSFile.cpp
++++ b/xbmc/filesystem/NFSFile.cpp
+@@ -477,7 +477,11 @@ void CNfsConnection::keepAlive(const std::string& _exportPath, struct nfsfh* _pF
+ 
+   nfs_lseek(pContext, _pFileHandle, 0, SEEK_CUR, &offset);
+ 
+-  int bytes = nfs_read(pContext, _pFileHandle, 32, buffer);
++#ifdef LIBNFS_API_V2
++  int bytes = nfs_read(pContext, _pFileHandle, buffer, sizeof(buffer));
++#else
++  int bytes = nfs_read(pContext, _pFileHandle, sizeof(buffer), buffer);
++#endif
+   if (bytes < 0)
+   {
+     CLog::LogF(LOGERROR, "nfs_read - Error ({}, {})", bytes, nfs_get_error(pContext));
+@@ -741,8 +745,11 @@ ssize_t CNFSFile::Read(void *lpBuf, size_t uiBufSize)
+ 
+   if (m_pFileHandle == NULL || m_pNfsContext == NULL )
+     return -1;
+-
++#ifdef LIBNFS_API_V2
++  numberOfBytesRead = nfs_read(m_pNfsContext, m_pFileHandle, lpBuf, uiBufSize);
++#else
+   numberOfBytesRead = nfs_read(m_pNfsContext, m_pFileHandle, uiBufSize, (char *)lpBuf);
++#endif
+ 
+   lock.unlock(); //no need to keep the connection lock after that
+ 
+@@ -841,12 +848,17 @@ ssize_t CNFSFile::Write(const void* lpBuf, size_t uiBufSize)
+     {
+       chunkSize = leftBytes;//write last chunk with correct size
+     }
++#ifdef LIBNFS_API_V2
++    writtenBytes = nfs_write(m_pNfsContext, m_pFileHandle,
++                             static_cast<const char*>(lpBuf) + numberOfBytesWritten, chunkSize);
++#else
+     //write chunk
+     //! @bug libnfs < 2.0.0 isn't const correct
+     writtenBytes = nfs_write(m_pNfsContext,
+                                   m_pFileHandle,
+                                   chunkSize,
+                                   const_cast<char*>((const char *)lpBuf) + numberOfBytesWritten);
++#endif
+     //decrease left bytes
+     leftBytes-= writtenBytes;
+     //increase overall written bytes
+
+From 4bf2aa7b8fc811347bffb3a2c6b88edb0c9170da Mon Sep 17 00:00:00 2001
+From: Stephan Sundermann <stephansundermann@gmail.com>
+Date: Sun, 15 Dec 2024 17:07:05 +0100
+Subject: [PATCH 2/2] [depends] Update to libnfs 6.0.2
+
+---
+ tools/depends/target/libnfs/LIBNFS-VERSION | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tools/depends/target/libnfs/LIBNFS-VERSION b/tools/depends/target/libnfs/LIBNFS-VERSION
+index 892aa7afcfd48..699a31c70fcae 100644
+--- a/tools/depends/target/libnfs/LIBNFS-VERSION
++++ b/tools/depends/target/libnfs/LIBNFS-VERSION
+@@ -1,6 +1,6 @@
+ LIBNAME=libnfs
+-VERSION=5.0.2
++VERSION=6.0.2
+ ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
+-SHA512=6dcf4ea8a01b35beb53694625d20fbebd858a88725c2742671878ad6fe7877999f93d262fb58a435b00c283c3e6fb6fa7222d04bb4540bf674b7ce196e9424f5
++SHA512=539790ab98aac7b2f25755b745d1f5e016518f1adb3748b8c58df187048bc31e091915d59e6359bb95c49dd986361cbbf2536edcda02598b0fac236762b61a46
+ BYPRODUCT=libnfs.a
+ BYPRODUCT_WIN=nfs.lib
