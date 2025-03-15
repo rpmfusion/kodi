@@ -327,6 +327,7 @@ popd
 %patch -P 2 -p1 -b.ffmpeg7
 %endif
 %patch -P 3 -p1 -b.pipewire
+%patch -P 4 -p1 -b.libnfs
 
 # Fix up Python shebangs
 %py3_shebang_fix \
