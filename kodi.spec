@@ -97,7 +97,9 @@ Patch4: kodi-20-libnfs.patch
 Patch5: kodi-20-pipewire14.patch
 
 %ifarch x86_64
+%if 0%{?fedora} > 43
 %global _with_crystalhd 1
+%endif
 %endif
 
 # Upstream does not support ppc64
@@ -468,6 +470,7 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 %changelog
 * Fri Aug 15 2025 Leigh Scott <leigh123linux@gmail.com> - 21.2-7
 - Rebuild for new python version
+- Drop crystalhd for f43+
 
 * Sat May 24 2025 Michael Cronenworth <mike@cchtml.com> - 21.2-6
 - Rebuild for new libcec
