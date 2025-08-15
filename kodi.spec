@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.2
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -466,6 +466,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Fri Aug 15 2025 Leigh Scott <leigh123linux@gmail.com> - 21.2-7
+- Rebuild for new python version
+
 * Sat May 24 2025 Michael Cronenworth <mike@cchtml.com> - 21.2-6
 - Rebuild for new libcec
 
