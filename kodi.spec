@@ -97,7 +97,7 @@ Patch4: kodi-20-libnfs.patch
 Patch5: kodi-20-pipewire14.patch
 
 %ifarch x86_64
-%if 0%{?fedora} > 43
+%if 0%{?fedora} < 43
 %global _with_crystalhd 1
 %endif
 %endif
