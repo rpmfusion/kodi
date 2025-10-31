@@ -38,8 +38,8 @@
 %endif
 
 Name: kodi
-Version: 21.2
-Release: 9%{?dist}
+Version: 21.3
+Release: 1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -468,6 +468,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Fri Oct 31 2025 leigh - 21.3-1
+- Update to 21.3
+
 * Sun Aug 24 2025 Leigh Scott <leigh123linux@gmail.com> - 21.2-9
 - Rebuild for new libtinyxml2
 
