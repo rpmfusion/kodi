@@ -87,15 +87,6 @@ Patch1: fix_python_install_directory.patch
 # https://salsa.debian.org/multimedia-team/kodi-media-center/kodi/-/blob/debian/sid/debian/patches/workarounds/0004-ffmpeg7.patch
 Patch2: 0004-ffmpeg7.patch
 
-# https://github.com/xbmc/xbmc/pull/26125
-Patch3: kodi-20-pipewire.patch
-
-# https://github.com/xbmc/xbmc/commit/f6ba404babe8b9d090dd5360949c410ba40c97df
-Patch4: kodi-20-libnfs.patch
-
-# https://github.com/xbmc/xbmc/commit/1a513cca5d095420b6aa18a3ad3aeffc4fcee8cc
-Patch5: kodi-20-pipewire14.patch
-
 %ifarch x86_64
 %if 0%{?fedora} < 43
 %global _with_crystalhd 1
@@ -331,9 +322,6 @@ popd
 %if 0%{?fedora} && 0%{?fedora} > 40
 %patch -P 2 -p1 -b.ffmpeg7
 %endif
-%patch -P 3 -p1 -b.pipewire
-%patch -P 4 -p1 -b.libnfs
-%patch -P 5 -p1 -b.pipewire14
 
 # Fix up Python shebangs
 %py3_shebang_fix \
