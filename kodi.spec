@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -86,6 +86,10 @@ Patch1: fix_python_install_directory.patch
 # https://github.com/xbmc/xbmc/pull/24972
 # https://salsa.debian.org/multimedia-team/kodi-media-center/kodi/-/blob/debian/sid/debian/patches/workarounds/0004-ffmpeg7.patch
 Patch2: 0004-ffmpeg7.patch
+
+# revert https://github.com/xbmc/xbmc/commit/c89cf388e3d0f124c88c72078a8069f37aa7164b
+# https://github.com/xbmc/xbmc/issues/27420
+Patch3: 0001-Revert-PipeWire-Lock-CPipewireRegistry-before-access.patch
 
 %ifarch x86_64
 %if 0%{?fedora} < 43
@@ -322,6 +326,7 @@ popd
 %if 0%{?fedora} && 0%{?fedora} > 40
 %patch -P 2 -p1 -b.ffmpeg7
 %endif
+%patch -P 3 -p1 -b.pipewire-revert
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -456,6 +461,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Sun Nov 02 2025 Michael Cronenworth <mike@cchtml.com> - 21.3-2
+- Revert pipewire change
+
 * Fri Oct 31 2025 leigh - 21.3-1
 - Update to 21.3
 
