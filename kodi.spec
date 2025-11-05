@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -461,6 +461,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Wed Nov 05 2025 Leigh Scott <leigh123linux@gmail.com> - 21.3-3
+- Rebuild for ffmpeg-8.0
+
 * Sun Nov 02 2025 Michael Cronenworth <mike@cchtml.com> - 21.3-2
 - Revert pipewire change
 
