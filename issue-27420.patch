@@ -1,0 +1,110 @@
+From b6977d331b458bcf5d22f4b63c5780ae2a539852 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Markus=20H=C3=A4rer?= <markus.haerer@gmx.net>
+Date: Sat, 27 Dec 2025 02:30:23 +0100
+Subject: [PATCH] [PipeWire] Enumerate formats on node change to prevent
+ deadlock
+
+---
+ .../Sinks/pipewire/AESinkPipewire.cpp         | 11 -------
+ .../Sinks/pipewire/PipewireNode.cpp           | 32 ++++++++-----------
+ .../AudioEngine/Sinks/pipewire/PipewireNode.h |  2 --
+ 3 files changed, 13 insertions(+), 32 deletions(-)
+
+diff --git a/xbmc/cores/AudioEngine/Sinks/pipewire/AESinkPipewire.cpp b/xbmc/cores/AudioEngine/Sinks/pipewire/AESinkPipewire.cpp
+index 1979ac212a231..e74f29a735bab 100644
+--- a/xbmc/cores/AudioEngine/Sinks/pipewire/AESinkPipewire.cpp
++++ b/xbmc/cores/AudioEngine/Sinks/pipewire/AESinkPipewire.cpp
+@@ -321,17 +321,6 @@ void CAESinkPipewire::EnumerateDevicesEx(AEDeviceInfoList& list, bool force)
+                   [&device](const auto& rate) { device.m_sampleRates.emplace_back(rate); });
+ 
+     auto& node = global->GetNode();
+-    node.EnumerateFormats();
+-
+-    int ret = loop.Wait(5s);
+-    if (ret == -ETIMEDOUT)
+-    {
+-      CLog::Log(LOGDEBUG,
+-                "CAESinkPipewire::{} - timed out out waiting for formats to be enumerated",
+-                __FUNCTION__);
+-      continue;
+-    }
+-
+     auto& channels = node.GetChannels();
+     if (channels.size() < 1)
+       continue;
+diff --git a/xbmc/cores/AudioEngine/Sinks/pipewire/PipewireNode.cpp b/xbmc/cores/AudioEngine/Sinks/pipewire/PipewireNode.cpp
+index 50eaf0c945886..468facbfb1a2e 100644
+--- a/xbmc/cores/AudioEngine/Sinks/pipewire/PipewireNode.cpp
++++ b/xbmc/cores/AudioEngine/Sinks/pipewire/PipewireNode.cpp
+@@ -32,19 +32,6 @@ CPipewireNode::~CPipewireNode()
+   spa_hook_remove(&m_objectListener);
+ }
+ 
+-void CPipewireNode::EnumerateFormats()
+-{
+-  if (!m_info)
+-    return;
+-
+-  for (uint32_t param = 0; param < m_info->n_params; param++)
+-  {
+-    if (m_info->params[param].id == SPA_PARAM_EnumFormat)
+-      pw_node_enum_params(reinterpret_cast<struct pw_node*>(m_proxy.get()), 0,
+-                          m_info->params[param].id, 0, 0, NULL);
+-  }
+-}
+-
+ void CPipewireNode::Info(void* userdata, const struct pw_node_info* info)
+ {
+   auto& node = *reinterpret_cast<CPipewireNode*>(userdata);
+@@ -52,12 +39,22 @@ void CPipewireNode::Info(void* userdata, const struct pw_node_info* info)
+   if (node.m_info)
+   {
+     CLog::Log(LOGDEBUG, "CPipewireNode::{} - node {} changed", __FUNCTION__, info->id);
+-    pw_node_info* m_info = node.m_info.get();
+-    m_info = pw_node_info_update(m_info, info);
++    pw_node_info_update(node.m_info.get(), info);
+   }
+   else
+   {
+-    node.m_info.reset(pw_node_info_update(node.m_info.get(), info));
++    node.m_info.reset(pw_node_info_update(nullptr, info));
++  }
++
++  // Check if the node parameters changed, if yes enumerate the available formats
++  if ((info->change_mask & PW_NODE_CHANGE_MASK_PARAMS) != 0)
++  {
++    for (uint32_t param = 0; param < info->n_params; param++)
++    {
++      if (info->params[param].id == SPA_PARAM_EnumFormat && info->params[param].flags & SPA_PARAM_INFO_READ)
++        pw_node_enum_params(reinterpret_cast<pw_node*>(node.m_proxy.get()), 0, info->params[param].id, 0, 0,
++                            nullptr);
++    }
+   }
+ }
+ 
+@@ -188,11 +185,8 @@ void CPipewireNode::Param(void* userdata,
+                           const struct spa_pod* param)
+ {
+   auto& node = *reinterpret_cast<CPipewireNode*>(userdata);
+-  auto& loop = node.GetRegistry().GetCore().GetContext().GetThreadLoop();
+ 
+   node.Parse(SPA_POD_TYPE(param), SPA_POD_BODY(param), SPA_POD_BODY_SIZE(param));
+-
+-  loop.Signal(false);
+ }
+ 
+ pw_node_events CPipewireNode::CreateNodeEvents()
+diff --git a/xbmc/cores/AudioEngine/Sinks/pipewire/PipewireNode.h b/xbmc/cores/AudioEngine/Sinks/pipewire/PipewireNode.h
+index e20a24a54fe84..b2a9dc4a897fd 100644
+--- a/xbmc/cores/AudioEngine/Sinks/pipewire/PipewireNode.h
++++ b/xbmc/cores/AudioEngine/Sinks/pipewire/PipewireNode.h
+@@ -32,8 +32,6 @@ class CPipewireNode : public CPipewireProxy
+   CPipewireNode() = delete;
+   ~CPipewireNode() override;
+ 
+-  void EnumerateFormats();
+-
+   pw_node_info* GetInfo() { return m_info.get(); }
+ 
+   std::set<spa_audio_format>& GetFormats() { return m_formats; }
+

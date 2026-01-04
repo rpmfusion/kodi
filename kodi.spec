@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.3
-Release: 4%{?dist}
+Release: 5%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -87,9 +87,17 @@ Patch1: fix_python_install_directory.patch
 # https://salsa.debian.org/multimedia-team/kodi-media-center/kodi/-/blob/debian/sid/debian/patches/workarounds/0004-ffmpeg7.patch
 Patch2: 0004-ffmpeg7.patch
 
-# revert https://github.com/xbmc/xbmc/commit/c89cf388e3d0f124c88c72078a8069f37aa7164b
-# https://github.com/xbmc/xbmc/issues/27420
-Patch3: 0001-Revert-PipeWire-Lock-CPipewireRegistry-before-access.patch
+# patch to fix issue 27420
+# https://github.com/neo1973/xbmc/commit/b6977d331b458bcf5d22f4b63c5780ae2a539852
+Patch3: issue-27420.patch
+
+# ffmpeg-8 support
+# https://github.com/xbmc/xbmc/commit/d7d111363e6387245eebe201b30318e51a929dd0
+# https://github.com/xbmc/xbmc/commit/eb17d21268b5d5021452c4a46fabee350e793b54
+# https://github.com/xbmc/xbmc/commit/d05df9e711bf9bdf99a44f1b9b3699f3e799b27e
+Patch4: ffmpeg-8-0001.patch
+# https://github.com/xbmc/xbmc/commit/ab71ca29f8cfeb62cfd0667f6ede1f0967867b46
+Patch5: ffmpeg-8-0002.patch
 
 %ifarch x86_64
 %if 0%{?fedora} < 43
@@ -326,7 +334,11 @@ popd
 %if 0%{?fedora} && 0%{?fedora} > 40
 %patch -P 2 -p1 -b.ffmpeg7
 %endif
-%patch -P 3 -p1 -b.pipewire-revert
+%patch -P 3 -p1 -b.pipewire-fix
+%if 0%{?fedora} && 0%{?fedora} > 43
+%patch -P 4 -p1 -b.ffmpeg-8-0001
+%patch -P 5 -p1 -b.ffmpeg-8-0002
+%endif
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -365,7 +377,7 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME="%{kodi_backends}" \
-  -DAPP_RENDER_SYSTEM=gl \
+  -DAPP_RENDER_SYSTEM=gles \
   -DENABLE_INTERNAL_RapidJSON=OFF
 
 %cmake_build
@@ -461,6 +473,10 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Sun Jan 04 2026 Michael Cronenworth <mike@cchtml.com> - 21.3-5
+- Fix ffmpeg-8.0
+- Switch to GLES render system
+
 * Fri Dec 12 2025 Nicolas Chauvet <kwizart@gmail.com> - 21.3-4
 - Rebuilt for libbluray
 
