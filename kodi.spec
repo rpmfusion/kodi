@@ -327,7 +327,7 @@ This package contains FirewallD files for Kodi.
 %prep
 %setup -q -n %{name}-%{DIRVERSION}
 pushd ..
-unzip %{SOURCE6}
+unzip -q %{SOURCE6}
 popd
 %patch -P 0 -p1 -b.versioning
 %patch -P 1 -p1 -b.sitelib
