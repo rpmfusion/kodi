@@ -153,7 +153,7 @@ BuildRequires: glib2-devel
 BuildRequires: gperf
 BuildRequires: gtest-devel
 BuildRequires: jasper-devel
-BuildRequires: java-21-devel
+BuildRequires: java-devel
 BuildRequires: lame-devel
 BuildRequires: lcms2-devel
 BuildRequires: libXinerama-devel
@@ -475,6 +475,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 %changelog
 * Mon Feb 02 2026 Sérgio Basto <sergio@serjux.com> - 21.3-6
 - Rebuild (libcdio)
+- Jdk21 will no longer in Rawhide
+  https://fedoraproject.org/wiki/Changes/Java25AndNoMoreSystemJdk
+  f44 : jdk25 will be added, will coexist with java-latest, and will provide java. Jdk21 will no longer be there.
 
 * Sun Jan 04 2026 Michael Cronenworth <mike@cchtml.com> - 21.3-5
 - Fix ffmpeg-8.0
