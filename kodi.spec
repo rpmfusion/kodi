@@ -71,8 +71,7 @@ Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 %endif
 
 # Build dependency ONLY
-# wget -O apache-groovy-binary-4.0.16.zip http://mirrors.kodi.tv/build-deps/sources/apache-groovy-binary-4.0.16.zip
-Source6: apache-groovy-binary-4.0.16.zip
+Source6: https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-binary-4.0.30.zip
 
 # Set program version parameters
 Patch0: kodi-20-versioning.patch
@@ -361,7 +360,7 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
 %if ! 0%{?_with_external_ffmpeg}
   -DFFMPEG_URL=%{SOURCE5} \
 %endif
-  -Dgroovy_SOURCE_DIR=%{_builddir}/groovy-4.0.16 \
+  -Dgroovy_SOURCE_DIR=%{_builddir}/groovy-4.0.30 \
   -Dapache-commons-lang_SOURCE_DIR=/usr/share/java \
   -Dapache-commons-text_SOURCE_DIR=/usr/share/java/apache-commons-text \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
