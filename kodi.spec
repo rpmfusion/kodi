@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.3
-Release: 5%{?dist}
+Release: 6%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -473,6 +473,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Mon Feb 02 2026 Sérgio Basto <sergio@serjux.com> - 21.3-6
+- Rebuild (libcdio)
+
 * Sun Jan 04 2026 Michael Cronenworth <mike@cchtml.com> - 21.3-5
 - Fix ffmpeg-8.0
 - Switch to GLES render system
