@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.3
-Release: 6%{?dist}
+Release: 7%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -472,6 +472,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Mon Feb 23 2026 Nicolas Chauvet <kwizart@gmail.com> - 21.3-7
+- Rebuilt for libdisplay
+
 * Mon Feb 02 2026 Sérgio Basto <sergio@serjux.com> - 21.3-6
 - Rebuild (libcdio)
 - Jdk21 will no longer in Rawhide
