@@ -218,7 +218,9 @@ BuildRequires: mesa-libGLES-devel
 BuildRequires: mesa-libgbm-devel
 BuildRequires: nasm
 BuildRequires: ninja-build
-BuildRequires: pcre2-devel
+%if 0%{?fedora} < 45
+BuildRequires: pcre-devel
+%endif
 BuildRequires: pixman-devel
 BuildRequires: pipewire-devel
 BuildRequires: pulseaudio-libs-devel
@@ -377,6 +379,9 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME="%{kodi_backends}" \
   -DAPP_RENDER_SYSTEM=gles \
+%if %{?fedora} < 45
+  -DENABLE_INTERNAL_PCRE=ON \
+%endif
   -DENABLE_INTERNAL_RapidJSON=OFF
 
 %cmake_build
