@@ -218,7 +218,7 @@ BuildRequires: mesa-libGLES-devel
 BuildRequires: mesa-libgbm-devel
 BuildRequires: nasm
 BuildRequires: ninja-build
-BuildRequires: pcre-devel
+BuildRequires: pcre2-devel
 BuildRequires: pixman-devel
 BuildRequires: pipewire-devel
 BuildRequires: pulseaudio-libs-devel
