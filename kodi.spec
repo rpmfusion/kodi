@@ -379,7 +379,7 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME="%{kodi_backends}" \
   -DAPP_RENDER_SYSTEM=gles \
-%if %{?fedora} < 45
+%if %{?fedora} > 44
   -DENABLE_INTERNAL_PCRE=ON \
 %endif
   -DENABLE_INTERNAL_RapidJSON=OFF
