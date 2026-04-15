@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.3
-Release: 7%{?dist}
+Release: 8%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -472,6 +472,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Wed Apr 15 2026 Nicolas Chauvet <kwizart@gmail.com> - 21.3-8
+- Rebuilt for pcre
+
 * Mon Feb 23 2026 Nicolas Chauvet <kwizart@gmail.com> - 21.3-7
 - Rebuilt for libdisplay
 
