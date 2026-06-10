@@ -1,0 +1,12 @@
+--- a/xbmc/interfaces/python/swig.cpp	2025-10-31 15:26:00.000000000 +0000
++++ b/xbmc/interfaces/python/swig.cpp	2026-06-10 10:53:52.000000000 +0100
+@@ -78,6 +78,9 @@ namespace PythonBindings
+ #if PY_VERSION_HEX >= 0x030D00A4
+       0,
+ #endif
++#if PY_VERSION_HEX >= 0x030f00b2
++      0,
++#endif
+     };
+ 
+     static int size = (long*)&(py_type_object_header.tp_name) - (long*)&py_type_object_header;

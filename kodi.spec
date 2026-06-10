@@ -39,7 +39,7 @@
 
 Name: kodi
 Version: 21.3
-Release: 8%{?dist}
+Release: 9%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -97,6 +97,11 @@ Patch3: issue-27420.patch
 Patch4: ffmpeg-8-0001.patch
 # https://github.com/xbmc/xbmc/commit/ab71ca29f8cfeb62cfd0667f6ede1f0967867b46
 Patch5: ffmpeg-8-0002.patch
+# https://salsa.debian.org/multimedia-team/kodi-media-center/kodi/-/blob/debian/sid/debian/patches/workarounds/0003-pcre2.patch?ref_type=heads
+Patch6: pcre2.patch
+# https://github.com/xbmc/xbmc/commit/29492cbd20d4c90a9c00a30ab525d4d0e81a968b
+Patch7: giflib6.patch
+Patch8: python315.patch
 
 %ifarch x86_64
 %if 0%{?fedora} < 43
@@ -136,7 +141,6 @@ BuildRequires: trousers-devel
 BuildRequires: flac-devel
 BuildRequires: flatbuffers-compiler
 BuildRequires: flatbuffers-devel
-BuildRequires: flex
 BuildRequires: fmt-devel
 BuildRequires: fontconfig-devel
 BuildRequires: fontpackages-devel
@@ -149,7 +153,6 @@ BuildRequires: gcc-c++
 BuildRequires: giflib-devel
 BuildRequires: glew-devel
 BuildRequires: glib2-devel
-BuildRequires: gperf
 BuildRequires: gtest-devel
 BuildRequires: jasper-devel
 BuildRequires: java-devel
@@ -216,16 +219,12 @@ BuildRequires: mariadb-connector-c-devel
 BuildRequires: mesa-libEGL-devel
 BuildRequires: mesa-libGLES-devel
 BuildRequires: mesa-libgbm-devel
-BuildRequires: nasm
 BuildRequires: ninja-build
-%if 0%{?fedora} < 45
-BuildRequires: pcre-devel
-%endif
+BuildRequires: pcre2-devel
 BuildRequires: pixman-devel
 BuildRequires: pipewire-devel
 BuildRequires: pulseaudio-libs-devel
 BuildRequires: python3-devel
-BuildRequires: python3-pillow
 BuildRequires: python3-setuptools
 BuildRequires: rapidjson-devel
 BuildRequires: spdlog-devel
@@ -332,14 +331,15 @@ unzip -q %{SOURCE6}
 popd
 %patch -P 0 -p1 -b.versioning
 %patch -P 1 -p1 -b.sitelib
-%if 0%{?fedora} && 0%{?fedora} > 40
 %patch -P 2 -p1 -b.ffmpeg7
-%endif
 %patch -P 3 -p1 -b.pipewire-fix
 %if 0%{?fedora} && 0%{?fedora} > 43
 %patch -P 4 -p1 -b.ffmpeg-8-0001
 %patch -P 5 -p1 -b.ffmpeg-8-0002
 %endif
+%patch -P 6 -p1 -b.pcre2
+%patch -P 7 -p1 -b.giflib6
+%patch -P 8 -p1 -b.python315
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -379,9 +379,6 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME="%{kodi_backends}" \
   -DAPP_RENDER_SYSTEM=gles \
-%if %{?fedora} > 44
-  -DENABLE_INTERNAL_PCRE=ON \
-%endif
   -DENABLE_INTERNAL_RapidJSON=OFF
 
 %cmake_build
@@ -477,6 +474,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Wed Jun 10 2026 Leigh Scott <leigh123linux@gmail.com> - 21.3-9
+- Patch for python-3.15, pcre2 and giflib-6
+
 * Wed Apr 15 2026 Nicolas Chauvet <kwizart@gmail.com> - 21.3-8
 - Rebuilt for pcre
 
