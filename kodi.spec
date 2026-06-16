@@ -26,7 +26,6 @@
 # (libbluray in EPEL 6 is too old.)
 %global _with_libbluray 1
 %global _with_cwiid 0
-%global _with_libssh 1
 %global _with_libcec 1
 %global _with_external_ffmpeg 1
 %global _with_wayland 1
@@ -39,7 +38,7 @@
 
 Name: kodi
 Version: 21.3
-Release: 9%{?dist}
+Release: 10%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -103,16 +102,9 @@ Patch6: pcre2.patch
 Patch7: giflib6.patch
 Patch8: python315.patch
 
-%ifarch x86_64
-%if 0%{?fedora} < 43
-%global _with_crystalhd 1
-%endif
-%endif
-
 # Upstream does not support ppc64
 ExcludeArch: %{power64}
 
-BuildRequires: a52dec-devel
 BuildRequires: afpfs-ng-devel
 BuildRequires: alsa-lib-devel
 BuildRequires: apache-commons-lang3
@@ -129,9 +121,6 @@ BuildRequires: cwiid-devel
 BuildRequires: dbus-devel
 BuildRequires: desktop-file-utils
 BuildRequires: e2fsprogs-devel
-BuildRequires: enca-devel
-BuildRequires: expat-devel
-BuildRequires: faad2-devel
 BuildRequires: firewalld-filesystem
 %if 0%{?_with_external_ffmpeg}
 BuildRequires: ffmpeg-devel
@@ -156,7 +145,6 @@ BuildRequires: glib2-devel
 BuildRequires: gtest-devel
 BuildRequires: jasper-devel
 BuildRequires: java-devel
-BuildRequires: lame-devel
 BuildRequires: lcms2-devel
 BuildRequires: libXinerama-devel
 BuildRequires: libXmu-devel
@@ -177,36 +165,25 @@ BuildRequires: libcrystalhd-devel
 %endif
 BuildRequires: libcurl-devel
 BuildRequires: libdav1d-devel
-BuildRequires: libdca-devel
 BuildRequires: libdisplay-info-devel
 BuildRequires: libdrm-devel
 BuildRequires: libidn2-devel
 BuildRequires: libinput-devel
 BuildRequires: libjpeg-turbo-devel
-BuildRequires: libmad-devel
 BuildRequires: libmicrohttpd-devel
 BuildRequires: libmms-devel
-BuildRequires: libmodplug-devel
-BuildRequires: libmpcdec-devel
-BuildRequires: libmpeg2-devel
 BuildRequires: libnfs-devel
 BuildRequires: libogg-devel
 # for AirPlay support
 BuildRequires: shairplay-devel
 BuildRequires: libplist-devel
 BuildRequires: libpng-devel
-BuildRequires: librtmp-devel
 BuildRequires: libsamplerate-devel
 BuildRequires: libsmbclient-devel
-%if 0%{?_with_libssh}
-BuildRequires: libssh-devel
-%endif
-BuildRequires: libtiff-devel
 BuildRequires: libtool
 BuildRequires: libunistring-devel
 BuildRequires: libuuid-devel
 BuildRequires: libva-devel
-BuildRequires: libvdpau-devel
 BuildRequires: libvorbis-devel
 %if 0%{?_with_wayland}
 BuildRequires: libxkbcommon-devel
@@ -235,7 +212,6 @@ BuildRequires: taglib-devel >= 1.10
 BuildRequires: tinyxml-devel
 BuildRequires: tinyxml2-devel
 BuildRequires: tre-devel
-BuildRequires: wavpack-devel
 %if 0%{?_with_wayland}
 BuildRequires: wayland-protocols-devel
 BuildRequires: waylandpp-devel
@@ -244,22 +220,6 @@ BuildRequires: yajl-devel
 BuildRequires: zlib-devel
 
 Requires: (%{name}-firewalld = %{version}-%{release} if firewalld)
-# need explicit requires for these packages
-# as they are dynamically loaded via XBMC's arcane
-# pseudo-DLL loading scheme (sigh)
-%if 0%{?_with_libbluray}
-Requires: libbluray%{?_isa}
-%endif
-%if 0%{?_with_libcec}
-Requires: libcec%{?_isa} >= 4.0.0
-%endif
-%if 0%{?_with_crystalhd}
-Requires: libcrystalhd%{?_isa}
-%endif
-Requires: libmad%{?_isa}
-Requires: librtmp%{?_isa}
-Requires: shairplay-libs%{?_isa}
-
 # This is just symlinked to, but needed both at build-time
 # and for installation
 Requires: python3-pillow%{?_isa}
@@ -474,6 +434,10 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Tue Jun 16 2026 Leigh Scott <leigh123linux@gmail.com> - 21.3-10
+- Drop some of the unused build requires, if they were used ever it was probably
+  for internel ffmpeg
+
 * Wed Jun 10 2026 Leigh Scott <leigh123linux@gmail.com> - 21.3-9
 - Patch for python-3.15, pcre2 and giflib-6
 
