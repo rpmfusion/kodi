@@ -1,9 +1,9 @@
-#global PRERELEASE rc2
-%global DIRVERSION %{version}
+%global PRERELEASE b1
+#global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
 #global DIRVERSION %{version}-%{GITCOMMIT}
-#global DIRVERSION %{version}%{PRERELEASE}
+%global DIRVERSION %{version}%{PRERELEASE}
 %global _hardened_build 1
 %ifarch %{arm} %{arm64}
 # Disable LTO for arm, see http://koji.rpmfusion.org/koji/taskinfo?taskID=424139
@@ -37,8 +37,8 @@
 %endif
 
 Name: kodi
-Version: 21.3
-Release: 10%{?dist}
+Version: 22.0
+Release: 0.1b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -80,27 +80,7 @@ Patch0: kodi-20-versioning.patch
 # https://github.com/xbmc/xbmc/commit/2b55d858fa39b144ecbaff6bfc7c2ccbb534e03d
 Patch1: fix_python_install_directory.patch
 
-# ffmpeg-7 fix
-# https://github.com/xbmc/xbmc/pull/24972
-# https://salsa.debian.org/multimedia-team/kodi-media-center/kodi/-/blob/debian/sid/debian/patches/workarounds/0004-ffmpeg7.patch
-Patch2: 0004-ffmpeg7.patch
-
-# patch to fix issue 27420
-# https://github.com/neo1973/xbmc/commit/b6977d331b458bcf5d22f4b63c5780ae2a539852
-Patch3: issue-27420.patch
-
-# ffmpeg-8 support
-# https://github.com/xbmc/xbmc/commit/d7d111363e6387245eebe201b30318e51a929dd0
-# https://github.com/xbmc/xbmc/commit/eb17d21268b5d5021452c4a46fabee350e793b54
-# https://github.com/xbmc/xbmc/commit/d05df9e711bf9bdf99a44f1b9b3699f3e799b27e
-Patch4: ffmpeg-8-0001.patch
-# https://github.com/xbmc/xbmc/commit/ab71ca29f8cfeb62cfd0667f6ede1f0967867b46
-Patch5: ffmpeg-8-0002.patch
-# https://salsa.debian.org/multimedia-team/kodi-media-center/kodi/-/blob/debian/sid/debian/patches/workarounds/0003-pcre2.patch?ref_type=heads
-Patch6: pcre2.patch
-# https://github.com/xbmc/xbmc/commit/29492cbd20d4c90a9c00a30ab525d4d0e81a968b
-Patch7: giflib6.patch
-Patch8: python315.patch
+Patch2: python315.patch
 
 # Upstream does not support ppc64
 ExcludeArch: %{power64}
@@ -114,13 +94,14 @@ BuildRequires: bluez-libs-devel
 BuildRequires: boost-devel
 BuildRequires: bzip2-devel
 BuildRequires: cmake
-BuildRequires: crossguid-devel
+BuildRequires: crossguid2-devel
 %if 0%{?_with_cwiid}
 BuildRequires: cwiid-devel
 %endif
 BuildRequires: dbus-devel
 BuildRequires: desktop-file-utils
 BuildRequires: e2fsprogs-devel
+BuildRequires: exiv2-devel
 BuildRequires: firewalld-filesystem
 %if 0%{?_with_external_ffmpeg}
 BuildRequires: ffmpeg-devel
@@ -145,6 +126,7 @@ BuildRequires: glib2-devel
 BuildRequires: gtest-devel
 BuildRequires: jasper-devel
 BuildRequires: java-devel
+BuildRequires: json-devel
 BuildRequires: lcms2-devel
 BuildRequires: libXinerama-devel
 BuildRequires: libXmu-devel
@@ -291,15 +273,7 @@ unzip -q %{SOURCE6}
 popd
 %patch -P 0 -p1 -b.versioning
 %patch -P 1 -p1 -b.sitelib
-%patch -P 2 -p1 -b.ffmpeg7
-%patch -P 3 -p1 -b.pipewire-fix
-%if 0%{?fedora} && 0%{?fedora} > 43
-%patch -P 4 -p1 -b.ffmpeg-8-0001
-%patch -P 5 -p1 -b.ffmpeg-8-0002
-%endif
-%patch -P 6 -p1 -b.pcre2
-%patch -P 7 -p1 -b.giflib6
-%patch -P 8 -p1 -b.python315
+%patch -P 2 -p1 -b.python315
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -434,6 +408,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Mon Jun 29 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.1b1
+- Kodi 22.0 beta 1
+
 * Tue Jun 16 2026 Leigh Scott <leigh123linux@gmail.com> - 21.3-10
 - Drop some of the unused build requires, if they were used ever it was probably
   for internel ffmpeg
