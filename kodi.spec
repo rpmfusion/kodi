@@ -38,7 +38,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.1b1%{?dist}
+Release: 0.2b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -311,7 +311,7 @@ popd
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME="%{kodi_backends}" \
-  -DAPP_RENDER_SYSTEM=gles \
+  -DAPP_RENDER_SYSTEM=gl \
   -DENABLE_INTERNAL_RapidJSON=OFF
 
 %cmake_build
@@ -407,6 +407,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Fri Jul 10 2026 Michael Cronenworth <mike@cchtml.com> - 22.0-0.2b1
+- Switch back to gl renderer
+
 * Mon Jun 29 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.1b1
 - Kodi 22.0 beta 1
 
