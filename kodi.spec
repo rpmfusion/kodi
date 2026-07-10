@@ -286,7 +286,6 @@ popd
   tools/EventClients/lib/python/xbmcclient.py
 
 %build
-export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
 %cmake \
 %if %{with dvdcss}
   -DLIBDVDCSS_URL=%{SOURCE4} \
@@ -297,8 +296,8 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
   -DFFMPEG_URL=%{SOURCE5} \
 %endif
   -Dgroovy_SOURCE_DIR=%{_builddir}/groovy-4.0.30 \
-  -Dapache-commons-lang_SOURCE_DIR=/usr/share/java \
-  -Dapache-commons-text_SOURCE_DIR=/usr/share/java/apache-commons-text \
+  -Dapache-commons-lang_SOURCE_DIR=%{_datadir}/java \
+  -Dapache-commons-text_SOURCE_DIR=%{_datadir}/java/apache-commons-text \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DCMAKE_C_FLAGS_RELWITHDEBINFO:STRING="-DNDEBUG" \
   -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-DNDEBUG" \
@@ -307,7 +306,7 @@ export PKG_CONFIG_PATH="%{_libdir}/compat-ffmpeg4/pkgconfig"
   -GNinja \
   -DENABLE_EVENTCLIENTS=ON \
   -DENABLE_INTERNAL_CROSSGUID=OFF \
-  -DLIRC_DEVICE=/var/run/lirc/lircd \
+  -DLIRC_DEVICE=%{_rundir}/lirc/lircd \
   -DLIBDVDNAV_URL=%{SOURCE2} \
   -DLIBDVDREAD_URL=%{SOURCE3} \
   -DPYTHON_EXECUTABLE=%{__python3} \
