@@ -38,7 +38,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.2b1%{?dist}
+Release: 0.3b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -407,6 +407,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Sun Aug 02 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.3b1
+- rebuilt
+
 * Fri Jul 10 2026 Michael Cronenworth <mike@cchtml.com> - 22.0-0.2b1
 - Switch back to gl renderer
 
