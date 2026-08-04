@@ -38,7 +38,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.3b1%{?dist}
+Release: 0.4b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -128,6 +128,7 @@ BuildRequires: jasper-devel
 BuildRequires: java-devel
 BuildRequires: json-devel
 BuildRequires: lcms2-devel
+BuildRequires: libvdpau-devel
 BuildRequires: libXinerama-devel
 BuildRequires: libXmu-devel
 BuildRequires: libXrandr-devel
@@ -407,6 +408,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Tue Aug 04 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.4b1
+- Add BuildRequires libvdpau-devel
+
 * Sun Aug 02 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.3b1
 - rebuilt
 
