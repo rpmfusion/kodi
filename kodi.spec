@@ -38,7 +38,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.4b1%{?dist}
+Release: 0.5b1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -81,6 +81,9 @@ Patch0: kodi-20-versioning.patch
 Patch1: fix_python_install_directory.patch
 
 Patch2: python315.patch
+
+# Based on https://github.com/xbmc/xbmc/commit/9c56bf593441a6c246fdc6931177e71f349ee2bc
+Patch3: ffmpeg9.patch
 
 # Upstream does not support ppc64
 ExcludeArch: %{power64}
@@ -275,6 +278,9 @@ popd
 %patch -P 0 -p1 -b.versioning
 %patch -P 1 -p1 -b.sitelib
 %patch -P 2 -p1 -b.python315
+%if 0%{?fedora} && 0%{?fedora} > 44
+%patch -P 3 -p1 -b.ffmpeg9
+%endif
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -408,6 +414,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Sat Aug 22 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.5b1
+- Rebuild for new ffmpeg
+
 * Tue Aug 04 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.4b1
 - Add BuildRequires libvdpau-devel
 
