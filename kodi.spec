@@ -1,4 +1,4 @@
-%global PRERELEASE b1
+%global PRERELEASE b2
 #global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
@@ -38,7 +38,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.5b1%{?dist}
+Release: 0.6b2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -46,19 +46,17 @@ License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
 # Some supporting libraries use the LGPL / BSD / MIT license
 Group: Applications/Multimedia
 URL: https://www.kodi.tv/
-Source0: %{name}-%{DIRVERSION}-patched.tar.xz
-# kodi contains code that we cannot ship, as well as redundant private
-# copies of upstream libraries that we already distribute.  Therefore
-# we use this script to remove the code before shipping it.
-# Invoke this script while in the directory where the tarball is located:
-# ./kodi-generate-tarball-xz.sh
-Source1: kodi-generate-tarball-xz.sh
+Source0: https://github.com/xbmc/xbmc/archive/refs/tags/%{DIRVERSION}-Piers.tar.gz#/xbmc-%{DIRVERSION}-Piers.tar.gz
 
 # kodi uses modified libdvd{css,nav,read} source and downloads at build time
 # wget -O kodi-libdvdnav-6.1.1-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdnav/archive/6.1.1-Next-Nexus-Alpha2-2.tar.gz
-Source2: kodi-libdvdnav-6.1.1-Next-Nexus-Alpha2-2.tar.gz
+# Source2: kodi-libdvdnav-6.1.1-Next-Nexus-Alpha2-2.tar.gz
+# curl -L -o libdvdnav-7.0.0.tar.bz2 https://mirrors.kodi.tv/build-deps/sources/libdvdnav-7.0.0.tar.bz2
+Source2: libdvdnav-7.0.0.tar.bz2
+# curl -L -o libdvdread-7.0.1.tar.bz2 https://mirrors.kodi.tv/build-deps/sources/libdvdread-7.0.1.tar.bz2
+Source3: libdvdread-7.0.1.tar.bz2
 # wget -O kodi-libdvdread-6.1.3-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdread/archive/6.1.3-Next-Nexus-Alpha2-2.tar.gz
-Source3: kodi-libdvdread-6.1.3-Next-Nexus-Alpha2-2.tar.gz
+# Source3: kodi-libdvdread-6.1.3-Next-Nexus-Alpha2-2.tar.gz
 %if %{with dvdcss}
 # wget -O kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz https://github.com/xbmc/libdvdcss/archive/1.4.3-Next-Nexus-Alpha2-2.tar.gz
 Source4: kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz
@@ -81,9 +79,6 @@ Patch0: kodi-20-versioning.patch
 Patch1: fix_python_install_directory.patch
 
 Patch2: python315.patch
-
-# Based on https://github.com/xbmc/xbmc/commit/9c56bf593441a6c246fdc6931177e71f349ee2bc
-Patch3: ffmpeg9.patch
 
 # Upstream does not support ppc64
 ExcludeArch: %{power64}
@@ -153,6 +148,8 @@ BuildRequires: libcurl-devel
 BuildRequires: libdav1d-devel
 BuildRequires: libdisplay-info-devel
 BuildRequires: libdrm-devel
+BuildRequires: libdvdnav-devel
+BuildRequires: libdvdread-devel
 BuildRequires: libidn2-devel
 BuildRequires: libinput-devel
 BuildRequires: libjpeg-turbo-devel
@@ -182,6 +179,7 @@ BuildRequires: mariadb-connector-c-devel
 BuildRequires: mesa-libEGL-devel
 BuildRequires: mesa-libGLES-devel
 BuildRequires: mesa-libgbm-devel
+BuildRequires: meson
 BuildRequires: ninja-build
 BuildRequires: pcre2-devel
 BuildRequires: pixman-devel
@@ -271,16 +269,13 @@ This package contains FirewallD files for Kodi.
 
 
 %prep
-%setup -q -n %{name}-%{DIRVERSION}
+%setup -q -n xbmc-%{DIRVERSION}-Piers
 pushd ..
 unzip -q %{SOURCE6}
 popd
 %patch -P 0 -p1 -b.versioning
 %patch -P 1 -p1 -b.sitelib
 %patch -P 2 -p1 -b.python315
-%if 0%{?fedora} && 0%{?fedora} > 44
-%patch -P 3 -p1 -b.ffmpeg9
-%endif
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -313,9 +308,9 @@ popd
   -GNinja \
   -DENABLE_EVENTCLIENTS=ON \
   -DENABLE_INTERNAL_CROSSGUID=OFF \
-  -DLIRC_DEVICE=%{_rundir}/lirc/lircd \
   -DLIBDVDNAV_URL=%{SOURCE2} \
   -DLIBDVDREAD_URL=%{SOURCE3} \
+  -DLIRC_DEVICE=%{_rundir}/lirc/lircd \
   -DPYTHON_EXECUTABLE=%{__python3} \
   -DCORE_PLATFORM_NAME="%{kodi_backends}" \
   -DAPP_RENDER_SYSTEM=gl \
@@ -414,6 +409,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Fri Sep 04 2026 Michael Cronenworth <mike@cchtml.com> - 22.0-0.5b2
+- Kodi 22.0 beta 2
+
 * Sat Aug 22 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.5b1
 - Rebuild for new ffmpeg
 
