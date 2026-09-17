@@ -38,7 +38,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.6b2%{?dist}
+Release: 0.7b2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -409,6 +409,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Thu Sep 17 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.7b2
+- Rebuild for f45 ffmpeg9
+
 * Fri Sep 04 2026 Michael Cronenworth <mike@cchtml.com> - 22.0-0.5b2
 - Kodi 22.0 beta 2
 
