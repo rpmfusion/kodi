@@ -1,4 +1,4 @@
-%global PRERELEASE b2
+%global PRERELEASE rc1
 #global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
@@ -38,7 +38,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.7b2%{?dist}
+Release: 0.8rc1%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -67,9 +67,6 @@ Source4: kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz
 Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 %endif
 
-# Build dependency ONLY
-Source6: https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-binary-4.0.30.zip
-
 # Set program version parameters
 Patch0: kodi-20-versioning.patch
 
@@ -77,8 +74,6 @@ Patch0: kodi-20-versioning.patch
 # https://github.com/xbmc/xbmc/commit/2208a3bc7d40c75f73fef8b94823b150ccff38dd
 # https://github.com/xbmc/xbmc/commit/2b55d858fa39b144ecbaff6bfc7c2ccbb534e03d
 Patch1: fix_python_install_directory.patch
-
-Patch2: python315.patch
 
 # Upstream does not support ppc64
 ExcludeArch: %{power64}
@@ -270,12 +265,8 @@ This package contains FirewallD files for Kodi.
 
 %prep
 %setup -q -n xbmc-%{DIRVERSION}-Piers
-pushd ..
-unzip -q %{SOURCE6}
-popd
 %patch -P 0 -p1 -b.versioning
 %patch -P 1 -p1 -b.sitelib
-%patch -P 2 -p1 -b.python315
 
 # Fix up Python shebangs
 %py3_shebang_fix \
@@ -297,7 +288,6 @@ popd
 %if ! 0%{?_with_external_ffmpeg}
   -DFFMPEG_URL=%{SOURCE5} \
 %endif
-  -Dgroovy_SOURCE_DIR=%{_builddir}/groovy-4.0.30 \
   -Dapache-commons-lang_SOURCE_DIR=%{_datadir}/java \
   -Dapache-commons-text_SOURCE_DIR=%{_datadir}/java/apache-commons-text \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -409,6 +399,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Wed Oct 14 2026 Michael Cronenworth <mike@cchtml.com> - 22.0-0.8rc1
+- Kodi 22.0 RC1
+
 * Thu Sep 17 2026 Leigh Scott <leigh123linux@gmail.com> - 22.0-0.7b2
 - Rebuild for f45 ffmpeg9
 
