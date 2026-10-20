@@ -36,6 +36,14 @@
 %global kodi_backends x11 gbm
 %endif
 
+# Requires SWIG 4.5.0
+# https://bugzilla.redhat.com/show_bug.cgi?id=2552175
+%if 0%{?fedora} >= 45
+%global _with_external_swig 1
+%else
+%global _with_external_swig 0
+%endif
+
 Name: kodi
 Version: 22.0
 Release: 0.8rc1%{?dist}
@@ -65,6 +73,11 @@ Source4: kodi-libdvdcss-1.4.3-Next-Nexus-Alpha2-2.tar.gz
 %if ! 0%{?_with_external_ffmpeg}
 # wget -O ffmpeg-5.1.2-Nexus-Alpha3.tar.gz https://github.com/xbmc/FFmpeg/archive/5.1.2-Nexus-Alpha3.tar.gz
 Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
+%endif
+
+%if ! 0%{?_with_external_swig}
+# wget -O https://mirrors.kodi.tv/build-deps/sources/swig-4.5.0.tar.gz
+Source6: swig-4.5.0.tar.gz
 %endif
 
 # Set program version parameters
@@ -185,7 +198,11 @@ BuildRequires: python3-setuptools
 BuildRequires: rapidjson-devel
 BuildRequires: spdlog-devel
 BuildRequires: sqlite-devel
+%if 0%{?_with_external_swig}
 BuildRequires: swig
+%else
+BuildRequires: bison
+%endif
 BuildRequires: systemd-devel
 BuildRequires: taglib-devel >= 1.10
 BuildRequires: tinyxml-devel
@@ -287,6 +304,10 @@ This package contains FirewallD files for Kodi.
 %endif
 %if ! 0%{?_with_external_ffmpeg}
   -DFFMPEG_URL=%{SOURCE5} \
+%endif
+%if ! 0%{?_with_external_swig}
+  -DENABLE_INTERNAL_SWIG=ON \
+  -DSWIG_URL=%{SOURCE6} \
 %endif
   -Dapache-commons-lang_SOURCE_DIR=%{_datadir}/java \
   -Dapache-commons-text_SOURCE_DIR=%{_datadir}/java/apache-commons-text \
