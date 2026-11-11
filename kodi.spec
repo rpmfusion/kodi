@@ -76,8 +76,8 @@ Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 %endif
 
 %if ! 0%{?_with_external_swig}
-# wget -O swig-4.5.1.tar.gz https://mirrors.kodi.tv/build-deps/sources/swig-4.5.1.tar.gz
-Source6: swig-4.5.1.tar.gz
+# wget -O swig-4.5.0.tar.gz https://mirrors.kodi.tv/build-deps/sources/swig-4.5.1.tar.gz
+Source6: swig-4.5.0.tar.gz
 %endif
 
 # Set program version parameters
