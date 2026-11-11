@@ -1,4 +1,4 @@
-%global PRERELEASE rc1
+%global PRERELEASE rc2
 #global DIRVERSION %{version}
 #global GITCOMMIT db40b2a
 # use the line below for pre-releases
@@ -36,7 +36,7 @@
 %global kodi_backends x11 gbm
 %endif
 
-# Requires SWIG 4.5.0
+# Requires SWIG 4.5.1
 # https://bugzilla.redhat.com/show_bug.cgi?id=2552175
 %if 0%{?fedora} >= 45
 %global _with_external_swig 1
@@ -46,7 +46,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.8rc1%{?dist}
+Release: 0.9rc2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -76,8 +76,8 @@ Source5: ffmpeg-5.1.2-Nexus-Alpha3.tar.gz
 %endif
 
 %if ! 0%{?_with_external_swig}
-# wget -O https://mirrors.kodi.tv/build-deps/sources/swig-4.5.0.tar.gz
-Source6: swig-4.5.0.tar.gz
+# wget -O swig-4.5.1.tar.gz https://mirrors.kodi.tv/build-deps/sources/swig-4.5.1.tar.gz
+Source6: swig-4.5.1.tar.gz
 %endif
 
 # Set program version parameters
