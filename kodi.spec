@@ -46,7 +46,7 @@
 
 Name: kodi
 Version: 22.0
-Release: 0.9rc2%{?dist}
+Release: 0.10rc2%{?dist}
 Summary: Media center
 
 License: GPLv2+ and GPLv3+ and LGPLv2+ and BSD and MIT
@@ -420,6 +420,9 @@ rm -f %{buildroot}%{_bindir}/TexturePacker
 
 
 %changelog
+* Mon Nov 23 2026 Nicolas Chauvet <kwizart@gmail.com> - 22.0-0.10rc2
+- rebuilt
+
 * Wed Oct 14 2026 Michael Cronenworth <mike@cchtml.com> - 22.0-0.8rc1
 - Kodi 22.0 RC1
 
